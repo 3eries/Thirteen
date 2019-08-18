@@ -11,6 +11,8 @@
 #include "cocos2d.h"
 #include "superbomb.h"
 
+static const std::string DEV_VERSION = "v0.0.0.1";
+
 // Common Functions
 void removeListeners(cocos2d::Ref *target);
 

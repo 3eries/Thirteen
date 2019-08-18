@@ -13,7 +13,7 @@
 #include "cocos2d.h"
 #include "superbomb.h"
 
-#include "../content/data/model/StageData.h"
+#include "../../content/data/model/StageData.h"
 
 class GameTile : public cocos2d::Node {
 public:
@@ -26,8 +26,13 @@ private:
     bool init(const TileData &data);
     
 public:
-    void setNumber(int number);
+    void clear(bool withAction);
+    
+    void setNumber(int number, bool withAction);
     void setSelected(bool isSelected);
+    
+    void runNumberEnterAction();
+    void runNumberExitAction();
     
     inline bool isEmpty() { return data.isEmpty; }
     

@@ -11,7 +11,8 @@
 #include "GameDefine.h"
 #include "ContentManager.hpp"
 
-#include "GameTile.hpp"
+#include "object/GameTile.hpp"
+#include "object/StageProgressBar.hpp"
 
 USING_NS_CC;
 using namespace std;
@@ -32,7 +33,9 @@ bool GameView::init() {
     setPosition(Vec2MC(0,0));
     setContentSize(SB_WIN_SIZE);
     
+    initBg();
     initTileMap();
+    initGameListener();
     
     // Touch Listener
     auto touchListener = EventListenerTouchOneByOne::create();
@@ -43,10 +46,109 @@ bool GameView::init() {
     touchListener->onTouchCancelled = CC_CALLBACK_2(GameView::onTouchCancelled, this);
     getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
     
-    // FIXME:
-    updateTileMap(Database::getStages()[1]);
-    
     return true;
+}
+
+void GameView::cleanup() {
+    
+    removeListeners(this);
+    
+    Node::cleanup();
+}
+
+void GameView::onNumberClear(vector<GameTile*> selectedTiles) {
+    
+    ++clearCount;
+    int clearCondition = GAME_MANAGER->getStage().clearCondition;
+    
+    // 스테이지 클리어 체크
+    bool isStageClear = (clearCount == clearCondition);
+    
+    if( isStageClear ) {
+        GameManager::onStageClear();
+    }
+    
+    // UI
+    stageProgressBar->setPercentage(((float)clearCount / clearCondition) * 100);
+    
+    for( auto tile : selectedTiles ) {
+        tile->clear(true);
+    }
+    
+    // 스테이지 클리어 못한 경우 다음 번호 생성
+    if( !isStageClear ) {
+        SBDirector::postDelayed(this, [=]() {
+            for( auto tile : selectedTiles ) {
+                tile->setNumber(getRandomNumber(), true);
+            }
+        }, TILE_NUMBER_EXIT_DURATION);
+    }
+}
+
+/**
+ * 게임 리셋
+ */
+void GameView::onGameReset() {
+    
+    isTouchLocked = false;
+}
+
+/**
+ * 게임 일시정지
+ */
+void GameView::onGamePause() {
+    
+    // SBNodeUtils::recursivePause(this);
+}
+
+/**
+ * 게임 재개
+ */
+void GameView::onGameResume() {
+    
+    // SBNodeUtils::recursiveResume(this);
+}
+
+/**
+ * 스테이지 변경
+ */
+void GameView::onStageChanged(const StageData &stage) {
+    
+    isTouchLocked = false;
+    clearCount = 0;
+    
+    updateTileMap(stage);
+}
+
+/**
+ * 스테이지 재시작
+ */
+void GameView::onStageRestart(const StageData &stage) {
+    
+    isTouchLocked = false;
+}
+
+/**
+ * 스테이지 클리어
+ */
+void GameView::onStageClear(const StageData &stage) {
+    
+    isTouchLocked = true;
+}
+
+/**
+ * 다음 스테이지로 이동
+ */
+void GameView::onMoveNextStage() {
+    
+}
+
+/**
+ * 다음 스테이지로 이동 완료
+ */
+void GameView::onMoveNextStageFinished() {
+    
+    stageProgressBar->setVisible(true);
 }
 
 /**
@@ -54,18 +156,25 @@ bool GameView::init() {
  */
 bool GameView::onTouchBegan(Touch *touch, Event*) {
     
+    if( isTouchLocked ) {
+        return false;
+    }
+    
     Vec2 p = touch->getLocation();
+    
+    if( !SB_BOUNDING_BOX_IN_WORLD(tileMap).containsPoint(p) ) {
+        return false;
+    }
     
     for( auto tile : tiles ) {
         auto tileBox = SB_BOUNDING_BOX_IN_WORLD(tile);
         
         if( tileBox.containsPoint(p) && !tile->isEmpty() ) {
             tile->setSelected(true);
-            return true;
         }
     }
     
-    return false;
+    return true;
 }
 
 /**
@@ -73,16 +182,20 @@ bool GameView::onTouchBegan(Touch *touch, Event*) {
  */
 void GameView::onTouchMoved(Touch *touch, Event*) {
 
+    if( isTouchLocked ) {
+        return;
+    }
+    
     Vec2 p = touch->getLocation();
     
     for( auto tile : tiles ) {
-        if( tile->isEmpty() ) {
+        if( tile->isEmpty() || tile->isSelected() ) {
             continue;
         }
         
         auto tileBox = SB_BOUNDING_BOX_IN_WORLD(tile);
         
-        if( tileBox.containsPoint(p) && !tile->isSelected() ) {
+        if( tileBox.containsPoint(p) ) {
             tile->setSelected(true);
         }
     }
@@ -94,11 +207,13 @@ void GameView::onTouchMoved(Touch *touch, Event*) {
 void GameView::onTouchEnded(Touch *touch, Event*) {
 
     // 선택된 타일의 합을 구한다
+    vector<GameTile*> selectedTiles;
     int number = 0;
     
     for( auto tile : tiles ) {
         if( tile->isSelected() ) {
             tile->setSelected(false);
+            selectedTiles.push_back(tile);
             
             number += tile->getNumber();
         }
@@ -106,7 +221,7 @@ void GameView::onTouchEnded(Touch *touch, Event*) {
     
     // 타일의 합이 13인지 체크
     if( number == 13 ) {
-        CCLOG("13야쓰!!");
+        onNumberClear(selectedTiles);
     }
 }
 
@@ -120,21 +235,21 @@ void GameView::onTouchCancelled(Touch *touch, Event *e) {
 /**
  * 타일맵 업데이트
  */
-void GameView::updateTileMap(const StageData &stageData) {
+void GameView::updateTileMap(const StageData &stage) {
  
     // 이전 타일 제거
     tileMap->removeAllChildren();
     tiles.clear();
     
     // 초기화
+    numbers = stage.numbers;
+    
     random_device rd;
     numberEngine = mt19937(rd());
     
-    tileMap->setContentSize(getTileContentSize(stageData.tileRows, stageData.tileColumns));
+    tileMap->setContentSize(getTileContentSize(stage.tileRows, stage.tileColumns));
     
-    auto numbers = stageData.numbers;
-    
-    for( auto tileData : stageData.tiles ) {
+    for( auto tileData : stage.tiles ) {
         auto tile = GameTile::create(tileData);
         tile->setAnchorPoint(ANCHOR_M);
         tile->setPosition(getTilePosition((int)tileData.p.x, (int)tileData.p.y));
@@ -143,10 +258,25 @@ void GameView::updateTileMap(const StageData &stageData) {
         tiles.push_back(tile);
         
         if( !tile->isEmpty() ) {
-            std::shuffle(numbers.begin(), numbers.end(), numberEngine);
-            tile->setNumber(numbers[0]);
+            tile->setNumber(getRandomNumber(), true);
         }
     }
+}
+
+int GameView::getRandomNumber() {
+    
+    std::shuffle(numbers.begin(), numbers.end(), numberEngine);
+    return numbers[0];
+}
+
+/**
+ * 배경 초기화
+ */
+void GameView::initBg() {
+
+    // 스테이지 진행도
+    stageProgressBar = StageProgressBar::create();
+    addChild(stageProgressBar);
 }
 
 /**
@@ -159,4 +289,52 @@ void GameView::initTileMap() {
     tileMap->setPosition(Vec2MC(0,0));
     tileMap->setContentSize(TILE_MAP_CONTENT_SIZE);
     addChild(tileMap);
+}
+
+/**
+ * 게임 이벤트 리스너 초기화
+ */
+void GameView::initGameListener() {
+    
+    string eventNames[] = {
+        GAME_EVENT_PAUSE,
+        GAME_EVENT_RESUME,
+        GAME_EVENT_STAGE_CHANGED,
+        GAME_EVENT_STAGE_RESTART,
+        GAME_EVENT_STAGE_CLEAR,
+    };
+    
+    for( string eventName : eventNames ) {
+        /*
+         auto listener = eventDispatcher->addCustomEventListener(eventName, [=](EventCustom *event) {
+         this->onCustomEvent(HASH_STR(event->getEventName().c_str()));
+         });
+         */
+        auto listener = EventListenerCustom::create(eventName, [=](EventCustom *event) {
+            
+            switch( GAME_EVENT_ENUMS[eventName] ) {
+                case GameEvent::RESET:     this->onGameReset();
+                case GameEvent::PAUSE:     this->onGamePause();
+                case GameEvent::RESUME:    this->onGameResume();
+                    
+                case GameEvent::STAGE_CHANGED: {
+                    auto stage = (StageData*)event->getUserData();
+                    this->onStageChanged(*stage);
+                } break;
+                    
+                case GameEvent::STAGE_RESTART: {
+                    auto stage = (StageData*)event->getUserData();
+                    this->onStageRestart(*stage);
+                } break;
+                    
+                case GameEvent::STAGE_CLEAR: {
+                    auto stage = (StageData*)event->getUserData();
+                    this->onStageClear(*stage);
+                } break;
+                    
+                default: break;
+            }
+        });
+        getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
+    }
 }

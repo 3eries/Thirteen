@@ -16,6 +16,7 @@
 #include "../content/data/model/StageData.h"
 
 class GameTile;
+class StageProgressBar;
 
 class GameView : public cocos2d::Node {
 public:
@@ -26,9 +27,30 @@ private:
     GameView();
     
     bool init() override;
-    void initTileMap();
+    void cleanup() override;
     
-    void updateTileMap(const StageData &stageData);
+    void initBg();
+    void initTileMap();
+    void initGameListener();
+    
+    void onNumberClear(std::vector<GameTile*> selectedTiles);
+    
+    void updateTileMap(const StageData &stage);
+    
+    int getRandomNumber();
+    
+// Game Event
+public:
+    void onGameReset();
+    void onGamePause();
+    void onGameResume();
+    
+    void onStageChanged(const StageData &stage);
+    void onStageRestart(const StageData &stage);
+    void onStageClear(const StageData &stage);
+    
+    void onMoveNextStage();
+    void onMoveNextStageFinished();
     
 // Touch Event
 private:
@@ -37,11 +59,19 @@ private:
     void onTouchEnded(cocos2d::Touch *touch, cocos2d::Event*);
     void onTouchCancelled(cocos2d::Touch *touch, cocos2d::Event*);
     
+    // int getMinDist();
+    
 private:
+    bool isTouchLocked;
+    
     cocos2d::Node *tileMap;
     std::vector<GameTile*> tiles;
+    StageProgressBar *stageProgressBar;
     
+    IntList numbers;
     std::mt19937 numberEngine;
+    
+    int clearCount; // 클리어 횟수
 };
 
 #endif /* GameView_hpp */

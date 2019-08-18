@@ -12,6 +12,7 @@
 #include "PopupManager.hpp"
 #include "BannerView.hpp"
 
+#include "GameManager.hpp"
 #include "GameView.hpp"
 
 #include "CommonLoadingBar.hpp"
@@ -53,6 +54,20 @@ bool GameScene::init() {
     initBanner();
     initGameView();
     initMenu();
+    initGameListener();
+    
+    // FIXME: 다시 하기 버튼
+    {
+        auto btn = SBNodeUtils::createTouchNode();
+        btn->setAnchorPoint(ANCHOR_MT);
+        btn->setPosition(Vec2TC(0, 0));
+        btn->setContentSize(Size(SB_WIN_SIZE.width*0.6f, 100));
+        addChild(btn, INT_MAX);
+        
+        btn->addClickEventListener([=](Ref*) {
+            GameManager::onStageChanged();
+        });
+    }
     
     return true;
 }
@@ -61,10 +76,8 @@ void GameScene::onEnter() {
     
     BaseScene::onEnter();
     
-//    GameManager::onGameEnter();
-//
-//    GAME_MANAGER->setStage(User::getClearStage()+1);
-//    GameManager::onGameStart();
+    GameManager::onGameEnter();
+    GAME_MANAGER->setStage(User::getClearStage()+1);
 }
 
 void GameScene::onEnterTransitionDidFinish() {
@@ -72,6 +85,8 @@ void GameScene::onEnterTransitionDidFinish() {
     BaseScene::onEnterTransitionDidFinish();
     
     SBAudioEngine::playBGM(SOUND_BGM_GAME);
+    
+    GameManager::onGameStart();
 }
 
 void GameScene::onExit() {
@@ -90,7 +105,7 @@ bool GameScene::onApplicationEnterBackground() {
         return false;
     }
     
-    // GameManager::onGamePause();
+    GameManager::onGamePause();
     
     return true;
 }
@@ -101,7 +116,7 @@ bool GameScene::onApplicationEnterForeground() {
         return false;
     }
     
-    // GameManager::onGameResume();
+    GameManager::onGameResume();
     
     return true;
 }
@@ -116,12 +131,56 @@ bool GameScene::onBackKeyReleased() {
 }
 
 /**
+ * 스테이지 변경
+ */
+void GameScene::onStageChanged(const StageData &stage) {
+}
+
+/**
+ * 스테이지 클리어
+ */
+void GameScene::onStageClear(const StageData &stage) {
+
+    // 다음 스테이지 버튼 노출
+    auto nextBtn = SBButton::create(DIR_IMG_GAME + "scratch_btn_next.png");
+    nextBtn->setZoomScale(ButtonZoomScale::WEAK);
+    // nextBtn->setZoomScale(0);
+    nextBtn->setAnchorPoint(ANCHOR_M);
+    nextBtn->setOnClickListener([=](Node*) {
+        SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
+        nextBtn->removeFromParent();
+
+        // 마지막 스테이지 클리어한 경우, 1스테이지로 복귀
+        if( stage.stage == Database::getLastStage().stage ) {
+            GAME_MANAGER->setStage(User::getClearStage()+1);
+            GameManager::onStageChanged();
+        } else {
+            GameManager::onMoveNextStage();
+            GameManager::onMoveNextStageFinished();
+        }
+    });
+    addChild(nextBtn);
+    
+    // 연출 진행되는 동안 버튼 터치 방지
+    nextBtn->setTouchEnabled(false);
+    
+    // 화면 아래에서 올라오는 연출
+    nextBtn->setPosition(Vec2BC(0, -nextBtn->getContentSize().height*0.5f));
+    
+    auto moveIn = MoveTo::create(0.2f, Vec2BC(0, 205));
+    auto callFunc = CallFunc::create([=]() {
+        nextBtn->setTouchEnabled(true);
+    });
+    nextBtn->runAction(Sequence::create(moveIn, callFunc, nullptr));
+}
+
+/**
  * Scene 전환
  */
 void GameScene::replaceScene(SceneType type) {
     
-//    GameManager::onGameExit();
-//    GameManager::destroyInstance();
+    GameManager::onGameExit();
+    GameManager::destroyInstance();
     removeListeners(this);
     
     BaseScene::replaceScene(type);
@@ -187,3 +246,28 @@ void GameScene::initGameView() {
 void GameScene::initMenu() {
 }
 
+/**
+ * 게임 이벤트 리스너 초기화
+ */
+void GameScene::initGameListener() {
+    
+    string eventNames[] = {
+        GAME_EVENT_STAGE_CHANGED,
+        GAME_EVENT_STAGE_CLEAR,
+    };
+    
+    for( string eventName : eventNames ) {
+        auto listener = EventListenerCustom::create(eventName, [=](EventCustom *event) {
+            
+            if( eventName == GAME_EVENT_STAGE_CHANGED ) {
+                auto stage = (StageData*)event->getUserData();
+                this->onStageChanged(*stage);
+            }
+            else if( eventName == GAME_EVENT_STAGE_CLEAR ) {
+                auto stage = (StageData*)event->getUserData();
+                this->onStageClear(*stage);
+            }
+        });
+        getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
+    }
+}

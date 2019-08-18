@@ -15,6 +15,7 @@
 #include "superbomb.h"
 
 #include "BaseScene.hpp"
+#include "../content/data/model/StageData.h"
 
 class GameView;
 
@@ -45,6 +46,12 @@ private:
     void initBanner();
     void initGameView();
     void initMenu();
+    void initGameListener();
+    
+// Game Event
+private:
+    void onStageChanged(const StageData &stage);
+    void onStageClear(const StageData &stage);
 
 public:
     void replaceScene(SceneType type) override;

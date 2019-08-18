@@ -13,6 +13,7 @@
 #include "GameUIHelper.hpp"
 
 #include "../test/TestHelper.hpp"
+#include "../game/GameManager.hpp"
 
 #include "CommonLoadingBar.hpp"
 #include "ExitAlertPopup.hpp"
@@ -45,6 +46,14 @@ bool MainScene::init() {
     
     initIAPListener();
     initPopupListener();
+    
+    // 개발 버전 표기
+    auto versionLabel = Label::createWithTTF(DEV_VERSION, FONT_ROBOTO_BLACK, 30, Size::ZERO,
+                                             TextHAlignment::RIGHT, TextVAlignment::BOTTOM);
+    versionLabel->setTextColor(Color4B::WHITE);
+    versionLabel->setAnchorPoint(ANCHOR_BR);
+    versionLabel->setPosition(Vec2BR(0,0));
+    addChild(versionLabel, INT_MAX);
     
     return true;
 }
@@ -126,6 +135,7 @@ void MainScene::onClick(Node *sender) {
             
         // 게임 시작
         case Tag::BTN_START: {
+            GAME_MANAGER->init();
             replaceScene(SceneType::GAME);
         } break;
             
@@ -225,7 +235,7 @@ void MainScene::initBg() {
     title->setZoomScale(0);
     title->setTag(Tag::BTN_TITLE);
     title->setAnchorPoint(ANCHOR_M);
-    title->setPosition(Vec2MC(0, 200));
+    title->setPosition(Vec2MC(0, 250));
     addChild(title, SBZOrder::BOTTOM);
     
     title->setOnClickListener(CC_CALLBACK_1(MainScene::onClick, this));
@@ -242,7 +252,7 @@ void MainScene::initMenu() {
                                            TextHAlignment::CENTER, TextVAlignment::CENTER);
     tapToStart->setTextColor(Color4B::WHITE);
     tapToStart->setAnchorPoint(ANCHOR_M);
-    tapToStart->setPosition(Vec2BC(0, 198));
+    tapToStart->setPosition(Vec2BC(0, 250));
     addChild(tapToStart);
     
     auto btn = SBNodeUtils::createTouchNode();

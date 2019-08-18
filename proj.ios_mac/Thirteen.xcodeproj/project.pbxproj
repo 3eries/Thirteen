@@ -18,6 +18,7 @@
 		1D5D5AF12309CE8A00A30FBB /* GameScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5D5AEF2309CE8A00A30FBB /* GameScene.cpp */; };
 		1D5D5AF42309D94800A30FBB /* GameManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5D5AF22309D94800A30FBB /* GameManager.cpp */; };
 		1D5D5AF82309D96900A30FBB /* GameTile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5D5AF62309D96900A30FBB /* GameTile.cpp */; };
+		1D5D5AFB2309D9E800A30FBB /* StageProgressBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5D5AF92309D9E800A30FBB /* StageProgressBar.cpp */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1D9CDDBE22E8A34D00106DA2 /* PatchManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CDCED22E8A34A00106DA2 /* PatchManager.cpp */; };
 		1D9CDDBF22E8A34D00106DA2 /* Define.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CDCEE22E8A34A00106DA2 /* Define.cpp */; };
@@ -171,6 +172,8 @@
 		1D5D5AF32309D94800A30FBB /* GameManager.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GameManager.hpp; sourceTree = "<group>"; };
 		1D5D5AF62309D96900A30FBB /* GameTile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GameTile.cpp; sourceTree = "<group>"; };
 		1D5D5AF72309D96900A30FBB /* GameTile.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GameTile.hpp; sourceTree = "<group>"; };
+		1D5D5AF92309D9E800A30FBB /* StageProgressBar.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StageProgressBar.cpp; sourceTree = "<group>"; };
+		1D5D5AFA2309D9E800A30FBB /* StageProgressBar.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StageProgressBar.hpp; sourceTree = "<group>"; };
 		1D6058910D05DD3D006BFB54 /* Thirteen-mobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Thirteen-mobile.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D9CDCED22E8A34A00106DA2 /* PatchManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PatchManager.cpp; sourceTree = "<group>"; };
 		1D9CDCEE22E8A34A00106DA2 /* Define.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Define.cpp; sourceTree = "<group>"; };
@@ -463,6 +466,8 @@
 			children = (
 				1D5D5AF62309D96900A30FBB /* GameTile.cpp */,
 				1D5D5AF72309D96900A30FBB /* GameTile.hpp */,
+				1D5D5AF92309D9E800A30FBB /* StageProgressBar.cpp */,
+				1D5D5AFA2309D9E800A30FBB /* StageProgressBar.hpp */,
 			);
 			path = object;
 			sourceTree = "<group>";
@@ -1145,6 +1150,7 @@
 				1D9CDE1222E8A34D00106DA2 /* SBEvent.cpp in Sources */,
 				1D9CDE0722E8A34D00106DA2 /* SBAudioEngine.cpp in Sources */,
 				1DEDA9B022EDF5B3001F68ED /* SBSkeletonAnimation.cpp in Sources */,
+				1D5D5AFB2309D9E800A30FBB /* StageProgressBar.cpp in Sources */,
 				1D9CDDDF22E8A34D00106DA2 /* NSData+AES.m in Sources */,
 				1D9CDE0322E8A34D00106DA2 /* SBStringUtils.cpp in Sources */,
 				1D9CDDFF22E8A34D00106DA2 /* SBActionHelper.cpp in Sources */,
