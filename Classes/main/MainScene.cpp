@@ -126,7 +126,7 @@ void MainScene::onClick(Node *sender) {
             
         // 게임 시작
         case Tag::BTN_START: {
-            // replaceScene(SceneType::GAME);
+            replaceScene(SceneType::GAME);
         } break;
             
         // 설정
@@ -219,18 +219,14 @@ void MainScene::showSettingPopup() {
 
 void MainScene::initBg() {
     
-    auto bg = Sprite::create(DIR_IMG_GAME + "RSP_bg.png");
-    bg->setAnchorPoint(ANCHOR_M);
-    bg->setPosition(Vec2MC(0,0));
-    addChild(bg);
+    addChild(LayerColor::create(Color4B::BLACK));
     
-    auto title = SBButton::create("Game Title", FONT_COMMODORE, 60);
+    auto title = SBButton::create(DIR_IMG_MAIN + "main_title.png");
     title->setZoomScale(0);
     title->setTag(Tag::BTN_TITLE);
     title->setAnchorPoint(ANCHOR_M);
-    title->setPosition(Vec2MC(0, 255));
-    title->setContentSize(title->getTitle()->getContentSize());
-    addChild(title);
+    title->setPosition(Vec2MC(0, 200));
+    addChild(title, SBZOrder::BOTTOM);
     
     title->setOnClickListener(CC_CALLBACK_1(MainScene::onClick, this));
 }
@@ -240,7 +236,35 @@ void MainScene::initBg() {
  */
 void MainScene::initMenu() {
     
+    // 탭하여 시작
+    // auto tapToStart = Sprite::create(DIR_IMG_MAIN + "scratch_taptostart.png");
+    auto tapToStart = Label::createWithTTF("TAP TO START", FONT_ROBOTO_BLACK, 50, Size::ZERO,
+                                           TextHAlignment::CENTER, TextVAlignment::CENTER);
+    tapToStart->setTextColor(Color4B::WHITE);
+    tapToStart->setAnchorPoint(ANCHOR_M);
+    tapToStart->setPosition(Vec2BC(0, 198));
+    addChild(tapToStart);
+    
+    auto btn = SBNodeUtils::createTouchNode();
+    btn->setTag(Tag::BTN_START);
+    addChild(btn);
+    
+    btn->addClickEventListener([=](Ref*) {
+        this->onClick(btn);
+    });
+    
+    // blink
+    {
+        auto delay = DelayTime::create(0.5f);
+        auto callFunc = CallFunc::create([=]() {
+            auto blink = RepeatForever::create(Blink::create(1.0f, 1));
+            tapToStart->runAction(blink);
+        });
+        tapToStart->runAction(Sequence::create(delay, callFunc, nullptr));
+    }
+    
     // 메인 화면 전용 메뉴
+    /*
     SBUIInfo infos[] = {
         SBUIInfo(Tag::BTN_START,        ANCHOR_M,    Vec2BC(0, 100),    DIR_IMG_MAIN + "RSP_btn_start.png"),
         SBUIInfo(Tag::BTN_SETTING,      ANCHOR_MR,   Vec2TR(-66 + (100*0.5f), -62),     DIR_IMG_COMMON + "RSP_btn_option.png"),
@@ -268,6 +292,7 @@ void MainScene::initMenu() {
     if( User::isRemovedAds() ) {
         getChildByTag(Tag::BTN_REMOVE_ADS)->setVisible(false);
     }
+    */
 }
 
 /**

@@ -17,6 +17,7 @@ enum class SceneType {
     TEST,
     SPLASH,
     MAIN,
+    GAME,
 };
 
 static inline std::string getSceneName(SceneType type) {
@@ -24,6 +25,7 @@ static inline std::string getSceneName(SceneType type) {
         case SceneType::TEST:            return "TEST";
         case SceneType::SPLASH:          return "SPLASH";
         case SceneType::MAIN:            return "MAIN";
+        case SceneType::GAME:            return "GAME";
         default:
             return "NOT DEFINED";
     }
@@ -36,6 +38,7 @@ class SceneManager : public cocos2d::Ref {
 public:
     static const float REPLACE_DURATION_SPLASH_TO_MAIN;
     static const float REPLACE_DURATION_MAIN;
+    static const float REPLACE_DURATION_GAME;
     
 public:
     static SceneManager* getInstance();

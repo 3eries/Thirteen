@@ -14,6 +14,8 @@ USING_NS_CC;
 USING_NS_SB;
 using namespace std;
 
+#define STAGE_FILE               (DIR_CONTENT_DATA + "stage.json")
+
 static Database *instance = nullptr;
 Database* Database::getInstance() {
     
@@ -47,34 +49,26 @@ void Database::init() {
  */
 void Database::parseStageJson() {
     
-    int stageId = 0;
+    CCLOG("========== PARSE START (stage.json)  ==========");
+    string json = SBStringUtils::readTextFile(STAGE_FILE);
     
-    while( true ) {
-        stageId++;
-        
-        string fileName = STR_FORMAT("stage_%04d.json", stageId);
-        string filePath = DIR_CONTENT_DATA + fileName;
-        
-        if( !FileUtils::getInstance()->isFileExist(filePath) ) {
-            break;
-        }
-        
-        CCLOG("========== PARSE START (%s)  ==========", fileName.c_str());
-        
-        string json = SBStringUtils::readTextFile(filePath);
-        
-        rapidjson::Document doc;
-        doc.Parse(json.c_str());
-        
-        rapidjson::Document::AllocatorType &allocator = doc.GetAllocator();
+    rapidjson::Document doc;
+    doc.Parse(json.c_str());
+    
+    rapidjson::Document::AllocatorType &allocator = doc.GetAllocator();
+
+    auto list = doc.GetArray();
+    
+    for( int i = 0; i < list.Size(); ++i ) {
+        const rapidjson::Value &v = list[i];
         
         StageData stage;
-        stage.parse(doc, allocator);
-
-        stages.push_back(stage);
+        stage.parse(v, allocator);
         
-        CCLOG("========== PARSE END (%s)  ==========", fileName.c_str());
-    } // stage loop
+        stages.push_back(stage);
+    }
+    
+    CCLOG("========== PARSE END (stage.json)  ==========");
     
     // order by floor asc
     sort(stages.begin(), stages.end(), [](const StageData &s1, const StageData &s2) {

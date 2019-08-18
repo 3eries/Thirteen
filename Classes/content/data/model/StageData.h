@@ -10,8 +10,27 @@
 #include "cocos2d.h"
 #include "superbomb.h"
 
+typedef cocos2d::Vec2 TilePosition;
+
+struct TileData {
+    TilePosition p;
+    bool isEmpty;
+    
+    TileData() : isEmpty(true) {}
+};
+
+typedef std::vector<TileData> TileDataList;
+
 struct StageData {
-    int            stage;                   // 스테이지
+    int             stage;                   // 스테이지
+    int             clearCondition;          // 클리어 조건
+    
+    IntList         numbers;                 // 숫자 리스트
+    IntList         numberWeight;            // 숫자 가중치
+    
+    TileDataList    tiles;                   // 타일 리스트
+    int             tileRows;                // 타일 가로줄 수
+    int             tileColumns;             // 타일 세로줄 수
     
     StageData() : stage(0) {}
     
@@ -21,13 +40,52 @@ struct StageData {
         {
             StringList keys({
                 "stage",
+                "clear_condition",
             });
             
             std::vector<int*> ptrs({
                 &stage,
+                &clearCondition,
             });
             
             SBJSON::parse(v, allocator, keys, ptrs);
+        }
+        
+        // number_list
+        auto numberList = v["number_list"].GetArray();
+        
+        for( int i = 0; i < numberList.Size(); ++i ) {
+            // const rapidjson::Value &v = list[i];
+            numbers.push_back(numberList[i].GetInt());
+        }
+        
+        // tile
+        CCLOG("STAGE %d", stage);
+        
+        auto tileList = v["tile"].GetArray();
+        tileRows = tileList.Size();
+        tileColumns = tileList[0].GetArray().Size();
+        
+        for( int i = 0; i < tileRows; ++i ) {
+            auto row = tileList[i].GetArray();
+            int y = tileRows - i - 1;
+            
+            std::string str = "[";
+            
+            for( int x = 0; x < row.Size(); ++x ) {
+                TileData tile;
+                tile.p.x = x;
+                tile.p.y = y;
+                tile.isEmpty = (row[x].GetInt() == 0 );
+                
+                // str += STR_FORMAT("%d(%d,%d)", !tile.isEmpty ? 1 : 0, (int)x, (int)y);
+                str += STR_FORMAT("%d", !tile.isEmpty ? 1 : 0);
+                
+                tiles.push_back(tile);
+            }
+            
+            str += "]";
+            CCLOG("%s", str.c_str());
         }
     }
     
@@ -35,9 +93,25 @@ struct StageData {
         return stage == 0;
     }
 
+    int getRandomNumber(std::mt19937 numberEngine) const {
+        
+        
+        
+        std::uniform_int_distribution<int> dist(numbers[0], numbers[numbers.size()-1]);
+        return dist(numberEngine);
+    }
+    
     std::string toString() {
         std::string str = "StageData {\n";
-        str += STR_FORMAT("\tstage: %d\n", stage);
+        str += STR_FORMAT("\tstage: %d, clearCondition: %d\n", stage, clearCondition);
+        str += STR_FORMAT("\ttileSize: %dx%d\n", tileColumns, tileRows);
+        
+        str += "\tnumbers: ";
+        for( int n : numbers ) {
+            str += STR_FORMAT("%d,", n);
+        }
+        str += "\n";
+        
         str += "}";
         
         return str;

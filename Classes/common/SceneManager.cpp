@@ -10,12 +10,14 @@
 
 #include "../splash/SplashScene.hpp"
 #include "../main/MainScene.hpp"
+#include "../game/GameScene.hpp"
 
 USING_NS_CC;
 using namespace std;
 
 const float SceneManager::REPLACE_DURATION_SPLASH_TO_MAIN = 1.5f;
 const float SceneManager::REPLACE_DURATION_MAIN = 0.3f;
+const float SceneManager::REPLACE_DURATION_GAME = 0.4f;
 
 static SceneManager *instance = nullptr;
 SceneManager* SceneManager::getInstance() {
@@ -51,6 +53,7 @@ Scene* SceneManager::createScene(SceneType type) {
     switch( type ) {
         case SceneType::SPLASH:          return SplashScene::create();
         case SceneType::MAIN:            return MainScene::create();
+        case SceneType::GAME:            return GameScene::create();
         default:
             CCASSERT(false, "SceneManager::createScene error: invalid scene type.");
             break;
@@ -90,19 +93,23 @@ void SceneManager::replace(SceneType type, function<Scene*()> createSceneFunc) {
             // Splash -> Main
             if( prevSceneType == SceneType::SPLASH ) {
                 /*
-                auto splashScene = dynamic_cast<SplashScene*>(prevScene);
-                
-                if( splashScene->isLogoMode() ) {
-                    trans = TransitionCrossFade::create(REPLACE_DURATION_SPLASH_TO_MAIN, scene);
-                } else {
-                    trans = TransitionFade::create(REPLACE_DURATION_MAIN, scene);
-                }
-                */
+                 auto splashScene = dynamic_cast<SplashScene*>(prevScene);
+                 
+                 if( splashScene->isLogoMode() ) {
+                 trans = TransitionCrossFade::create(REPLACE_DURATION_SPLASH_TO_MAIN, scene);
+                 } else {
+                 trans = TransitionFade::create(REPLACE_DURATION_MAIN, scene);
+                 }
+                 */
             }
             // XXX -> Main
             else {
-                trans = TransitionFade::create(REPLACE_DURATION_MAIN, scene);
+                // trans = TransitionFade::create(REPLACE_DURATION_MAIN, scene);
             }
+        } break;
+        case SceneType::GAME: {
+            trans = TransitionSlideInR::create(REPLACE_DURATION_GAME, scene);
+            // trans = TransitionFade::create(REPLACE_DURATION_GAME, scene);
         } break;
             
         default: break;
