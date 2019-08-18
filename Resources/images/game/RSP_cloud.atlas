@@ -1,0 +1,76 @@
+
+RSP_cloud.png
+size: 1024,1024
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+bird_A_down
+  rotate: false
+  xy: 536, 200
+  size: 44, 44
+  orig: 44, 44
+  offset: 0, 0
+  index: -1
+bird_A_up
+  rotate: false
+  xy: 434, 122
+  size: 44, 44
+  orig: 44, 44
+  offset: 0, 0
+  index: -1
+bird_B_down
+  rotate: false
+  xy: 688, 674
+  size: 56, 50
+  orig: 56, 50
+  offset: 0, 0
+  index: -1
+bird_B_up
+  rotate: false
+  xy: 808, 836
+  size: 56, 50
+  orig: 56, 50
+  offset: 0, 0
+  index: -1
+cloud_1
+  rotate: false
+  xy: 2, 168
+  size: 532, 76
+  orig: 532, 76
+  offset: 0, 0
+  index: -1
+cloud_2
+  rotate: false
+  xy: 2, 726
+  size: 804, 160
+  orig: 804, 160
+  offset: 0, 0
+  index: -1
+cloud_3
+  rotate: false
+  xy: 2, 88
+  size: 430, 78
+  orig: 430, 78
+  offset: 0, 0
+  index: -1
+cloud_4
+  rotate: false
+  xy: 2, 2
+  size: 302, 84
+  orig: 302, 84
+  offset: 0, 0
+  index: -1
+cloud_bottom_left
+  rotate: false
+  xy: 2, 246
+  size: 656, 236
+  orig: 656, 236
+  offset: 0, 0
+  index: -1
+cloud_bottom_right
+  rotate: false
+  xy: 2, 484
+  size: 684, 240
+  orig: 684, 240
+  offset: 0, 0
+  index: -1

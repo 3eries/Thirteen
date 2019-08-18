@@ -1,0 +1,66 @@
+{
+    "android": {
+        "firebase": {},
+        "ads": {
+            "test": 0,
+            "test_devices": ["70E156DD37C77C954FC580FDA70F4645"],
+            "auto_load_interval": 3,
+            "app_id": "ca-app-pub-9699962520672188~1100277534",
+            "banner_unit_id": "ca-app-pub-9699962520672188/3683274502",
+            "interstitial_unit_id": "ca-app-pub-9699962520672188/3890092401",
+            "rewarded_video_unit_id": "ca-app-pub-9699962520672188/8759275703",
+            "placements": {
+                "vungle": []
+            }
+        },
+        "iap": {
+            "items": {
+                "remove_ads": {
+                    "type": "remove_ads",
+                    "id": "remove_ads",
+                    "amount": 0,
+                    "price": ""
+                },
+                "test_item": {
+                    "type": "consumable",
+                    "id": "",
+                    "amount": 0,
+                    "price": ""
+                }
+            },
+            "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2LYxV7C5qq1rAVr/QIJVcquhD0Oq+TGJimvfuSDyxBcKx51wTzLaFv1UZ4SPpnPxlQ3vNofj8p4eA1YxbCgcxXWzgoFWOb3wYrNL89Z7kt9AsHzVaZkkTymbmFJkJRqHAr7gEJ0o0LAqlEfcBQEJGPni1bunEahQEiquUkxL7CwTVCT/xu2h5QU/9OaozEWXfZawpPJHwL9diwn8VAwPkA2wN9EUkIGEHfYBMYZjuT3zL0AKwu0ETK6xyMtRSssgKJ55HuCG+ScvLYC3W3KprTfs6BNSKxqs9LMYazM0xuXCCUUwMGO0hnEkUoR86Mui4mfj1dMBHalWpYvu0HG79wIDAQAB"
+        }
+    },
+    "ios": {
+        "firebase": {},
+        "ads": {
+            "test": 0,
+            "test_devices": ["b4557ed216280a136490cbe37144356d"],
+            "auto_load_interval": 3,
+            "app_id": "ca-app-pub-9699962520672188~4051241482",
+            "banner_unit_id": "ca-app-pub-9699962520672188/5835096448",
+            "interstitial_unit_id": "ca-app-pub-9699962520672188/3738991113",
+            "rewarded_video_unit_id": "ca-app-pub-9699962520672188/2766079973",
+            "placements": {
+                "vungle": []
+            }
+        },
+        "iap": {
+            "items": {
+                "remove_ads": {
+                    "type": "remove_ads",
+                    "id": "remove_ads",
+                    "amount": 0,
+                    "price": ""
+                },
+                
+                "test_item": {
+                    "type": "consumable",
+                    "id": "",
+                    "amount": 0,
+                    "price": ""
+                }
+            }
+        }
+    }
+}

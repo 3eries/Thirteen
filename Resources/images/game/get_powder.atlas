@@ -1,0 +1,27 @@
+
+get_powder.png
+size: 256,64
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+effect_winner_powder_red
+  rotate: false
+  xy: 2, 2
+  size: 45, 44
+  orig: 45, 44
+  offset: 0, 0
+  index: -1
+effect_winner_powder_white
+  rotate: false
+  xy: 49, 2
+  size: 45, 44
+  orig: 45, 44
+  offset: 0, 0
+  index: -1
+effect_winner_powder_yellow
+  rotate: false
+  xy: 96, 2
+  size: 45, 44
+  orig: 45, 44
+  offset: 0, 0
+  index: -1

@@ -1,0 +1,12 @@
+{
+    "android": {
+        "store": "https://play.google.com/store/apps/details?id=com.superbomb.series.rps",
+        "more_games": "https://play.google.com/store/apps/dev?id=5304294506734337771"
+    },
+    "ios": {
+        "store": "https://itunes.apple.com/app/id1410764042",
+        "more_games": "https://itunes.apple.com/developer/seong-min-hwang/id1392753835"
+    },
+    "first_coin": 30,
+    "max_score": 9999
+}
