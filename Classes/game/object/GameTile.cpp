@@ -8,7 +8,7 @@
 #include "GameTile.hpp"
 
 #include "Define.h"
-#include "GameDefine.h"
+#include "../GameDefine.h"
 
 USING_NS_CC;
 using namespace std;
