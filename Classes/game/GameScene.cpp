@@ -56,19 +56,6 @@ bool GameScene::init() {
     initMenu();
     initGameListener();
     
-    // FIXME: 다시 하기 버튼
-    {
-        auto btn = SBNodeUtils::createTouchNode();
-        btn->setAnchorPoint(ANCHOR_MT);
-        btn->setPosition(Vec2TC(0, 0));
-        btn->setContentSize(Size(SB_WIN_SIZE.width*0.6f, 100));
-        addChild(btn, INT_MAX);
-        
-        btn->addClickEventListener([=](Ref*) {
-            GameManager::onStageChanged();
-        });
-    }
-    
     return true;
 }
 
@@ -77,7 +64,8 @@ void GameScene::onEnter() {
     BaseScene::onEnter();
     
     GameManager::onGameEnter();
-    GAME_MANAGER->setStage(User::getClearStage()+1);
+    // GAME_MANAGER->setStage(User::getClearStage()+1);
+    GAME_MANAGER->setStage(1);
 }
 
 void GameScene::onEnterTransitionDidFinish() {
@@ -259,13 +247,18 @@ void GameScene::initGameListener() {
     for( string eventName : eventNames ) {
         auto listener = EventListenerCustom::create(eventName, [=](EventCustom *event) {
             
-            if( eventName == GAME_EVENT_STAGE_CHANGED ) {
-                auto stage = (StageData*)event->getUserData();
-                this->onStageChanged(*stage);
-            }
-            else if( eventName == GAME_EVENT_STAGE_CLEAR ) {
-                auto stage = (StageData*)event->getUserData();
-                this->onStageClear(*stage);
+            switch( GAME_EVENT_ENUMS[eventName] ) {
+                case GameEvent::STAGE_CHANGED: {
+                    auto stage = (StageData*)event->getUserData();
+                    this->onStageChanged(*stage);
+                } break;
+                    
+                case GameEvent::STAGE_CLEAR: {
+                    auto stage = (StageData*)event->getUserData();
+                    this->onStageClear(*stage);
+                } break;
+                    
+                default: break;
             }
         });
         getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);

@@ -44,6 +44,7 @@ bool GameTile::init(const TileData &data) {
     
     setAnchorPoint(ANCHOR_M);
     setContentSize(TILE_CONTENT_SIZE);
+    setVisible(!data.isEmpty);
     
     bg = Sprite::create(DIR_IMG_GAME + "game_tile.png");
     bg->setAnchorPoint(ANCHOR_M);

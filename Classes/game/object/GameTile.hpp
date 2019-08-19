@@ -34,6 +34,7 @@ public:
     void runNumberEnterAction();
     void runNumberExitAction();
     
+    inline TilePosition getTilePosition() { return data.p; }
     inline bool isEmpty() { return data.isEmpty; }
     
 private:
@@ -44,5 +45,7 @@ private:
     cocos2d::Sprite *bg;
     cocos2d::Label *numberLabel;
 };
+
+typedef std::vector<GameTile*> GameTileList;
 
 #endif /* GameTile_hpp */

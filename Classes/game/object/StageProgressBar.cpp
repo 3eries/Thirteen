@@ -90,17 +90,23 @@ void StageProgressBar::initGameListener() {
          */
         auto listener = EventListenerCustom::create(eventName, [=](EventCustom *event) {
             
-            if( eventName == GAME_EVENT_STAGE_CHANGED ) {
-                auto stage = (StageData*)event->getUserData();
-                this->onStageChanged(*stage);
-            }
-            else if( eventName == GAME_EVENT_STAGE_RESTART ) {
-                auto stage = (StageData*)event->getUserData();
-                this->onStageRestart(*stage);
-            }
-            else if( eventName == GAME_EVENT_STAGE_CLEAR ) {
-                auto stage = (StageData*)event->getUserData();
-                this->onStageClear(*stage);
+            switch( GAME_EVENT_ENUMS[eventName] ) {
+                case GameEvent::STAGE_CHANGED: {
+                    auto stage = (StageData*)event->getUserData();
+                    this->onStageChanged(*stage);
+                } break;
+                    
+                case GameEvent::STAGE_RESTART: {
+                    auto stage = (StageData*)event->getUserData();
+                    this->onStageRestart(*stage);
+                } break;
+                    
+                case GameEvent::STAGE_CLEAR: {
+                    auto stage = (StageData*)event->getUserData();
+                    this->onStageClear(*stage);
+                } break;
+                    
+                default: break;
             }
         });
         getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);

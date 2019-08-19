@@ -11,7 +11,6 @@
 #include "GameDefine.h"
 #include "ContentManager.hpp"
 
-#include "object/GameTile.hpp"
 #include "object/StageProgressBar.hpp"
 
 USING_NS_CC;
@@ -37,6 +36,9 @@ bool GameView::init() {
     initTileMap();
     initGameListener();
     
+    // 멀티 터치 방지
+    addChild(SBNodeUtils::createSwallowMultiTouchNode(), SBZOrder::BOTTOM+1);
+    
     // Touch Listener
     auto touchListener = EventListenerTouchOneByOne::create();
     touchListener->setSwallowTouches(true);
@@ -45,6 +47,19 @@ bool GameView::init() {
     touchListener->onTouchEnded = CC_CALLBACK_2(GameView::onTouchEnded, this);
     touchListener->onTouchCancelled = CC_CALLBACK_2(GameView::onTouchCancelled, this);
     getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
+    
+    // FIXME: 다시 하기 버튼
+    {
+        auto btn = SBNodeUtils::createTouchNode();
+        btn->setAnchorPoint(ANCHOR_MT);
+        btn->setPosition(Vec2TC(0, 0));
+        btn->setContentSize(Size(SB_WIN_SIZE.width*0.6f, 100));
+        addChild(btn, INT_MAX);
+        
+        btn->addClickEventListener([=](Ref*) {
+            this->updateTileMap(GAME_MANAGER->getStage());
+        });
+    }
     
     return true;
 }
@@ -56,7 +71,64 @@ void GameView::cleanup() {
     Node::cleanup();
 }
 
-void GameView::onNumberClear(vector<GameTile*> selectedTiles) {
+/**
+ * 타일 선택
+ */
+void GameView::selectTile(GameTile *tile) {
+    
+    CCASSERT(!tile->isSelected(), "GameView::selectTile error: already selected.");
+    
+    if( isSelectableTile(tile) ) {
+        tile->setSelected(true);
+        selectedTiles.push_back(tile);
+    }
+}
+
+/**
+ * 선택 가능한 타일인지 반환합니다
+ */
+bool GameView::isSelectableTile(GameTile *tile) {
+    
+    if( selectedTiles.size() == 0 ) {
+        return true;
+    }
+    
+    // 이미 선택된 타일과 인접한지 체크
+    bool isAdjacent = false;
+    
+    for( auto selectedTile : selectedTiles ) {
+        auto diff = selectedTile->getTilePosition() - tile->getTilePosition();
+        diff.x = fabsf(diff.x);
+        diff.y = fabsf(diff.y);
+        CCLOG("diff: %d,%d", (int)diff.x, (int)diff.y);
+        
+        /*
+        if( diff.x == 0 || diff.y == 0 ) {
+            isAdjacent = true;
+            break;
+        }
+        */
+        if( diff.x == 0 && diff.y == 1 ) {
+            isAdjacent = true;
+            break;
+        }
+
+        if( diff.y == 0 && diff.x == 1 ) {
+            isAdjacent = true;
+            break;
+        }
+        
+        float dist = selectedTile->getTilePosition().getDistance(tile->getTilePosition());
+        // CCLOG("dist: %f", dist);
+    }
+    
+    return isAdjacent;
+}
+
+/**
+ * 13 클리어
+ */
+void GameView::onNumberClear(GameTileList selectedTiles) {
     
     ++clearCount;
     int clearCondition = GAME_MANAGER->getStage().clearCondition;
@@ -170,7 +242,7 @@ bool GameView::onTouchBegan(Touch *touch, Event*) {
         auto tileBox = SB_BOUNDING_BOX_IN_WORLD(tile);
         
         if( tileBox.containsPoint(p) && !tile->isEmpty() ) {
-            tile->setSelected(true);
+            selectTile(tile);
         }
     }
     
@@ -196,7 +268,7 @@ void GameView::onTouchMoved(Touch *touch, Event*) {
         auto tileBox = SB_BOUNDING_BOX_IN_WORLD(tile);
         
         if( tileBox.containsPoint(p) ) {
-            tile->setSelected(true);
+            selectTile(tile);
         }
     }
 }
@@ -207,29 +279,28 @@ void GameView::onTouchMoved(Touch *touch, Event*) {
 void GameView::onTouchEnded(Touch *touch, Event*) {
 
     // 선택된 타일의 합을 구한다
-    vector<GameTile*> selectedTiles;
     int number = 0;
     
-    for( auto tile : tiles ) {
-        if( tile->isSelected() ) {
-            tile->setSelected(false);
-            selectedTiles.push_back(tile);
-            
-            number += tile->getNumber();
-        }
+    for( auto tile : selectedTiles ) {
+        tile->setSelected(false);
+        number += tile->getNumber();
     }
     
     // 타일의 합이 13인지 체크
     if( number == 13 ) {
         onNumberClear(selectedTiles);
     }
+    
+    selectedTiles.clear();
 }
 
 void GameView::onTouchCancelled(Touch *touch, Event *e) {
 
-    for( auto tile : tiles ) {
+    for( auto tile : selectedTiles ) {
         tile->setSelected(false);
     }
+    
+    selectedTiles.clear();
 }
 
 /**
@@ -305,17 +376,12 @@ void GameView::initGameListener() {
     };
     
     for( string eventName : eventNames ) {
-        /*
-         auto listener = eventDispatcher->addCustomEventListener(eventName, [=](EventCustom *event) {
-         this->onCustomEvent(HASH_STR(event->getEventName().c_str()));
-         });
-         */
         auto listener = EventListenerCustom::create(eventName, [=](EventCustom *event) {
             
             switch( GAME_EVENT_ENUMS[eventName] ) {
-                case GameEvent::RESET:     this->onGameReset();
-                case GameEvent::PAUSE:     this->onGamePause();
-                case GameEvent::RESUME:    this->onGameResume();
+                case GameEvent::RESET:     this->onGameReset();         break;
+                case GameEvent::PAUSE:     this->onGamePause();         break;
+                case GameEvent::RESUME:    this->onGameResume();        break;
                     
                 case GameEvent::STAGE_CHANGED: {
                     auto stage = (StageData*)event->getUserData();

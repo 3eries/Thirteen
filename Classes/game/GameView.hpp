@@ -14,8 +14,8 @@
 #include "superbomb.h"
 
 #include "../content/data/model/StageData.h"
+#include "object/GameTile.hpp"
 
-class GameTile;
 class StageProgressBar;
 
 class GameView : public cocos2d::Node {
@@ -33,10 +33,12 @@ private:
     void initTileMap();
     void initGameListener();
     
-    void onNumberClear(std::vector<GameTile*> selectedTiles);
+    void selectTile(GameTile *tile);
+    void onNumberClear(GameTileList selectedTiles);
     
     void updateTileMap(const StageData &stage);
     
+    bool isSelectableTile(GameTile *tile);
     int getRandomNumber();
     
 // Game Event
@@ -65,7 +67,9 @@ private:
     bool isTouchLocked;
     
     cocos2d::Node *tileMap;
-    std::vector<GameTile*> tiles;
+    GameTileList tiles;
+    GameTileList selectedTiles;
+    
     StageProgressBar *stageProgressBar;
     
     IntList numbers;
