@@ -56,6 +56,14 @@ bool GameScene::init() {
     initMenu();
     initGameListener();
     
+    // 개발 버전 표기
+    auto versionLabel = Label::createWithTTF(DEV_VERSION, FONT_ROBOTO_BLACK, 30, Size::ZERO,
+                                             TextHAlignment::RIGHT, TextVAlignment::BOTTOM);
+    versionLabel->setTextColor(Color4B::WHITE);
+    versionLabel->setAnchorPoint(ANCHOR_BR);
+    versionLabel->setPosition(Vec2BR(0,0));
+    addChild(versionLabel, INT_MAX);
+    
     return true;
 }
 
@@ -238,29 +246,26 @@ void GameScene::initMenu() {
  * 게임 이벤트 리스너 초기화
  */
 void GameScene::initGameListener() {
-    
-    string eventNames[] = {
+
+    StringList events({
         GAME_EVENT_STAGE_CHANGED,
         GAME_EVENT_STAGE_CLEAR,
-    };
+    });
     
-    for( string eventName : eventNames ) {
-        auto listener = EventListenerCustom::create(eventName, [=](EventCustom *event) {
-            
-            switch( GAME_EVENT_ENUMS[eventName] ) {
-                case GameEvent::STAGE_CHANGED: {
-                    auto stage = (StageData*)event->getUserData();
-                    this->onStageChanged(*stage);
-                } break;
-                    
-                case GameEvent::STAGE_CLEAR: {
-                    auto stage = (StageData*)event->getUserData();
-                    this->onStageClear(*stage);
-                } break;
-                    
-                default: break;
-            }
-        });
-        getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
-    }
+    GameManager::addEventListener(events, [=](GameEvent event, void *userData) {
+        
+        switch( event ) {
+            case GameEvent::STAGE_CHANGED: {
+                auto stage = (StageData*)userData;
+                this->onStageChanged(*stage);
+            } break;
+                
+            case GameEvent::STAGE_CLEAR: {
+                auto stage = (StageData*)userData;
+                this->onStageClear(*stage);
+            } break;
+                
+            default: break;
+        }
+    }, this);
 }

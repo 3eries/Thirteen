@@ -60,11 +60,6 @@ void GameManager::reset() {
     setStage(1);
 }
 
-EventDispatcher* GameManager::getEventDispatcher() {
-    
-    return Director::getInstance()->getEventDispatcher();
-}
-
 /**
  * 게임 상태를 변경합니다
  */
@@ -136,6 +131,22 @@ bool GameManager::isContinuable() {
 }
 
 #pragma mark- Game Event
+
+void GameManager::addEventListener(StringList events, GameEventListener gameEventListener,
+                                   Node *target) {
+    
+    for( string eventName : events ) {
+        auto listener = EventListenerCustom::create(eventName, [=](EventCustom *event) {
+            gameEventListener(GAME_EVENT_ENUMS[eventName], event->getUserData());
+        });
+        getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, target);
+    }
+}
+
+EventDispatcher* GameManager::getEventDispatcher() {
+    
+    return Director::getInstance()->getEventDispatcher();
+}
 
 /**
  * 게임 진입

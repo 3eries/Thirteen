@@ -70,47 +70,33 @@ void StageProgressBar::initUI() {
 
 void StageProgressBar::initGameListener() {
     
-//    auto listener = GameEventListener::create(this);
-//    listener->onStageChanged         = CC_CALLBACK_1(StageProgressBar::onStageChanged, this);
-//    listener->onStageRestart         = CC_CALLBACK_1(StageProgressBar::onStageRestart, this);
-//    listener->onStageClear           = CC_CALLBACK_1(StageProgressBar::onStageClear, this);
-//    GameManager::getEventDispatcher()->addListener(listener);
-    
-    string eventNames[] = {
+    StringList events({
         GAME_EVENT_STAGE_CHANGED,
         GAME_EVENT_STAGE_RESTART,
         GAME_EVENT_STAGE_CLEAR,
-    };
+    });
     
-    for( string eventName : eventNames ) {
-        /*
-         auto listener = eventDispatcher->addCustomEventListener(eventName, [=](EventCustom *event) {
-         this->onCustomEvent(HASH_STR(event->getEventName().c_str()));
-         });
-         */
-        auto listener = EventListenerCustom::create(eventName, [=](EventCustom *event) {
-            
-            switch( GAME_EVENT_ENUMS[eventName] ) {
-                case GameEvent::STAGE_CHANGED: {
-                    auto stage = (StageData*)event->getUserData();
-                    this->onStageChanged(*stage);
-                } break;
-                    
-                case GameEvent::STAGE_RESTART: {
-                    auto stage = (StageData*)event->getUserData();
-                    this->onStageRestart(*stage);
-                } break;
-                    
-                case GameEvent::STAGE_CLEAR: {
-                    auto stage = (StageData*)event->getUserData();
-                    this->onStageClear(*stage);
-                } break;
-                    
-                default: break;
-            }
-        });
-        getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
-    }
+    GameManager::addEventListener(events, [=](GameEvent event, void *userData) {
+        
+        switch( event ) {
+            case GameEvent::STAGE_CHANGED: {
+                auto stage = (StageData*)userData;
+                this->onStageChanged(*stage);
+            } break;
+                
+            case GameEvent::STAGE_RESTART: {
+                auto stage = (StageData*)userData;
+                this->onStageRestart(*stage);
+            } break;
+                
+            case GameEvent::STAGE_CLEAR: {
+                auto stage = (StageData*)userData;
+                this->onStageClear(*stage);
+            } break;
+                
+            default: break;
+        }
+    }, this);
 }
 
 void StageProgressBar::setPercentage(float percentage) {

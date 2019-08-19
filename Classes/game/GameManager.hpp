@@ -36,7 +36,6 @@ private:
     GameManager();
     
     void reset();
-    static cocos2d::EventDispatcher* getEventDispatcher();
     
 public:
     void init();
@@ -68,8 +67,14 @@ private:
     CC_SYNTHESIZE_READONLY(int, resultCount, ResultCount);        // 결과 노출 횟수
     CC_SYNTHESIZE_READONLY(int, continueCount, ContinueCount);    // 이어하기한 횟수
     
-    // Game Event
+// Game Event
 public:
+    typedef std::function<void(GameEvent/*event*/, void*/*userData*/)> GameEventListener;
+    
+    static void addEventListener(StringList events, GameEventListener gameEventListener,
+                                 cocos2d::Node *target);
+    static cocos2d::EventDispatcher* getEventDispatcher();
+    
     static void onGameEnter();
     static void onGameExit();
     static void onGameReset();

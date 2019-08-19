@@ -100,14 +100,8 @@ bool GameView::isSelectableTile(GameTile *tile) {
         auto diff = selectedTile->getTilePosition() - tile->getTilePosition();
         diff.x = fabsf(diff.x);
         diff.y = fabsf(diff.y);
-        CCLOG("diff: %d,%d", (int)diff.x, (int)diff.y);
+        // CCLOG("diff: %d,%d", (int)diff.x, (int)diff.y);
         
-        /*
-        if( diff.x == 0 || diff.y == 0 ) {
-            isAdjacent = true;
-            break;
-        }
-        */
         if( diff.x == 0 && diff.y == 1 ) {
             isAdjacent = true;
             break;
@@ -118,7 +112,7 @@ bool GameView::isSelectableTile(GameTile *tile) {
             break;
         }
         
-        float dist = selectedTile->getTilePosition().getDistance(tile->getTilePosition());
+        // float dist = selectedTile->getTilePosition().getDistance(tile->getTilePosition());
         // CCLOG("dist: %f", dist);
     }
     
@@ -367,40 +361,37 @@ void GameView::initTileMap() {
  */
 void GameView::initGameListener() {
     
-    string eventNames[] = {
+    StringList events({
         GAME_EVENT_PAUSE,
         GAME_EVENT_RESUME,
         GAME_EVENT_STAGE_CHANGED,
         GAME_EVENT_STAGE_RESTART,
         GAME_EVENT_STAGE_CLEAR,
-    };
+    });
     
-    for( string eventName : eventNames ) {
-        auto listener = EventListenerCustom::create(eventName, [=](EventCustom *event) {
-            
-            switch( GAME_EVENT_ENUMS[eventName] ) {
-                case GameEvent::RESET:     this->onGameReset();         break;
-                case GameEvent::PAUSE:     this->onGamePause();         break;
-                case GameEvent::RESUME:    this->onGameResume();        break;
-                    
-                case GameEvent::STAGE_CHANGED: {
-                    auto stage = (StageData*)event->getUserData();
-                    this->onStageChanged(*stage);
-                } break;
-                    
-                case GameEvent::STAGE_RESTART: {
-                    auto stage = (StageData*)event->getUserData();
-                    this->onStageRestart(*stage);
-                } break;
-                    
-                case GameEvent::STAGE_CLEAR: {
-                    auto stage = (StageData*)event->getUserData();
-                    this->onStageClear(*stage);
-                } break;
-                    
-                default: break;
-            }
-        });
-        getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
-    }
+    GameManager::addEventListener(events, [=](GameEvent event, void *userData) {
+        
+        switch( event ) {
+            case GameEvent::RESET:     this->onGameReset();         break;
+            case GameEvent::PAUSE:     this->onGamePause();         break;
+            case GameEvent::RESUME:    this->onGameResume();        break;
+                
+            case GameEvent::STAGE_CHANGED: {
+                auto stage = (StageData*)userData;
+                this->onStageChanged(*stage);
+            } break;
+                
+            case GameEvent::STAGE_RESTART: {
+                auto stage = (StageData*)userData;
+                this->onStageRestart(*stage);
+            } break;
+                
+            case GameEvent::STAGE_CLEAR: {
+                auto stage = (StageData*)userData;
+                this->onStageClear(*stage);
+            } break;
+                
+            default: break;
+        }
+    }, this);
 }
