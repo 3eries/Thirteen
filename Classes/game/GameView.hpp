@@ -27,14 +27,17 @@ private:
     GameView();
     
     bool init() override;
+    void onEnter() override;
     void cleanup() override;
     
     void initBg();
     void initTileMap();
     void initGameListener();
     
-    void selectTile(GameTile *tile);
     void onNumberClear(GameTileList selectedTiles);
+    void onHint();
+    
+    void selectTile(GameTile *tile);
     
     void updateTileMap(const StageData &stage);
     
@@ -42,6 +45,25 @@ private:
     
     void resetNumberEngine();
     int getRandomNumber();
+    
+    typedef GameTileList MadePattern;
+    
+    void recursiveMadePattern(GameTile *anchorTile, MadePattern &pattern, int &sum);
+    std::vector<MadePattern> getMadePatterns();
+    
+    GameTile* getTile(const TilePosition &p);
+    
+private:
+    cocos2d::Node *tileMap;
+    GameTileList tiles;
+    GameTileList selectedTiles;
+    
+    StageProgressBar *stageProgressBar;
+    
+    IntList numbers;
+    std::mt19937 numberEngine;
+    
+    int clearCount; // 클리어 횟수
     
 // Game Event
 public:
@@ -65,17 +87,6 @@ private:
     
 private:
     bool isTouchLocked;
-    
-    cocos2d::Node *tileMap;
-    GameTileList tiles;
-    GameTileList selectedTiles;
-    
-    StageProgressBar *stageProgressBar;
-    
-    IntList numbers;
-    std::mt19937 numberEngine;
-    
-    int clearCount; // 클리어 횟수
 };
 
 #endif /* GameView_hpp */

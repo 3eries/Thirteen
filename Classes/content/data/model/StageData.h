@@ -11,6 +11,7 @@
 #include "superbomb.h"
 
 typedef cocos2d::Vec2 TilePosition;
+typedef std::vector<TilePosition> TilePositionList;
 
 struct TileData {
     TilePosition p;

@@ -11,6 +11,7 @@
 #include "GameDefine.h"
 #include "ContentManager.hpp"
 
+#include "object/HintButton.hpp"
 #include "object/StageProgressBar.hpp"
 
 USING_NS_CC;
@@ -65,11 +66,69 @@ bool GameView::init() {
     return true;
 }
 
+void GameView::onEnter() {
+    
+    Log::i("GameView::onEnter");
+    
+    Node::onEnter();
+    
+    onStageChanged(GAME_MANAGER->getStage());
+}
+
 void GameView::cleanup() {
     
     removeListeners(this);
     
     Node::cleanup();
+}
+
+/**
+ * 13 클리어
+ */
+void GameView::onNumberClear(GameTileList selectedTiles) {
+    
+    ++clearCount;
+    int clearCondition = GAME_MANAGER->getStage().clearCondition;
+    
+    // 스테이지 클리어 체크
+    bool isStageClear = (clearCount == clearCondition);
+    
+    if( isStageClear ) {
+        GameManager::onStageClear();
+    }
+    
+    // UI
+    stageProgressBar->setPercentage(((float)clearCount / clearCondition) * 100, true);
+    
+    for( auto tile : selectedTiles ) {
+        tile->clear(true);
+    }
+    
+    // 스테이지 클리어 못한 경우 다음 번호 생성
+    if( !isStageClear ) {
+        SBDirector::postDelayed(this, [=]() {
+            for( auto tile : selectedTiles ) {
+                tile->setNumber(getRandomNumber(), true);
+            }
+        }, TILE_NUMBER_EXIT_DURATION);
+    }
+}
+
+/**
+ * 힌트 보기
+ */
+void GameView::onHint() {
+    
+    auto patterns = getMadePatterns();
+    Log::i("GameView onHint patterns: %d", (int)patterns.size());
+    
+    if( patterns.size() > 0 ) {
+        auto pattern = patterns[0];
+        
+        for( auto tile : pattern ) {
+            tile->yap();
+        }
+    }
 }
 
 /**
@@ -83,6 +142,50 @@ void GameView::selectTile(GameTile *tile) {
         tile->setSelected(true);
         selectedTiles.push_back(tile);
     }
+}
+
+/**
+ * 타일맵 업데이트
+ */
+void GameView::updateTileMap(const StageData &stage) {
+    
+    // 이전 타일 제거
+    tileMap->removeAllChildren();
+    tiles.clear();
+    
+    // 초기화
+    numbers = stage.numbers;
+    resetNumberEngine();
+    
+    // UI 업데이트
+    tileMap->setContentSize(getTileContentSize(stage.tileRows, stage.tileColumns));
+    
+    for( auto tileData : stage.tiles ) {
+        if( tileData.isEmpty ) {
+            continue;
+        }
+        
+        auto tile = GameTile::create(tileData);
+        tile->setAnchorPoint(ANCHOR_M);
+        tile->setPosition(getTilePosition((int)tileData.p.x, (int)tileData.p.y));
+        tile->setNumber(getRandomNumber(), false);
+        tileMap->addChild(tile);
+        
+        tiles.push_back(tile);
+    }
+    
+    // 인접 타일 설정
+    for( auto tile : tiles ) {
+        auto p = tile->getTilePosition();
+        tile->setNearTile(getTile(p + TilePosition(-1,0)),
+                          getTile(p + TilePosition(1,0)),
+                          getTile(p + TilePosition(0,1)),
+                          getTile(p + TilePosition(0,-1)));
+    }
+    
+    // 패턴 검증
+    auto patterns = getMadePatterns();
+    Log::i("GameView updateTileMap patterns: %d", (int)patterns.size());
 }
 
 /**
@@ -120,36 +223,173 @@ bool GameView::isSelectableTile(GameTile *tile) {
     return isAdjacent;
 }
 
-/**
- * 13 클리어
- */
-void GameView::onNumberClear(GameTileList selectedTiles) {
+#define PRINT_SIMULATION_NUMBER     1
+#define NUMBER_SIMULATION_COUNT     10000
+
+void GameView::resetNumberEngine() {
     
-    ++clearCount;
-    int clearCondition = GAME_MANAGER->getStage().clearCondition;
+    auto level = GAME_MANAGER->getStage();
     
-    // 스테이지 클리어 체크
-    bool isStageClear = (clearCount == clearCondition);
+    random_device rd;
+    numberEngine = mt19937(rd());
+    uniform_int_distribution<int> dist(1, level.numberWeightSum);
     
-    if( isStageClear ) {
-        GameManager::onStageClear();
+#if PRINT_SIMULATION_NUMBER
+    map<int,int> numberMap;
+    double t = SBSystemUtils::getCurrentTimeSeconds();
+#endif
+    
+    for( int i = 0; i < NUMBER_SIMULATION_COUNT; ++i ) {
+        int n = dist(numberEngine);
+        
+#if PRINT_SIMULATION_NUMBER
+        if( numberMap.find(n) == numberMap.end() ) {
+            numberMap[n] = 1;
+        } else {
+            numberMap[n] = numberMap[n]+1;
+        }
+#endif
     }
     
-    // UI
-    stageProgressBar->setPercentage(((float)clearCount / clearCondition) * 100, true);
+    // print numbers
+#if PRINT_SIMULATION_NUMBER
+    for( auto it = numberMap.begin(); it != numberMap.end(); ++it ) {
+        float per = ((float)it->second / NUMBER_SIMULATION_COUNT) * 100.0f;
+        Log::i("simulation result number %d: %.2f%%", it->first, per);
+    }
+    Log::i("simulation time: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
+#endif
     
-    for( auto tile : selectedTiles ) {
-        tile->clear(true);
+    int weightRangeBegin = 1;
+    int weightRangeEnd = 0;
+    
+    for( int i = 0; i < level.numbers.size(); ++i ) {
+        int weight = level.numberWeights[i];
+        weightRangeEnd += weight;
+        CCLOG("가중치 체크 num:%d weight range: %d~%d", level.numbers[i], weightRangeBegin, weightRangeEnd);
+        
+        weightRangeBegin = weightRangeEnd+1;
+    }
+}
+
+int GameView::getRandomNumber() {
+    
+    auto level = GAME_MANAGER->getStage();
+    
+    uniform_int_distribution<int> dist(1, level.numberWeightSum);
+    int r = dist(numberEngine);
+    
+    int weightRangeBegin = 1;
+    int weightRangeEnd = 0;
+    
+    for( int i = 0; i < level.numbers.size(); ++i ) {
+        int weight = level.numberWeights[i];
+        weightRangeEnd += weight;
+        
+        if( r >= weightRangeBegin && r <= weightRangeEnd ) {
+            return level.numbers[i];
+        }
+        
+        weightRangeBegin = weightRangeEnd+1;
     }
     
-    // 스테이지 클리어 못한 경우 다음 번호 생성
-    if( !isStageClear ) {
-        SBDirector::postDelayed(this, [=]() {
-            for( auto tile : selectedTiles ) {
-                tile->setNumber(getRandomNumber(), true);
+    CCASSERT(false, "GameView::getRandomNumber error.");
+    return 0;
+    //    std::shuffle(numbers.begin(), numbers.end(), numberEngine);
+    //    return numbers[0];
+}
+
+void GameView::recursiveMadePattern(GameTile *anchorTile, MadePattern &pattern, int &sum) {
+    
+    if( !anchorTile || sum >= 13 ) {
+        return;
+    }
+    
+    // 이미 등록된 타일
+    for( auto patternTile : pattern ) {
+        if( anchorTile == patternTile ) {
+            return;
+        }
+    }
+    
+    CCLOG("sum: %d", sum);
+    sum += anchorTile->getNumber();
+    pattern.push_back(anchorTile);
+    
+    recursiveMadePattern(anchorTile->getLeft(), pattern, sum);
+    recursiveMadePattern(anchorTile->getRight(), pattern, sum);
+    recursiveMadePattern(anchorTile->getTop(), pattern, sum);
+    recursiveMadePattern(anchorTile->getBottom(), pattern, sum);
+}
+
+vector<GameView::MadePattern> GameView::getMadePatterns() {
+    
+    vector<MadePattern> patterns;
+    
+    for( auto tile : tiles ) {
+        int number = 0;
+        MadePattern pattern;
+        
+        recursiveMadePattern(tile, pattern, number);
+        
+        CCLOG("result n: %d", number);
+        
+        if( number == 13 ) {
+            patterns.push_back(pattern);
+        }
+    }
+    
+    // 중복 패턴 제거
+    
+    /*
+    auto getAdjacentTiles = [=](GameTile *anchorTile) -> GameTileList {
+        
+        GameTileList adjacentTiles;
+        auto anchorTilePos = anchorTile->getTilePosition();
+        
+        for( auto tile : tiles ) {
+            if( anchorTile == tile ) {
+                continue;
             }
-        }, TILE_NUMBER_EXIT_DURATION);
+            
+            auto diff = anchorTilePos - tile->getTilePosition();
+            diff.x = fabsf(diff.x);
+            diff.y = fabsf(diff.y);
+            
+            if( (diff.x == 0 && diff.y == 1) || (diff.y == 0 && diff.x == 1) ) {
+                adjacentTiles.push_back(tile);
+            }
+        }
+        
+        return adjacentTiles;
+    };
+    
+    for( auto firstTile : tiles ) {
+        int num = firstTile->getNumber();
+        auto adjacentTiles = getAdjacentTiles(firstTile);
+        
+        for( auto adjacentTile : adjacentTiles ) {
+            num += adjacentTile->getNumber();
+            
+            if( num == 13 ) {
+                
+            }
+        }
     }
+    */
+     
+    return patterns;
+}
+
+GameTile* GameView::getTile(const TilePosition &p) {
+    
+    for( auto tile : tiles ) {
+        if( tile->getTilePosition() == p ) {
+            return tile;
+        }
+    }
+    
+    return nullptr;
 }
 
 /**
@@ -299,116 +539,18 @@ void GameView::onTouchCancelled(Touch *touch, Event *e) {
 }
 
 /**
- * 타일맵 업데이트
- */
-void GameView::updateTileMap(const StageData &stage) {
- 
-    // 이전 타일 제거
-    tileMap->removeAllChildren();
-    tiles.clear();
-    
-    // 초기화
-    numbers = stage.numbers;
-    resetNumberEngine();
-    
-    // UI 업데이트
-    tileMap->setContentSize(getTileContentSize(stage.tileRows, stage.tileColumns));
-    
-    for( auto tileData : stage.tiles ) {
-        auto tile = GameTile::create(tileData);
-        tile->setAnchorPoint(ANCHOR_M);
-        tile->setPosition(getTilePosition((int)tileData.p.x, (int)tileData.p.y));
-        tileMap->addChild(tile);
-        
-        tiles.push_back(tile);
-        
-        if( !tile->isEmpty() ) {
-            tile->setNumber(getRandomNumber(), true);
-        }
-    }
-}
-
-#define PRINT_SIMULATION_NUMBER     1
-#define NUMBER_SIMULATION_COUNT     10000
-
-void GameView::resetNumberEngine() {
-    
-    auto level = GAME_MANAGER->getStage();
-    
-    random_device rd;
-    numberEngine = mt19937(rd());
-    uniform_int_distribution<int> dist(1, level.numberWeightSum);
-    
-#if PRINT_SIMULATION_NUMBER
-    map<int,int> numberMap;
-    double t = SBSystemUtils::getCurrentTimeSeconds();
-#endif
-    
-    for( int i = 0; i < NUMBER_SIMULATION_COUNT; ++i ) {
-        int n = dist(numberEngine);
-
-#if PRINT_SIMULATION_NUMBER
-        if( numberMap.find(n) == numberMap.end() ) {
-            numberMap[n] = 1;
-        } else {
-            numberMap[n] = numberMap[n]+1;
-        }
-#endif
-    }
-    
-    // print numbers
-#if PRINT_SIMULATION_NUMBER
-    for( auto it = numberMap.begin(); it != numberMap.end(); ++it ) {
-        float per = ((float)it->second / NUMBER_SIMULATION_COUNT) * 100.0f;
-        Log::i("simulation result number %d: %.2f%%", it->first, per);
-    }
-    Log::i("simulation time: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
-#endif
-    
-    int weightRangeBegin = 1;
-    int weightRangeEnd = 0;
-    
-    for( int i = 0; i < level.numbers.size(); ++i ) {
-        int weight = level.numberWeights[i];
-        weightRangeEnd += weight;
-        CCLOG("가중치 체크 num:%d weight range: %d~%d", level.numbers[i], weightRangeBegin, weightRangeEnd);
-        
-        weightRangeBegin = weightRangeEnd+1;
-    }
-}
-
-int GameView::getRandomNumber() {
-    
-    auto level = GAME_MANAGER->getStage();
-    
-    uniform_int_distribution<int> dist(1, level.numberWeightSum);
-    int r = dist(numberEngine);
-
-    int weightRangeBegin = 1;
-    int weightRangeEnd = 0;
-    
-    for( int i = 0; i < level.numbers.size(); ++i ) {
-        int weight = level.numberWeights[i];
-        weightRangeEnd += weight;
-        
-        if( r >= weightRangeBegin && r <= weightRangeEnd ) {
-            return level.numbers[i];
-        }
-        
-        weightRangeBegin = weightRangeEnd+1;
-    }
-    
-    CCASSERT(false, "GameView::getRandomNumber error.");
-    return 0;
-//    std::shuffle(numbers.begin(), numbers.end(), numberEngine);
-//    return numbers[0];
-}
-
-/**
  * 배경 초기화
  */
 void GameView::initBg() {
 
+    // 힌트
+    auto hintButton = HintButton::create();
+    hintButton->setAnchorPoint(ANCHOR_ML);
+    hintButton->setPosition(Vec2TL(10, -58));
+    addChild(hintButton);
+    
+    hintButton->setOnHintListener(CC_CALLBACK_0(GameView::onHint, this));
+    
     // 스테이지 진행도
     stageProgressBar = StageProgressBar::create();
     addChild(stageProgressBar);

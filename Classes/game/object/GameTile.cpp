@@ -28,7 +28,8 @@ GameTile* GameTile::create(const TileData &data) {
 
 GameTile::GameTile() :
 number(0),
-selected(false) {
+selected(false),
+left(nullptr), right(nullptr), top(nullptr), bottom(nullptr) {
 }
 
 GameTile::~GameTile() {
@@ -44,7 +45,6 @@ bool GameTile::init(const TileData &data) {
     
     setAnchorPoint(ANCHOR_M);
     setContentSize(TILE_CONTENT_SIZE);
-    setVisible(!data.isEmpty);
     
     bg = Sprite::create(DIR_IMG_GAME + "game_tile.png");
     bg->setAnchorPoint(ANCHOR_M);
@@ -69,6 +69,14 @@ void GameTile::clear(bool withAction) {
     }
 }
 
+void GameTile::setNearTile(GameTile *left, GameTile *right, GameTile *top, GameTile *bottom) {
+    
+    this->left = left;
+    this->right = right;
+    this->top = top;
+    this->bottom = bottom;
+}
+
 void GameTile::setNumber(int number, bool withAction) {
     
     this->number = number;
@@ -83,6 +91,16 @@ void GameTile::setSelected(bool isSelected) {
     
     this->selected = isSelected;
     bg->setColor(isSelected ? TILE_SELECTED_COLOR : TILE_NORMAL_COLOR);
+    
+    // FIXME: 디버그용 코드
+    numberLabel->stopAllActions();
+}
+
+void GameTile::yap() {
+
+    auto scale1 = ScaleTo::create(1.0f, 2.0f);
+    auto scale2 = ScaleTo::create(1.0f, 1.0f);
+    numberLabel->runAction(RepeatForever::create(Sequence::create(scale1, scale2, nullptr)));
 }
 
 /**

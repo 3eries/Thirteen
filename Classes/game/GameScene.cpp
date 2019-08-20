@@ -74,6 +74,7 @@ void GameScene::onEnter() {
     GameManager::onGameEnter();
     // GAME_MANAGER->setStage(User::getClearStage()+1);
     GAME_MANAGER->setStage(1);
+    GameManager::onGameStart();
 }
 
 void GameScene::onEnterTransitionDidFinish() {
@@ -81,8 +82,6 @@ void GameScene::onEnterTransitionDidFinish() {
     BaseScene::onEnterTransitionDidFinish();
     
     SBAudioEngine::playBGM(SOUND_BGM_GAME);
-    
-    GameManager::onGameStart();
 }
 
 void GameScene::onExit() {

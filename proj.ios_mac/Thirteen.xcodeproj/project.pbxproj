@@ -15,6 +15,7 @@
 		1AF87B8A1F6F7822007BE51C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1AF87B5B1F6F77D6007BE51C /* main.m */; };
 		1AF87B8B1F6F782A007BE51C /* RootViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1AF87B5E1F6F77D6007BE51C /* RootViewController.mm */; };
 		1D0ED1A52309B6B90021C0FE /* GameView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D0ED1A32309B6B90021C0FE /* GameView.cpp */; };
+		1D5B5905230C2C07006D9A6B /* HintButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5B5903230C2C07006D9A6B /* HintButton.cpp */; };
 		1D5D5AF12309CE8A00A30FBB /* GameScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5D5AEF2309CE8A00A30FBB /* GameScene.cpp */; };
 		1D5D5AF42309D94800A30FBB /* GameManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5D5AF22309D94800A30FBB /* GameManager.cpp */; };
 		1D5D5AF82309D96900A30FBB /* GameTile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5D5AF62309D96900A30FBB /* GameTile.cpp */; };
@@ -165,6 +166,8 @@
 		1D0ED1A32309B6B90021C0FE /* GameView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GameView.cpp; sourceTree = "<group>"; };
 		1D0ED1A42309B6B90021C0FE /* GameView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GameView.hpp; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		1D5B5903230C2C07006D9A6B /* HintButton.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HintButton.cpp; sourceTree = "<group>"; };
+		1D5B5904230C2C07006D9A6B /* HintButton.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = HintButton.hpp; sourceTree = "<group>"; };
 		1D5D5AE92309C29000A30FBB /* GameDefine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GameDefine.h; sourceTree = "<group>"; };
 		1D5D5AEF2309CE8A00A30FBB /* GameScene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GameScene.cpp; sourceTree = "<group>"; };
 		1D5D5AF02309CE8A00A30FBB /* GameScene.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GameScene.hpp; sourceTree = "<group>"; };
@@ -466,6 +469,8 @@
 			children = (
 				1D5D5AF62309D96900A30FBB /* GameTile.cpp */,
 				1D5D5AF72309D96900A30FBB /* GameTile.hpp */,
+				1D5B5903230C2C07006D9A6B /* HintButton.cpp */,
+				1D5B5904230C2C07006D9A6B /* HintButton.hpp */,
 				1D5D5AF92309D9E800A30FBB /* StageProgressBar.cpp */,
 				1D5D5AFA2309D9E800A30FBB /* StageProgressBar.hpp */,
 			);
@@ -1226,6 +1231,7 @@
 				1AF87B8A1F6F7822007BE51C /* main.m in Sources */,
 				1D9CDDEA22E8A34D00106DA2 /* PluginManager.cpp in Sources */,
 				1D9CDDEF22E8A34D00106DA2 /* IAPHelper.cpp in Sources */,
+				1D5B5905230C2C07006D9A6B /* HintButton.cpp in Sources */,
 				1D9CDDE222E8A34D00106DA2 /* NSData+Base64.m in Sources */,
 				1D9CDE0822E8A34D00106DA2 /* SBJSON.cpp in Sources */,
 				1D9CDDFD22E8A34D00106DA2 /* SBAction.cpp in Sources */,
@@ -1284,6 +1290,7 @@
 					"$(_COCOS_LIB_IOS_BEGIN)",
 					"$(_COCOS_LIB_IOS_END)",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.superbomb.series.Thirteen;
 				SDKROOT = iphoneos;
 				STRIP_PNG_TEXT = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1318,6 +1325,7 @@
 					"$(_COCOS_LIB_IOS_BEGIN)",
 					"$(_COCOS_LIB_IOS_END)",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.superbomb.series.Thirteen;
 				SDKROOT = iphoneos;
 				STRIP_PNG_TEXT = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";

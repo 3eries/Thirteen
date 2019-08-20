@@ -28,8 +28,11 @@ private:
 public:
     void clear(bool withAction);
     
+    void setNearTile(GameTile *left, GameTile *right, GameTile *top, GameTile *bottom);
     void setNumber(int number, bool withAction);
     void setSelected(bool isSelected);
+    
+    void yap();
     
     void runNumberEnterAction();
     void runNumberExitAction();
@@ -41,6 +44,11 @@ private:
     CC_SYNTHESIZE_READONLY(TileData, data, Data);
     CC_SYNTHESIZE_READONLY(int, number, Number);
     SB_SYNTHESIZE_READONLY_BOOL(selected, Selected);
+    
+    CC_SYNTHESIZE_READONLY(GameTile*, left, Left);
+    CC_SYNTHESIZE_READONLY(GameTile*, right, Right);
+    CC_SYNTHESIZE_READONLY(GameTile*, top, Top);
+    CC_SYNTHESIZE_READONLY(GameTile*, bottom, Bottom);
     
     cocos2d::Sprite *bg;
     cocos2d::Label *numberLabel;
