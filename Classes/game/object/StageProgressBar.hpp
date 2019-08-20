@@ -30,7 +30,7 @@ private:
     void initGameListener();
     
 public:
-    void setPercentage(float percentage);
+    void setPercentage(float percentage, bool withAction = false);
     
 // Game Event
 public:
@@ -40,8 +40,7 @@ public:
     
 private:
     cocos2d::ProgressTimer *gage;
-    cocos2d::Label *currStageLabel;
-    cocos2d::Label *nextStageLabel;
+    cocos2d::Label *levelLabel;
 };
 
 #endif /* StageProgressBar_hpp */

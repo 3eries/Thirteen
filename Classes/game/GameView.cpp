@@ -136,7 +136,7 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
     }
     
     // UI
-    stageProgressBar->setPercentage(((float)clearCount / clearCondition) * 100);
+    stageProgressBar->setPercentage(((float)clearCount / clearCondition) * 100, true);
     
     for( auto tile : selectedTiles ) {
         tile->clear(true);
@@ -400,7 +400,6 @@ int GameView::getRandomNumber() {
     
     CCASSERT(false, "GameView::getRandomNumber error.");
     return 0;
-    
 //    std::shuffle(numbers.begin(), numbers.end(), numberEngine);
 //    return numbers[0];
 }

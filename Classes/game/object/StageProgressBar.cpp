@@ -36,13 +36,12 @@ bool StageProgressBar::init() {
 
 void StageProgressBar::initUI() {
     
-    // scratch_stage_gage_bg.png Vec2TC(-1, -58) , Size(460, 80)
-    auto gageBg = Sprite::create(DIR_IMG_GAME + "scratch_stage_gage_bg.png");
+    auto gageBg = Sprite::create(DIR_IMG_GAME + "game_level_gage_bg.png");
     gageBg->setAnchorPoint(ANCHOR_M);
     gageBg->setPosition(Vec2TC(0, -58));
     addChild(gageBg);
     
-    gage = ProgressTimer::create(Sprite::create(DIR_IMG_GAME + "scratch_stage_gage.png"));
+    gage = ProgressTimer::create(Sprite::create(DIR_IMG_GAME + "game_level_gage.png"));
     gage->setType(ProgressTimer::Type::BAR);
     gage->setMidpoint(Vec2(0,0));
     gage->setBarChangeRate(Vec2(1, 0));
@@ -51,21 +50,12 @@ void StageProgressBar::initUI() {
     gage->setPercentage(0);
     gageBg->addChild(gage);
     
-    // 50 roboto_black_40 Vec2TC(-190, -58) , Size(43, 29)
-    currStageLabel = Label::createWithTTF("1", FONT_ROBOTO_BLACK, 40, Size::ZERO,
-                                          TextHAlignment::CENTER, TextVAlignment::CENTER);
-    currStageLabel->setAnchorPoint(ANCHOR_M);
-    currStageLabel->setPosition(Vec2TC(-190, -58));
-    currStageLabel->setTextColor(Color4B::BLACK);
-    addChild(currStageLabel);
-    
-    // 51 roboto_black_40 Vec2TC(187, -58) , Size(38, 30)
-    nextStageLabel = Label::createWithTTF("2", FONT_ROBOTO_BLACK, 40, Size::ZERO,
-                                          TextHAlignment::CENTER, TextVAlignment::CENTER);
-    nextStageLabel->setAnchorPoint(ANCHOR_M);
-    nextStageLabel->setPosition(Vec2TC(190, -58));
-    nextStageLabel->setTextColor(Color4B::BLACK);
-    addChild(nextStageLabel);
+    levelLabel = Label::createWithTTF("LEVEL 1", FONT_ROBOTO_BLACK, 40, Size::ZERO,
+                                      TextHAlignment::CENTER, TextVAlignment::CENTER);
+    levelLabel->setTextColor(Color4B::BLACK);
+    levelLabel->setAnchorPoint(ANCHOR_M);
+    levelLabel->setPosition(Vec2MC(gageBg->getContentSize(), 0, 0));
+    gageBg->addChild(levelLabel);
 }
 
 void StageProgressBar::initGameListener() {
@@ -99,9 +89,21 @@ void StageProgressBar::initGameListener() {
     }, this);
 }
 
-void StageProgressBar::setPercentage(float percentage) {
+void StageProgressBar::setPercentage(float percentage, bool withAction) {
     
-    gage->setPercentage(percentage);
+    gage->stopAllActions();
+    
+    if( withAction ) {
+        auto updatePercentage = [=](float f) {
+            gage->setPercentage(f);
+        };
+        auto numberAction = ActionFloat::create(0.2f, gage->getPercentage(), percentage,
+                                                updatePercentage);
+        gage->runAction(numberAction);
+        
+    } else {
+        gage->setPercentage(percentage);
+    }
 }
 
 /**
@@ -110,8 +112,7 @@ void StageProgressBar::setPercentage(float percentage) {
 void StageProgressBar::onStageChanged(const StageData &stage) {
     
     setPercentage(0);
-    currStageLabel->setString(TO_STRING(stage.stage));
-    nextStageLabel->setString(TO_STRING(stage.stage+1));
+    levelLabel->setString(STR_FORMAT("LEVEL %d", stage.stage));
 }
 
 /**
