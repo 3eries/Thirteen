@@ -39,6 +39,8 @@ private:
     void updateTileMap(const StageData &stage);
     
     bool isSelectableTile(GameTile *tile);
+    
+    void resetNumberEngine();
     int getRandomNumber();
     
 // Game Event
@@ -60,8 +62,6 @@ private:
     void onTouchMoved(cocos2d::Touch *touch, cocos2d::Event*);
     void onTouchEnded(cocos2d::Touch *touch, cocos2d::Event*);
     void onTouchCancelled(cocos2d::Touch *touch, cocos2d::Event*);
-    
-    // int getMinDist();
     
 private:
     bool isTouchLocked;

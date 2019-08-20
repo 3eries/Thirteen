@@ -14,6 +14,7 @@
 #include "object/StageProgressBar.hpp"
 
 USING_NS_CC;
+USING_NS_SB;
 using namespace std;
 
 GameView::GameView() {
@@ -308,10 +309,9 @@ void GameView::updateTileMap(const StageData &stage) {
     
     // 초기화
     numbers = stage.numbers;
+    resetNumberEngine();
     
-    random_device rd;
-    numberEngine = mt19937(rd());
-    
+    // UI 업데이트
     tileMap->setContentSize(getTileContentSize(stage.tileRows, stage.tileColumns));
     
     for( auto tileData : stage.tiles ) {
@@ -328,10 +328,81 @@ void GameView::updateTileMap(const StageData &stage) {
     }
 }
 
+#define PRINT_SIMULATION_NUMBER     1
+#define NUMBER_SIMULATION_COUNT     10000
+
+void GameView::resetNumberEngine() {
+    
+    auto level = GAME_MANAGER->getStage();
+    
+    random_device rd;
+    numberEngine = mt19937(rd());
+    uniform_int_distribution<int> dist(1, level.numberWeightSum);
+    
+#if PRINT_SIMULATION_NUMBER
+    map<int,int> numberMap;
+    double t = SBSystemUtils::getCurrentTimeSeconds();
+#endif
+    
+    for( int i = 0; i < NUMBER_SIMULATION_COUNT; ++i ) {
+        int n = dist(numberEngine);
+
+#if PRINT_SIMULATION_NUMBER
+        if( numberMap.find(n) == numberMap.end() ) {
+            numberMap[n] = 1;
+        } else {
+            numberMap[n] = numberMap[n]+1;
+        }
+#endif
+    }
+    
+    // print numbers
+#if PRINT_SIMULATION_NUMBER
+    for( auto it = numberMap.begin(); it != numberMap.end(); ++it ) {
+        float per = ((float)it->second / NUMBER_SIMULATION_COUNT) * 100.0f;
+        Log::i("simulation result number %d: %.2f%%", it->first, per);
+    }
+    Log::i("simulation time: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
+#endif
+    
+    int weightRangeBegin = 1;
+    int weightRangeEnd = 0;
+    
+    for( int i = 0; i < level.numbers.size(); ++i ) {
+        int weight = level.numberWeights[i];
+        weightRangeEnd += weight;
+        CCLOG("가중치 체크 num:%d weight range: %d~%d", level.numbers[i], weightRangeBegin, weightRangeEnd);
+        
+        weightRangeBegin = weightRangeEnd+1;
+    }
+}
+
 int GameView::getRandomNumber() {
     
-    std::shuffle(numbers.begin(), numbers.end(), numberEngine);
-    return numbers[0];
+    auto level = GAME_MANAGER->getStage();
+    
+    uniform_int_distribution<int> dist(1, level.numberWeightSum);
+    int r = dist(numberEngine);
+
+    int weightRangeBegin = 1;
+    int weightRangeEnd = 0;
+    
+    for( int i = 0; i < level.numbers.size(); ++i ) {
+        int weight = level.numberWeights[i];
+        weightRangeEnd += weight;
+        
+        if( r >= weightRangeBegin && r <= weightRangeEnd ) {
+            return level.numbers[i];
+        }
+        
+        weightRangeBegin = weightRangeEnd+1;
+    }
+    
+    CCASSERT(false, "GameView::getRandomNumber error.");
+    return 0;
+    
+//    std::shuffle(numbers.begin(), numbers.end(), numberEngine);
+//    return numbers[0];
 }
 
 /**

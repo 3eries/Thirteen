@@ -26,13 +26,14 @@ struct StageData {
     int             clearCondition;          // 클리어 조건
     
     IntList         numbers;                 // 숫자 리스트
-    IntList         numberWeight;            // 숫자 가중치
+    IntList         numberWeights;           // 숫자 가중치 리스트
+    int             numberWeightSum;         // 숫자 가중치 합계
     
     TileDataList    tiles;                   // 타일 리스트
     int             tileRows;                // 타일 가로줄 수
     int             tileColumns;             // 타일 세로줄 수
     
-    StageData() : stage(0) {}
+    StageData() : stage(0), numberWeightSum(0) {}
     
     void parse(const rapidjson::Value &v, rapidjson::Document::AllocatorType &allocator) {
         
@@ -58,6 +59,27 @@ struct StageData {
             // const rapidjson::Value &v = list[i];
             numbers.push_back(numberList[i].GetInt());
         }
+        
+        // number_weight
+        if( v.HasMember("number_weight") ) {
+            auto numberWeightList = v["number_weight"].GetArray();
+            
+            for( int i = 0; i < numberWeightList.Size(); ++i ) {
+                numberWeights.push_back(numberWeightList[i].GetInt());
+            }
+        }
+        
+        if( numberWeights.size() == 0 ) {
+            for( int i = 0; i < numberList.Size(); ++i ) {
+                numberWeights.push_back(100 / numberList.Size());
+            }
+        }
+        
+        for( auto n : numberWeights ) {
+            numberWeightSum += n;
+        }
+        
+        CCASSERT(numbers.size() == numberWeights.size(), "StageData number error: 숫자 리스트와 가중치 리스트의 크기가 다릅니다.");
         
         // tile
         CCLOG("STAGE %d", stage);
@@ -92,14 +114,6 @@ struct StageData {
     bool isNull() const {
         return stage == 0;
     }
-
-    int getRandomNumber(std::mt19937 numberEngine) const {
-        
-        
-        
-        std::uniform_int_distribution<int> dist(numbers[0], numbers[numbers.size()-1]);
-        return dist(numberEngine);
-    }
     
     std::string toString() {
         std::string str = "StageData {\n";
@@ -108,6 +122,12 @@ struct StageData {
         
         str += "\tnumbers: ";
         for( int n : numbers ) {
+            str += STR_FORMAT("%d,", n);
+        }
+        str += "\n";
+
+        str += STR_FORMAT("\tnumberWeightSum: %d, list: ", numberWeightSum);
+        for( int n : numberWeights ) {
             str += STR_FORMAT("%d,", n);
         }
         str += "\n";
