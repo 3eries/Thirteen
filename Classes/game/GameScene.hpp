@@ -27,7 +27,8 @@ public:
 private:
     enum Tag {
         BANNER           = 100,
-        BTN_PAUSE,
+        
+        BTN_SETTING,
     };
     
 private:
@@ -43,7 +44,6 @@ private:
     bool onBackKeyReleased() override;
     
     void initBg();
-    void initBanner();
     void initGameView();
     void initMenu();
     void initGameListener();

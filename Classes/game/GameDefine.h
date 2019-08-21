@@ -99,8 +99,11 @@ static const std::vector<cocos2d::Color3B> TILE_COLORS({
 #define                 TILE_CONTENT_SIZE                   cocos2d::Size(84,84)
 #define                 TILE_PADDING                        10
 
-#define                 TILE_NORMAL_COLOR                   cocos2d::Color3B(255,255,255)
-#define                 TILE_SELECTED_COLOR                 cocos2d::Color3B(0,255,207)
+#define                 TILE_SELECTED_STROKE                6
+#define                 TILE_SELECTED_STROKE_COLOR          cocos2d::Color3B(0, 255, 36)
+
+#define                 TILE_NUMBER_NORMAL_COLOR            cocos2d::Color4B(0,0,0,255)
+#define                 TILE_NUMBER_SELECTED_COLOR          cocos2d::Color4B(255,255,255,255)
 
 #define                 TILE_NUMBER_ENTER_DURATION          0.3f
 #define                 TILE_NUMBER_EXIT_DURATION           0.3f

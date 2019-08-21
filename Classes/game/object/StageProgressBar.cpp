@@ -36,13 +36,15 @@ bool StageProgressBar::init() {
 
 void StageProgressBar::initUI() {
     
-    auto gageBg = Sprite::create(DIR_IMG_GAME + "game_level_gage_bg.png");
+    // game_gage_level.png Vec2TC(0, -57) , Size(440, 44)
+    auto gageBg = Sprite::create(DIR_IMG_GAME + "game_gage_level.png");
     gageBg->setAnchorPoint(ANCHOR_M);
-    gageBg->setPosition(Vec2TC(0, -58));
+    gageBg->setPosition(Vec2TC(0, -57));
     addChild(gageBg);
     
-    gage = ProgressTimer::create(Sprite::create(DIR_IMG_GAME + "game_level_gage.png"));
+    gage = ProgressTimer::create(Sprite::create(DIR_IMG_GAME + "game_gage_level.png"));
     gage->setType(ProgressTimer::Type::BAR);
+    gage->setColor(Color3B(46, 196, 182));
     gage->setMidpoint(Vec2(0,0));
     gage->setBarChangeRate(Vec2(1, 0));
     gage->setAnchorPoint(ANCHOR_M);
@@ -50,7 +52,8 @@ void StageProgressBar::initUI() {
     gage->setPercentage(0);
     gageBg->addChild(gage);
     
-    levelLabel = Label::createWithTTF("LEVEL 1", FONT_ROBOTO_BLACK, 40, Size::ZERO,
+    // LEVEL 13 size:39 Vec2TC(0, -58) , Size(164, 28)
+    levelLabel = Label::createWithTTF("LEVEL 1", FONT_ROBOTO_BLACK, 39, Size::ZERO,
                                       TextHAlignment::CENTER, TextVAlignment::CENTER);
     levelLabel->setTextColor(Color4B::BLACK);
     levelLabel->setAnchorPoint(ANCHOR_M);

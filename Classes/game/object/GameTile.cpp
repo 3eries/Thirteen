@@ -49,12 +49,11 @@ bool GameTile::init(const TileData &data) {
     bg = Sprite::create(DIR_IMG_GAME + "game_tile.png");
     bg->setAnchorPoint(ANCHOR_M);
     bg->setPosition(Vec2MC(TILE_CONTENT_SIZE, 0, 0));
-    bg->setColor(TILE_NORMAL_COLOR);
     addChild(bg);
 
     numberLabel = Label::createWithTTF("", FONT_ROBOTO_BLACK, 40, Size::ZERO,
                                        TextHAlignment::CENTER, TextVAlignment::CENTER);
-    numberLabel->setTextColor(Color4B::BLACK);
+    numberLabel->setTextColor(TILE_NUMBER_NORMAL_COLOR);
     numberLabel->setAnchorPoint(ANCHOR_M);
     numberLabel->setPosition(Vec2MC(TILE_CONTENT_SIZE, 0, 0));
     addChild(numberLabel);
@@ -82,6 +81,13 @@ void GameTile::setNumber(int number, bool withAction) {
     this->number = number;
     numberLabel->setString(TO_STRING(number));
     
+    // 배경색 업데이트
+    int bgColorIdx = number-1;
+    if( bgColorIdx < TILE_COLORS.size() ) {
+        bg->setColor(TILE_COLORS[bgColorIdx]);
+    }
+    
+    // 연출
     if( withAction ) {
         runNumberEnterAction();
     }
@@ -90,7 +96,9 @@ void GameTile::setNumber(int number, bool withAction) {
 void GameTile::setSelected(bool isSelected) {
     
     this->selected = isSelected;
-    bg->setColor(isSelected ? TILE_SELECTED_COLOR : TILE_NORMAL_COLOR);
+    
+    bg->setVisible(!isSelected);
+    numberLabel->setTextColor(isSelected ? TILE_NUMBER_SELECTED_COLOR : TILE_NUMBER_NORMAL_COLOR);
     
     // FIXME: 디버그용 코드
     numberLabel->stopAllActions();

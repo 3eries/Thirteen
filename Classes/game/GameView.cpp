@@ -138,10 +138,14 @@ void GameView::selectTile(GameTile *tile) {
     
     CCASSERT(!tile->isSelected(), "GameView::selectTile error: already selected.");
     
-    if( isSelectableTile(tile) ) {
-        tile->setSelected(true);
-        selectedTiles.push_back(tile);
+    if( !isSelectableTile(tile) ) {
+        return;
     }
+    
+    tile->setSelected(true);
+    selectedTiles.push_back(tile);
+    
+    // 마스킹 영역 업데이트
 }
 
 /**
@@ -312,7 +316,6 @@ void GameView::recursiveMadePattern(GameTile *anchorTile, MadePattern &pattern, 
         }
     }
     
-    CCLOG("sum: %d", sum);
     sum += anchorTile->getNumber();
     pattern.push_back(anchorTile);
     
@@ -332,13 +335,12 @@ vector<GameView::MadePattern> GameView::getMadePatterns() {
         
         recursiveMadePattern(tile, pattern, number);
         
-        CCLOG("result n: %d", number);
-        
         if( number == 13 ) {
             patterns.push_back(pattern);
         }
     }
     
+    // TODO:
     // 중복 패턴 제거
     
     /*
@@ -545,8 +547,6 @@ void GameView::initBg() {
 
     // 힌트
     auto hintButton = HintButton::create();
-    hintButton->setAnchorPoint(ANCHOR_ML);
-    hintButton->setPosition(Vec2TL(10, -58));
     addChild(hintButton);
     
     hintButton->setOnHintListener(CC_CALLBACK_0(GameView::onHint, this));

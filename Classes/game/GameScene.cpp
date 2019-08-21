@@ -51,7 +51,6 @@ bool GameScene::init() {
     SBAnalytics::setCurrentScreen(ANALYTICS_SCREEN_GAME);
     
     initBg();
-    initBanner();
     initGameView();
     initMenu();
     initGameListener();
@@ -61,7 +60,7 @@ bool GameScene::init() {
                                              TextHAlignment::RIGHT, TextVAlignment::BOTTOM);
     versionLabel->setTextColor(Color4B::WHITE);
     versionLabel->setAnchorPoint(ANCHOR_BR);
-    versionLabel->setPosition(Vec2BR(0,0));
+    versionLabel->setPosition(Vec2BR(0,120));
     addChild(versionLabel, INT_MAX);
     
     return true;
@@ -198,7 +197,7 @@ void GameScene::checkReview() {
 void GameScene::onClick(Node *sender) {
     
     switch( sender->getTag() ) {
-        case Tag::BTN_PAUSE: {
+        case Tag::BTN_SETTING: {
             // GameManager::onGamePause();
         } break;
     }
@@ -209,18 +208,13 @@ void GameScene::onClick(Node *sender) {
  */
 void GameScene::initBg() {
     
-}
-
-/**
- * 배너 초기화
- */
-void GameScene::initBanner() {
+    addChild(LayerColor::create(Color4B(GAME_BG_COLOR)));
     
     // 배너
     if( !User::isRemovedAds() ) {
-//        auto bannerView = BannerView::create();
-//        bannerView->setTag(Tag::BANNER);
-//        addChild(bannerView, SBZOrder::TOP);
+        auto bannerView = BannerView::create();
+        bannerView->setTag(Tag::BANNER);
+        addChild(bannerView, SBZOrder::TOP);
     }
 }
 
@@ -239,6 +233,17 @@ void GameScene::initGameView() {
  * 메뉴 초기화
  */
 void GameScene::initMenu() {
+    
+    // 설정 버튼
+    // common_btn_more.png Vec2TR(-56, -54) , Size(74, 74)
+    auto settingBtn = SBButton::create(DIR_IMG_COMMON + "common_btn_more.png");
+    settingBtn->setTag(Tag::BTN_SETTING);
+    settingBtn->setZoomScale(ButtonZoomScale::NORMAL);
+    settingBtn->setAnchorPoint(ANCHOR_M);
+    settingBtn->setPosition(Vec2TR(-56, -54));
+    addChild(settingBtn);
+    
+    settingBtn->setOnClickListener(CC_CALLBACK_1(GameScene::onClick, this));
 }
 
 /**

@@ -27,29 +27,27 @@ bool HintButton::init() {
         return false;
     }
     
-    setContentSize(Size(120, 60));
+    // game_btn_hint.png Vec2TL(54, -54) , Size(74, 74)
+    auto bg = Sprite::create(DIR_IMG_GAME + "game_btn_hint.png");
+    auto size = bg->getContentSize();
+    
+    setAnchorPoint(ANCHOR_M);
+    setPosition(Vec2TL(54, -54));
+    setContentSize(size);
     
     auto contentView = Node::create();
     contentView->setAnchorPoint(ANCHOR_M);
-    contentView->setPosition(Vec2MC(getContentSize(), 0, 0));
-    contentView->setContentSize(getContentSize());
+    contentView->setPosition(Vec2MC(size, 0, 0));
+    contentView->setContentSize(size);
     addChild(contentView);
     
-    // 배경
-    auto bg = LayerColor::create(Color4B::WHITE);
-    bg->setIgnoreAnchorPointForPosition(false);
     bg->setAnchorPoint(ANCHOR_M);
-    bg->setPosition(Vec2MC(getContentSize(), 0, 0));
-    bg->setContentSize(getContentSize());
+    bg->setPosition(Vec2MC(size, 0, 0));
     contentView->addChild(bg);
     
-    // 타이틀
-    auto title = Label::createWithTTF("HINT", FONT_ROBOTO_BLACK, 40, Size::ZERO,
-                                      TextHAlignment::CENTER, TextVAlignment::CENTER);
-    title->setTextColor(Color4B::BLACK);
-    title->setAnchorPoint(ANCHOR_M);
-    title->setPosition(Vec2MC(getContentSize(), 0, 0));
-    contentView->addChild(title);
+    // 힌트 아이템 개수
+    // game_bg_hint_number.png Vec2TL(88, -23) , Size(32, 32)
+    // 9 size:27 Vec2TL(88, -23) , Size(14, 20)
     
     // 터치 이벤트
     setTouchEnabled(true);
