@@ -14,10 +14,12 @@
 
 #include "../test/TestHelper.hpp"
 #include "../game/GameManager.hpp"
+#include "../game/GameDefine.h"
 
 #include "CommonLoadingBar.hpp"
 #include "ExitAlertPopup.hpp"
 #include "SettingPopup.hpp"
+#include "BannerView.hpp"
 
 USING_NS_CC;
 USING_NS_SB;
@@ -42,17 +44,15 @@ bool MainScene::init() {
     SBAnalytics::setCurrentScreen(ANALYTICS_SCREEN_MAIN);
     
     initBg();
+    initTitle();
     initMenu();
-    
-    initIAPListener();
-    initPopupListener();
     
     // 개발 버전 표기
     auto versionLabel = Label::createWithTTF(DEV_VERSION, FONT_ROBOTO_BLACK, 30, Size::ZERO,
                                              TextHAlignment::RIGHT, TextVAlignment::BOTTOM);
     versionLabel->setTextColor(Color4B::WHITE);
     versionLabel->setAnchorPoint(ANCHOR_BR);
-    versionLabel->setPosition(Vec2BR(0,0));
+    versionLabel->setPosition(Vec2BR(0,120));
     addChild(versionLabel, INT_MAX);
     
     return true;
@@ -143,25 +143,6 @@ void MainScene::onClick(Node *sender) {
         case Tag::BTN_SETTING: {
             showSettingPopup();
         } break;
-        
-        // 광고 제거 아이템
-        case Tag::BTN_REMOVE_ADS: {
-            if( iap::IAPHelper::isReady() ) {
-                auto loadingBar = CommonLoadingBar::create();
-                loadingBar->setUIDelay(0.1f);
-                loadingBar->show();
-                
-                auto listener = iap::PurchaseListener::create();
-                listener->setTarget(this);
-                listener->onPurchased = [=](const iap::Item &item) {
-                };
-                listener->onFinished = [=](bool result) {
-                    loadingBar->dismissWithDelay(0);
-                };
-
-                iap::IAPHelper::purchaseRemoveAds(listener);
-            }
-        } break;
             
         // test
         case Tag::BTN_TEST: {
@@ -176,6 +157,8 @@ void MainScene::onClick(Node *sender) {
  * 설정 팝업 노출
  */
 void MainScene::showSettingPopup() {
+   
+    return;
     
     auto popup = SettingPopup::create();
     popup->setOnClickMenuListener([=](SettingPopup::Tag tag) {
@@ -231,14 +214,87 @@ void MainScene::initBg() {
     
     addChild(LayerColor::create(Color4B::BLACK));
     
-    auto title = SBButton::create(DIR_IMG_MAIN + "main_title.png");
-    title->setZoomScale(0);
-    title->setTag(Tag::BTN_TITLE);
-    title->setAnchorPoint(ANCHOR_M);
-    title->setPosition(Vec2MC(0, 250));
-    addChild(title, SBZOrder::BOTTOM);
+    // 배너
+    if( !User::isRemovedAds() ) {
+        auto bannerView = BannerView::create();
+        addChild(bannerView, SBZOrder::TOP);
+    }
+}
+
+void MainScene::initTitle() {
+ 
+    titleColors = TILE_COLORS;
+    titleColorIndex = 0;
     
-    title->setOnClickListener(CC_CALLBACK_1(MainScene::onClick, this));
+    // random_shuffle(titleColors.begin(), titleColors.end());
+
+//    auto stencil = Sprite::create(DIR_IMG_MAIN + "main_title_mask.png");
+//    stencil->setAnchorPoint(Vec2::ZERO);
+//    stencil->setPosition(Vec2::ZERO);
+//
+//    auto clippingNode = ClippingNode::create(stencil);
+//    clippingNode->setAlphaThreshold(0);
+////    clippingNode->setInverted(true);
+//    clippingNode->setAnchorPoint(ANCHOR_M);
+//    clippingNode->setPosition(Vec2MC(0, 250));
+//    clippingNode->setContentSize(stencil->getContentSize());
+//    addChild(clippingNode);
+//
+//    /*
+//    auto title = Sprite::create(DIR_IMG_MAIN + "main_title.png");
+//    title->setAnchorPoint(Vec2::ZERO);
+//    title->setPosition(Vec2::ZERO);
+//    title->setColor(titleColors[titleColors.size()-1]);
+//    clippingNode->addChild(title);
+//    */
+//
+//    auto cover = Sprite::create(DIR_IMG_MAIN + "main_title_cover.png");
+//    cover->setAnchorPoint(ANCHOR_MB);
+//    cover->setPosition(Vec2BC(clippingNode->getContentSize(), 0, -cover->getContentSize().height));
+//    cover->setColor(titleColors[0]);
+//    clippingNode->addChild(cover);
+
+    int firstColorIdx = arc4random() % (titleColors.size()-1);
+    firstColorIdx += 1;
+    
+    auto title = Sprite::create(DIR_IMG_MAIN + "main_title.png");
+    title->setAnchorPoint(ANCHOR_M);
+    title->setPosition(Vec2MC(-2, 101));
+    title->setColor(titleColors[firstColorIdx]);
+    addChild(title);
+    
+    Vec2 COVER_POSITION = Vec2MC(0, -80);
+    
+    auto cover = Sprite::create(DIR_IMG_MAIN + "main_title_cover.png");
+    cover->setAnchorPoint(ANCHOR_MT);
+    cover->setPosition(COVER_POSITION);
+    cover->setColor(titleColors[titleColorIndex++]);
+    addChild(cover);
+    
+    auto mask = Sprite::create(DIR_IMG_MAIN + "main_title_mask.png");
+    mask->setAnchorPoint(ANCHOR_M);
+    mask->setPosition(Vec2MC(0,0));
+    mask->setColor(GAME_BG_COLOR);
+    addChild(mask);
+    
+    // 연출
+    auto move = MoveBy::create(3.0f, Vec2(0, cover->getContentSize().height));
+    auto callFunc = CallFunc::create([=]() {
+       
+        title->setColor(cover->getColor());
+        
+        cover->setPositionY(COVER_POSITION.y);
+        cover->setColor(titleColors[titleColorIndex]);
+        
+        titleColorIndex++;
+        
+        if( titleColorIndex == titleColors.size() ) {
+            titleColorIndex = 0;
+        }
+    });
+    auto delay = DelayTime::create(0.0f);
+    auto seq = Sequence::create(move, callFunc, delay, nullptr);
+    cover->runAction(RepeatForever::create(seq));
 }
 
 /**
@@ -257,6 +313,9 @@ void MainScene::initMenu() {
     
     auto btn = SBNodeUtils::createTouchNode();
     btn->setTag(Tag::BTN_START);
+    btn->setAnchorPoint(ANCHOR_MB);
+    btn->setPosition(Vec2BC(0, 0));
+    btn->setContentSize(Size(SB_WIN_SIZE.width, SB_WIN_SIZE.height*0.5f));
     addChild(btn);
     
     btn->addClickEventListener([=](Ref*) {
@@ -274,19 +333,20 @@ void MainScene::initMenu() {
     }
     
     // 메인 화면 전용 메뉴
-    /*
-    SBUIInfo infos[] = {
-        SBUIInfo(Tag::BTN_START,        ANCHOR_M,    Vec2BC(0, 100),    DIR_IMG_MAIN + "RSP_btn_start.png"),
-        SBUIInfo(Tag::BTN_SETTING,      ANCHOR_MR,   Vec2TR(-66 + (100*0.5f), -62),     DIR_IMG_COMMON + "RSP_btn_option.png"),
-        SBUIInfo(Tag::BTN_REMOVE_ADS,   ANCHOR_M,    Vec2MC(0, 25),     DIR_IMG_COMMON + "RSP_btn_remove_ads.png"),
-#if ENABLE_TEST_MENU
-        SBUIInfo(Tag::BTN_TEST,         ANCHOR_TL,   Vec2TL(10, -10),   DIR_IMG_COMMON + "RSP_btn_test.png"),
-#endif
-    };
+//    auto settingBtn = Button::create(DIR_IMG_COMMON + "common_btn_more.png");
+//    settingBtn->setTag(Tag::BTN_SETTING);
+//    settingBtn->setZoomScale(ButtonZoomScale::NORMAL);
+//    settingBtn->setAnchorPoint(ANCHOR_M);
+//    settingBtn->setPosition(Vec2TR(-56, -54));
+//    addChild(settingBtn);
+//
+//    settingBtn->setOnClickListener(CC_CALLBACK_1(GameScene::onClick, this));
     
-    if( SBDirector::isPadResolution() ) {
-        infos[0].file = SBStringUtils::replaceAll(infos[0].file, DIR_IMG_MAIN, DIR_IMG_MAIN_IPAD);
-    }
+    SBUIInfo infos[] = {
+        SBUIInfo(Tag::BTN_SETTING, ANCHOR_M,
+                 Vec2TR(-56, -54),
+                 DIR_IMG_COMMON + "common_btn_more.png"),
+    };
     
     for( int i = 0; i < sizeof(infos)/sizeof(SBUIInfo); ++i ) {
         auto info = infos[i];
@@ -298,52 +358,4 @@ void MainScene::initMenu() {
         
         btn->setOnClickListener(CC_CALLBACK_1(MainScene::onClick, this));
     }
-    
-    if( User::isRemovedAds() ) {
-        getChildByTag(Tag::BTN_REMOVE_ADS)->setVisible(false);
-    }
-    */
-}
-
-/**
- * 인앱 결제 리스너 초기화
- */
-void MainScene::initIAPListener() {
-    
-    auto onRemoveAds = [=]() {
-        
-        this->getChildByTag(Tag::BTN_REMOVE_ADS)->setVisible(false);
-    };
-    
-    // purchase listener
-    auto purchaseListener = iap::PurchaseListener::create();
-    purchaseListener->setForever(true);
-    purchaseListener->onRemoveAds = onRemoveAds;
-    
-    iap::IAPHelper::getInstance()->addListener(this, purchaseListener);
-    
-    // restore listener
-    auto restoreListener = iap::RestoreListener::create();
-    restoreListener->setForever(true);
-    restoreListener->onRemoveAds = onRemoveAds;
-    
-    iap::IAPHelper::getInstance()->addListener(this, restoreListener);
-}
-
-/**
- * 팝업 리스너 초기화
- */
-void MainScene::initPopupListener() {
-    
-    auto listener = PopupListener::create();
-    listener->setTarget(this);
-    listener->onEvent = [=](Node *sender, PopupEventType type) {
-        
-        auto popup = dynamic_cast<BasePopup*>(sender);
-        
-        // 팝업 연출에 따른 메인화면 메뉴 처리
-        // TODO:
-    };
-    
-    PopupManager::getInstance()->addListener(listener);
 }

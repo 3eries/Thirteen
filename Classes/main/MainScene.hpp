@@ -21,7 +21,6 @@ private:
         BTN_TITLE           = 100,
         BTN_START,
         BTN_SETTING,
-        BTN_REMOVE_ADS,
         BTN_TEST,
     };
     
@@ -39,15 +38,17 @@ private:
     bool onBackKeyReleased() override;
     
     void initBg();
+    void initTitle();
     void initMenu();
-    
-    void initIAPListener();
-    void initPopupListener();
     
 private:
     void onClick(cocos2d::Node *sender) override;
     
     void showSettingPopup();
+    
+private:
+    std::vector<cocos2d::Color3B> titleColors;
+    int titleColorIndex;
 };
 
 #endif /* MainScene_hpp */

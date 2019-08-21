@@ -76,7 +76,25 @@ enum GameState {
     RESULT          = (1 << 8),     // 결과 화면
 };
 
+#define                 GAME_BG_COLOR          cocos2d::Color3B(0, 17, 17)
+
 //////////// Tile
+static const std::vector<cocos2d::Color3B> TILE_COLORS({
+    cocos2d::Color3B(239, 255, 233),
+    cocos2d::Color3B(46, 196, 182),
+    cocos2d::Color3B(231, 40, 59),
+    cocos2d::Color3B(246, 234, 140),
+    cocos2d::Color3B(188, 205, 244),
+    cocos2d::Color3B(252,145, 58),
+    cocos2d::Color3B(136, 219, 163),
+    cocos2d::Color3B(37, 128, 228),
+    cocos2d::Color3B(225, 59, 106),
+    cocos2d::Color3B(82, 79, 79),
+    cocos2d::Color3B(25, 144, 144),
+    cocos2d::Color3B(188, 255, 255),
+    cocos2d::Color3B(131, 87, 208),
+});
+
 #define                 TILE_MAP_CONTENT_SIZE               cocos2d::Size(648,1024)
 #define                 TILE_CONTENT_SIZE                   cocos2d::Size(84,84)
 #define                 TILE_PADDING                        10
