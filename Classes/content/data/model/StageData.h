@@ -41,7 +41,7 @@ struct StageData {
         // int values
         {
             StringList keys({
-                "stage",
+                "level",
                 "clear_condition",
             });
             
@@ -61,9 +61,9 @@ struct StageData {
             numbers.push_back(numberList[i].GetInt());
         }
         
-        // number_weight
-        if( v.HasMember("number_weight") ) {
-            auto numberWeightList = v["number_weight"].GetArray();
+        // number_weight_list
+        if( v.HasMember("number_weight_list") ) {
+            auto numberWeightList = v["number_weight_list"].GetArray();
             
             for( int i = 0; i < numberWeightList.Size(); ++i ) {
                 numberWeights.push_back(numberWeightList[i].GetInt());

@@ -14,7 +14,7 @@ USING_NS_CC;
 USING_NS_SB;
 using namespace std;
 
-#define STAGE_FILE               (DIR_CONTENT_DATA + "stage.json")
+#define LEVEL_FILE               (DIR_CONTENT_DATA + "level.json")
 
 static Database *instance = nullptr;
 Database* Database::getInstance() {
@@ -41,16 +41,16 @@ Database::~Database() {
 
 void Database::init() {
     
-    parseStageJson();
+    parseLevelJson();
 }
 
 /**
- * stage_xxxx.json
+ * level.json
  */
-void Database::parseStageJson() {
+void Database::parseLevelJson() {
     
-    CCLOG("========== PARSE START (stage.json)  ==========");
-    string json = SBStringUtils::readTextFile(STAGE_FILE);
+    CCLOG("========== PARSE START (level.json)  ==========");
+    string json = SBStringUtils::readTextFile(LEVEL_FILE);
     
     rapidjson::Document doc;
     doc.Parse(json.c_str());
@@ -68,7 +68,7 @@ void Database::parseStageJson() {
         stages.push_back(stage);
     }
     
-    CCLOG("========== PARSE END (stage.json)  ==========");
+    CCLOG("========== PARSE END (level.json)  ==========");
     
     // order by floor asc
     sort(stages.begin(), stages.end(), [](const StageData &s1, const StageData &s2) {

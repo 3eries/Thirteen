@@ -28,7 +28,7 @@ public:
 private:
     Database();
     
-    void parseStageJson();
+    void parseLevelJson();
     
 public:
     static StageDataList       getStages();
