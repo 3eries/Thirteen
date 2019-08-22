@@ -17,20 +17,22 @@
 
 class GameTile : public cocos2d::Node {
 public:
-    static GameTile* create(const TileData &data);
+    static GameTile* create();
     ~GameTile();
     
 private:
     GameTile();
     
-    bool init(const TileData &data);
+    bool init() override;
     
 public:
-    void clear(bool withAction);
+    void remove();
+    void clear();
     
-    void setNearTile(GameTile *left, GameTile *right, GameTile *top, GameTile *bottom);
-    void setNumber(int number, bool withAction);
+    void setTilePosition(const TilePosition &p);
+    void setNumber(int number);
     void setSelected(bool isSelected);
+    void setNearTile(GameTile *left, GameTile *right, GameTile *top, GameTile *bottom);
     
     void updateSelectedLine();
     void yap();
@@ -38,11 +40,8 @@ public:
     void runNumberEnterAction();
     void runNumberExitAction();
     
-    inline TilePosition getTilePosition() { return data.p; }
-    inline bool isEmpty() { return data.isEmpty; }
-    
 private:
-    CC_SYNTHESIZE_READONLY(TileData, data, Data);
+    CC_SYNTHESIZE_READONLY(TilePosition, tilePos, TilePosition);
     CC_SYNTHESIZE_READONLY(int, number, Number);
     SB_SYNTHESIZE_READONLY_BOOL(selected, Selected);
     

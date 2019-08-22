@@ -105,6 +105,10 @@ static const std::vector<cocos2d::Color3B> TILE_COLORS({
 #define                 TILE_NUMBER_NORMAL_COLOR            cocos2d::Color4B(0,0,0,255)
 #define                 TILE_NUMBER_SELECTED_COLOR          cocos2d::Color4B(255,255,255,255)
 
+#define                 TILE_ENTER_DURATION                 0.3f
+#define                 TILE_EXIT_DURATION                  0.3f
+#define                 TILE_MOVE_DURATION                  0.3f
+
 #define                 TILE_NUMBER_ENTER_DURATION          0.3f
 #define                 TILE_NUMBER_EXIT_DURATION           0.3f
 
@@ -119,7 +123,7 @@ static inline cocos2d::Size getTileContentSize(int rows, int columns) {
     return size;
 }
 
-static inline cocos2d::Vec2 getTilePosition(int x, int y) {
+static inline cocos2d::Vec2 convertTilePosition(int x, int y) {
     
     cocos2d::Vec2 pos;
     pos.x += TILE_CONTENT_SIZE.width * x;
@@ -132,6 +136,10 @@ static inline cocos2d::Vec2 getTilePosition(int x, int y) {
     pos.y += TILE_CONTENT_SIZE.height * 0.5f;
     
     return pos;
+}
+
+static inline cocos2d::Vec2 convertTilePosition(const cocos2d::Vec2 &p) {
+    return convertTilePosition((int)p.x, (int)p.y);
 }
 
 #endif /* GameDefine_h */

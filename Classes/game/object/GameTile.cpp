@@ -13,11 +13,11 @@
 USING_NS_CC;
 using namespace std;
 
-GameTile* GameTile::create(const TileData &data) {
+GameTile* GameTile::create() {
     
     auto tile = new GameTile();
     
-    if( tile && tile->init(data) ) {
+    if( tile && tile->init() ) {
         tile->autorelease();
         return tile;
     }
@@ -35,16 +35,15 @@ left(nullptr), right(nullptr), top(nullptr), bottom(nullptr) {
 GameTile::~GameTile() {
 }
 
-bool GameTile::init(const TileData &data) {
+bool GameTile::init() {
     
     if( !Node::init() ) {
         return false;
     }
     
-    this->data = data;
-    
     setAnchorPoint(ANCHOR_M);
     setContentSize(TILE_CONTENT_SIZE);
+    setCascadeOpacityEnabled(true);
     
     bg = Sprite::create(DIR_IMG_GAME + "game_tile.png");
     bg->setAnchorPoint(ANCHOR_M);
@@ -67,35 +66,44 @@ bool GameTile::init(const TileData &data) {
     return true;
 }
 
-void GameTile::clear(bool withAction) {
+void GameTile::remove() {
     
-    if( withAction ) {
-        runNumberExitAction();
-    }
+    runAction(ScaleTo::create(TILE_EXIT_DURATION, 0)); // scale
+    runAction(FadeOut::create(TILE_EXIT_DURATION));    // fade out
+    
+    SBDirector::postDelayed(this, [=]() {
+        this->removeFromParent();
+    }, TILE_EXIT_DURATION);
 }
 
-void GameTile::setNearTile(GameTile *left, GameTile *right, GameTile *top, GameTile *bottom) {
+void GameTile::clear() {
     
-    this->left = left;
-    this->right = right;
-    this->top = top;
-    this->bottom = bottom;
+    runAction(ScaleTo::create(TILE_EXIT_DURATION, 0)); // scale
+    runAction(FadeOut::create(TILE_EXIT_DURATION));    // fade out
+    
+    SBDirector::postDelayed(this, [=]() {
+        this->setScale(1);
+        this->setOpacity(255);
+        this->setVisible(false);
+    }, TILE_EXIT_DURATION);
 }
 
-void GameTile::setNumber(int number, bool withAction) {
+void GameTile::setTilePosition(const TilePosition &p) {
+    
+    this->tilePos = p;
+    setPosition(convertTilePosition(p));
+}
+
+void GameTile::setNumber(int number) {
     
     this->number = number;
     numberLabel->setString(TO_STRING(number));
     
     // 배경색 업데이트
     int bgColorIdx = number-1;
+    
     if( bgColorIdx < TILE_COLORS.size() ) {
         bg->setColor(TILE_COLORS[bgColorIdx]);
-    }
-    
-    // 연출
-    if( withAction ) {
-        runNumberEnterAction();
     }
 }
 
@@ -110,6 +118,14 @@ void GameTile::setSelected(bool isSelected) {
     
     // FIXME: 디버그용 코드
     numberLabel->stopAllActions();
+}
+
+void GameTile::setNearTile(GameTile *left, GameTile *right, GameTile *top, GameTile *bottom) {
+    
+    this->left = left;
+    this->right = right;
+    this->top = top;
+    this->bottom = bottom;
 }
 
 void GameTile::updateSelectedLine() {

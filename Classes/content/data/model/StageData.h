@@ -83,7 +83,7 @@ struct StageData {
         CCASSERT(numbers.size() == numberWeights.size(), "StageData number error: 숫자 리스트와 가중치 리스트의 크기가 다릅니다.");
         
         // tile
-        CCLOG("STAGE %d", stage);
+        CCLOG("LEVEL %d", stage);
         
         auto tileList = v["tile"].GetArray();
         tileRows = tileList.Size();
@@ -114,6 +114,16 @@ struct StageData {
     
     bool isNull() const {
         return stage == 0;
+    }
+    
+    bool isTileEmpty(const TilePosition &p) const {
+        for( auto tile : tiles ) {
+            if( tile.p.equals(p) ) {
+                return tile.isEmpty;
+            }
+        }
+        
+        return true;
     }
     
     std::string toString() {

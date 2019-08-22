@@ -87,30 +87,78 @@ void GameView::cleanup() {
  */
 void GameView::onNumberClear(GameTileList selectedTiles) {
     
+    auto level = GAME_MANAGER->getStage();
+    
     ++clearCount;
-    int clearCondition = GAME_MANAGER->getStage().clearCondition;
+    int clearCondition = level.clearCondition;
     
-    // 스테이지 클리어 체크
-    bool isStageClear = (clearCount == clearCondition);
+    stageProgressBar->setPercentage(((float)clearCount / clearCondition) * 100, true);
     
-    if( isStageClear ) {
+    // 레벨 클리어 체크
+    bool isLevelClear = (clearCount == clearCondition);
+    
+    if( isLevelClear ) {
         GameManager::onStageClear();
     }
     
-    // UI
-    stageProgressBar->setPercentage(((float)clearCount / clearCondition) * 100, true);
+    // 타일 클리어
+    map<int, GameTileList> clearTilesMap;
     
     for( auto tile : selectedTiles ) {
-        tile->clear(true);
+        int x = tile->getTilePosition().x;
+        
+        if( clearTilesMap.find(x) == clearTilesMap.end() ) {
+            clearTilesMap[x] = GameTileList();
+        }
+        
+        ((GameTileList&)clearTilesMap[x]).push_back(tile);
+        
+        // 타일 제거
+        // removeTile(tile);
+        tile->clear();
     }
     
-    // 스테이지 클리어 못한 경우 다음 번호 생성
-    if( !isStageClear ) {
+    // 타일 이동
+    if( !isLevelClear ) {
         SBDirector::postDelayed(this, [=]() {
-            for( auto tile : selectedTiles ) {
-                tile->setNumber(getRandomNumber(), true);
+            for( auto it = clearTilesMap.begin(); it != clearTilesMap.end(); ++it ) {
+                auto x = it->first;
+                auto clearTiles = it->second;
+                
+                CCLOG("x:%d, %d개 제거", x, (int)clearTiles.size());
+                
+                // 클리어 타일 재활용
+                for( int i = 0; i < clearTiles.size(); ++i ) {
+                    auto clearTile = clearTiles[i];
+                    clearTile->setTilePosition(TilePosition(x, level.tileRows+i));
+                    clearTile->setNumber(getRandomNumber());
+                    clearTile->setVisible(true);
+                }
+                
+                // 아래로 이동
+                auto columnTiles = getColumnTiles(x);
+                auto validPosList = getValidColumnTilePositions(x);
+                
+                CCASSERT(columnTiles.size() == validPosList.size(), "타일 이동 에러");
+                
+                for( int i = 0; i < columnTiles.size(); ++i ) {
+                    auto tile = columnTiles[i];
+                    auto tilePos = validPosList[i];
+                    
+                    auto move = MoveTo::create(TILE_MOVE_DURATION, convertTilePosition(tilePos));
+                    auto callFunc = CallFunc::create([=]() {
+                        tile->setTilePosition(tilePos);
+                    });
+                    tile->runAction(Sequence::create(move, callFunc, nullptr));
+                }
             }
-        }, TILE_NUMBER_EXIT_DURATION);
+            
+            // 이동 완료
+            SBDirector::postDelayed(this, [=]() {
+                this->updateNearTile();
+            }, TILE_MOVE_DURATION+0.05f);
+            
+        }, TILE_EXIT_DURATION, true);
     }
 }
 
@@ -165,22 +213,32 @@ void GameView::updateTileMap(const StageData &stage) {
     
     // UI 업데이트
     tileMap->setContentSize(getTileContentSize(stage.tileRows, stage.tileColumns));
+    tileMap->getStencil()->setContentSize(tileMap->getContentSize());
     
     for( auto tileData : stage.tiles ) {
-        if( tileData.isEmpty ) {
-            continue;
+        if( !tileData.isEmpty ) {
+            auto bg = Sprite::create(DIR_IMG_GAME + "game_tile.png");
+            bg->setColor(Color3B::BLACK);
+            bg->setAnchorPoint(ANCHOR_M);
+            bg->setPosition(convertTilePosition(tileData.p));
+            tileMap->addChild(bg, -1);
+            
+            addTile(tileData);
         }
-        
-        auto tile = GameTile::create(tileData);
-        tile->setAnchorPoint(ANCHOR_M);
-        tile->setPosition(getTilePosition((int)tileData.p.x, (int)tileData.p.y));
-        tile->setNumber(getRandomNumber(), false);
-        tileMap->addChild(tile);
-        
-        tiles.push_back(tile);
     }
     
-    // 인접 타일 설정
+    updateNearTile();
+    
+    // 패턴 검증
+    auto patterns = getMadePatterns();
+    Log::i("GameView updateTileMap patterns: %d", (int)patterns.size());
+}
+
+/**
+ * 인접한 타일을 업데이트합니다
+ */
+void GameView::updateNearTile() {
+    
     for( auto tile : tiles ) {
         auto p = tile->getTilePosition();
         tile->setNearTile(getTile(p + TilePosition(-1,0)),
@@ -188,10 +246,29 @@ void GameView::updateTileMap(const StageData &stage) {
                           getTile(p + TilePosition(0,1)),
                           getTile(p + TilePosition(0,-1)));
     }
+}
+
+/**
+ * 타일을 추가합니다
+ */
+void GameView::addTile(const TileData &tileData) {
+
+    auto tile = GameTile::create();
+    tile->setAnchorPoint(ANCHOR_M);
+    tile->setTilePosition(tileData.p);
+    tile->setNumber(getRandomNumber());
+    tileMap->addChild(tile);
     
-    // 패턴 검증
-    auto patterns = getMadePatterns();
-    Log::i("GameView updateTileMap patterns: %d", (int)patterns.size());
+    tiles.push_back(tile);
+}
+
+/**
+ * 타일을 제거합니다
+ */
+void GameView::removeTile(GameTile *tile) {
+    
+    tile->remove();
+    SBCollection::remove(tiles, tile);
 }
 
 /**
@@ -396,6 +473,40 @@ GameTile* GameView::getTile(const TilePosition &p) {
     return nullptr;
 }
 
+GameTileList GameView::getColumnTiles(int x) {
+    
+    GameTileList columnTiles;
+    
+    for( auto tile : tiles ) {
+        if( (int)tile->getTilePosition().x == x ) {
+            columnTiles.push_back(tile);
+        }
+    }
+    
+    // y좌표 오름차순 정렬
+    sort(columnTiles.begin(), columnTiles.end(), [=](GameTile *t1, GameTile *t2) -> bool {
+        return t1->getTilePosition().y < t2->getTilePosition().y;
+    });
+    
+    return columnTiles;
+}
+
+TilePositionList GameView::getValidColumnTilePositions(int x) {
+    
+    auto level = GAME_MANAGER->getStage();
+    TilePositionList posList;
+    
+    for( int y = 0; y < level.tileRows; ++y ) {
+        TilePosition p(x,y);
+        
+        if( !level.isTileEmpty(p) ) {
+            posList.push_back(p);
+        }
+    }
+    
+    return posList;
+}
+
 /**
  * 게임 리셋
  */
@@ -480,7 +591,7 @@ bool GameView::onTouchBegan(Touch *touch, Event*) {
     for( auto tile : tiles ) {
         auto tileBox = SB_BOUNDING_BOX_IN_WORLD(tile);
         
-        if( tileBox.containsPoint(p) && !tile->isEmpty() ) {
+        if( tileBox.containsPoint(p) ) {
             selectTile(tile);
         }
     }
@@ -500,7 +611,7 @@ void GameView::onTouchMoved(Touch *touch, Event*) {
     Vec2 p = touch->getLocation();
     
     for( auto tile : tiles ) {
-        if( tile->isEmpty() || tile->isSelected() ) {
+        if( tile->isSelected() ) {
             continue;
         }
         
@@ -563,7 +674,13 @@ void GameView::initBg() {
  */
 void GameView::initTileMap() {
 
-    tileMap = Node::create();
+    auto stencil = LayerColor::create(Color4B::WHITE);
+    stencil->setIgnoreAnchorPointForPosition(false);
+    stencil->setAnchorPoint(Vec2::ZERO);
+    stencil->setPosition(Vec2::ZERO);
+    stencil->setContentSize(TILE_MAP_CONTENT_SIZE);
+    
+    tileMap = ClippingNode::create(stencil);
     tileMap->setAnchorPoint(ANCHOR_M);
     tileMap->setPosition(Vec2MC(0,0));
     tileMap->setContentSize(TILE_MAP_CONTENT_SIZE);

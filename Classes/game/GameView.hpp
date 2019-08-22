@@ -40,6 +40,10 @@ private:
     void selectTile(GameTile *tile);
     
     void updateTileMap(const StageData &stage);
+    void updateNearTile();
+    
+    void addTile(const TileData &tileData);
+    void removeTile(GameTile *tile);
     
     bool isSelectableTile(GameTile *tile);
     
@@ -51,10 +55,12 @@ private:
     void recursiveMadePattern(GameTile *anchorTile, MadePattern &pattern, int &sum);
     std::vector<MadePattern> getMadePatterns();
     
-    GameTile* getTile(const TilePosition &p);
+    GameTile*        getTile(const TilePosition &p);
+    GameTileList     getColumnTiles(int x);
+    TilePositionList getValidColumnTilePositions(int x);
     
 private:
-    cocos2d::Node *tileMap;
+    cocos2d::ClippingNode *tileMap;
     GameTileList tiles;
     GameTileList selectedTiles;
     
