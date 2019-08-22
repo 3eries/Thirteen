@@ -55,6 +55,9 @@ bool GameScene::init() {
     initMenu();
     initGameListener();
     
+    // 멀티 터치 방지
+    addChild(SBNodeUtils::createSwallowMultiTouchNode(), INT_MAX);
+    
     // 개발 버전 표기
     auto versionLabel = Label::createWithTTF(DEV_VERSION, FONT_ROBOTO_BLACK, 30, Size::ZERO,
                                              TextHAlignment::RIGHT, TextVAlignment::BOTTOM);

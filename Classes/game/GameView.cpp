@@ -38,9 +38,6 @@ bool GameView::init() {
     initTileMap();
     initGameListener();
     
-    // 멀티 터치 방지
-    addChild(SBNodeUtils::createSwallowMultiTouchNode(), SBZOrder::BOTTOM+1);
-    
     // Touch Listener
     auto touchListener = EventListenerTouchOneByOne::create();
     touchListener->setSwallowTouches(true);
