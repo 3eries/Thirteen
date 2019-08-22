@@ -32,6 +32,7 @@ public:
     void setNumber(int number, bool withAction);
     void setSelected(bool isSelected);
     
+    void updateSelectedLine();
     void yap();
     
     void runNumberEnterAction();
@@ -52,6 +53,7 @@ private:
     
     cocos2d::Sprite *bg;
     cocos2d::Label *numberLabel;
+    cocos2d::Node* selectedLine;
 };
 
 typedef std::vector<GameTile*> GameTileList;

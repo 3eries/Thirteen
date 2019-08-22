@@ -145,7 +145,9 @@ void GameView::selectTile(GameTile *tile) {
     tile->setSelected(true);
     selectedTiles.push_back(tile);
     
-    // 마스킹 영역 업데이트
+    for( auto tile : selectedTiles ) {
+        tile->updateSelectedLine();
+    }
 }
 
 /**

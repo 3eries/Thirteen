@@ -58,6 +58,12 @@ bool GameTile::init(const TileData &data) {
     numberLabel->setPosition(Vec2MC(TILE_CONTENT_SIZE, 0, 0));
     addChild(numberLabel);
     
+    selectedLine = Node::create();
+    selectedLine->setAnchorPoint(ANCHOR_M);
+    selectedLine->setPosition(Vec2MC(TILE_CONTENT_SIZE, 0, 0));
+    selectedLine->setContentSize(TILE_CONTENT_SIZE);
+    addChild(selectedLine);
+    
     return true;
 }
 
@@ -100,8 +106,96 @@ void GameTile::setSelected(bool isSelected) {
     bg->setVisible(!isSelected);
     numberLabel->setTextColor(isSelected ? TILE_NUMBER_SELECTED_COLOR : TILE_NUMBER_NORMAL_COLOR);
     
+    selectedLine->removeAllChildren();
+    
     // FIXME: 디버그용 코드
     numberLabel->stopAllActions();
+}
+
+void GameTile::updateSelectedLine() {
+    
+    // 선택된 경우 테두리 생성
+    selectedLine->removeAllChildren();
+    
+    const float LINE_SIZE = TILE_SELECTED_LINE_SIZE;
+    
+    Vec2 origin;
+    Vec2 destination = getContentSize();
+    
+    auto addLine = [=](Vec2 origin, Vec2 destination) {
+        auto line = DrawNode::create();
+        line->setAnchorPoint(Vec2::ZERO);
+        line->setPosition(Vec2::ZERO);
+        line->setContentSize(getContentSize());
+        line->drawSolidRect(origin, destination, Color4F(TILE_SELECTED_LINE_COLOR));
+        // line->drawLine(origin, destination, Color4F(TILE_SELECTED_LINE_COLOR));
+        selectedLine->addChild(line);
+    };
+    
+    auto isNearTileSelected = [=](GameTile *tile) -> bool {
+        return tile && tile->isSelected();
+    };
+    
+    // left
+    if( isNearTileSelected(left) ) {
+        // bottom
+        if( !isNearTileSelected(bottom) || !isNearTileSelected(left->getBottom()) ) {
+            addLine(Vec2(origin.x + LINE_SIZE, origin.y), Vec2(-TILE_PADDING, LINE_SIZE));
+        }
+        // top
+        if( !isNearTileSelected(top) || !isNearTileSelected(left->getTop()) ) {
+            addLine(Vec2(origin.x + LINE_SIZE, destination.y),
+                    Vec2(-TILE_PADDING, destination.y - LINE_SIZE));
+        }
+    } else {
+        addLine(origin, Vec2(LINE_SIZE, destination.y));
+    }
+    
+    // right
+    if( isNearTileSelected(right) ) {
+        // bottom
+        if( !isNearTileSelected(bottom) || !isNearTileSelected(right->getBottom()) ) {
+            addLine(Vec2(destination.x, origin.y), Vec2(destination.x + TILE_PADDING, LINE_SIZE));
+        }
+        // top
+        if( !isNearTileSelected(top) || !isNearTileSelected(right->getTop()) ) {
+            addLine(destination, Vec2(destination.x + TILE_PADDING, destination.y - LINE_SIZE));
+        }
+    } else {
+        addLine(Vec2(origin.x + destination.x, origin.y),
+                Vec2(destination.x - LINE_SIZE, destination.y));
+    }
+    
+    // top
+    if( isNearTileSelected(top) ) {
+        // left
+        if( !isNearTileSelected(left) || !isNearTileSelected(top->getLeft()) ) {
+            addLine(Vec2(origin.x, destination.y - LINE_SIZE),
+                    Vec2(LINE_SIZE, destination.y + TILE_PADDING));
+        }
+        // right
+        if( !isNearTileSelected(right) || !isNearTileSelected(top->getRight()) ) {
+            addLine(Vec2(destination.x, destination.y - LINE_SIZE),
+                    Vec2(destination.x - LINE_SIZE, destination.y + TILE_PADDING));
+        }
+    } else {
+        addLine(Vec2(origin.x, destination.y), Vec2(destination.x, destination.y - LINE_SIZE));
+    }
+    
+    // bottom
+    if( isNearTileSelected(bottom) ) {
+        // left
+        if( !isNearTileSelected(left) || !isNearTileSelected(bottom->getLeft()) ) {
+            addLine(Vec2(origin.x, LINE_SIZE), Vec2(LINE_SIZE, -TILE_PADDING));
+        }
+        // right
+        if( !isNearTileSelected(right) || !isNearTileSelected(bottom->getRight()) ) {
+            addLine(Vec2(destination.x, LINE_SIZE),
+                    Vec2(destination.x - LINE_SIZE, -TILE_PADDING));
+        }
+    } else {
+        addLine(origin, Vec2(destination.x, LINE_SIZE));
+    }
 }
 
 void GameTile::yap() {
