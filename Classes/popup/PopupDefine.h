@@ -20,6 +20,7 @@ enum class PopupType {
     SHOP,
     SETTING,
     PAUSE,
+    GET_HINT,
     GAME_RESULT,
     CONTINUE,
 };

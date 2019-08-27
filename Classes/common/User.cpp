@@ -18,6 +18,7 @@ USING_NS_SB;
 using namespace std;
 
 #define USER_DEFAULT_KEY_REMOVE_ADS                     "USER_REMOVE_ADS"
+#define USER_DEFAULT_KEY_HINT                           "USER_HINT"
 #define USER_DEFAULT_KEY_COIN                           "USER_COIN"
 #define USER_DEFAULT_KEY_CLEAR_STAGE                    "USER_CLEAR_STAGE"
 
@@ -105,6 +106,47 @@ void User::removeAds() {
 bool User::isRemovedAds() {
     
     return UserDefault::getInstance()->getBoolForKey(USER_DEFAULT_KEY_REMOVE_ADS, false);
+}
+
+/**
+ * 힌트 개수를 설정합니다
+ */
+void User::setHintCount(int i) {
+    
+    UserDefault::getInstance()->setIntegerForKey(USER_DEFAULT_KEY_HINT, i);
+    UserDefault::getInstance()->flush();
+    
+    Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(DIRECTOR_EVENT_UPDATE_HINT_COUNT);
+}
+
+/**
+ * 힌트 개수를 반환합니다
+ */
+int User::getHintCount() {
+    
+    return UserDefault::getInstance()->getIntegerForKey(USER_DEFAULT_KEY_HINT, GAME_CONFIG->getFirstHint());
+}
+
+/**
+ * 힌트를 획득합니다
+ */
+void User::getHint(int i) {
+    
+    setHintCount(getHintCount() + i);
+}
+
+/**
+ * 힌트를 사용합니다
+ */
+bool User::useHint() {
+    
+    int count = getHintCount();
+    if( count == 0 ) {
+        return false;
+    }
+    
+    setHintCount(count-1);
+    return true;
 }
 
 /**

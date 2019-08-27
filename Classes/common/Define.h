@@ -69,6 +69,7 @@ static const std::string LEADER_BOARD_HIGH_SCORE                = "CgkIhM_O4eseE
 
 // cocos2d::Director Event
 static const std::string DIRECTOR_EVENT_REMOVE_ADS              = "DIRECTOR_EVENT_REMOVE_ADS";
+static const std::string DIRECTOR_EVENT_UPDATE_HINT_COUNT       = "DIRECTOR_EVENT_UPDATE_HINT_COUNT";
 static const std::string DIRECTOR_EVENT_UPDATE_USER_COIN        = "DIRECTOR_EVENT_UPDATE_USER_COIN";
 static const std::string DIRECTOR_EVENT_UNLOCK_ALL_PUZZLES      = "DIRECTOR_EVENT_UNLOCK_ALL_PUZZLES";
 

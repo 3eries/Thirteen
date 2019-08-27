@@ -8,5 +8,6 @@
         "more_games": "https://itunes.apple.com/developer/seong-min-hwang/id1392753835"
     },
     "first_coin": 30,
+    "first_hint":2,
     "max_score": 9999
 }

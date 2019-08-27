@@ -30,6 +30,12 @@ public:
     static void             removeAds();
     static bool             isRemovedAds();
     
+    // hint
+    static void             setHintCount(int i);
+    static int              getHintCount();
+    static void             getHint(int i);
+    static bool             useHint();
+    
     // coin
     static void             setCoin(int i);
     static void             earnCoin(int i);

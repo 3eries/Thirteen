@@ -16,6 +16,7 @@
 #include "../content/data/model/StageData.h"
 #include "object/GameTile.hpp"
 
+class HintButton;
 class StageProgressBar;
 
 class GameView : public cocos2d::Node {
@@ -64,6 +65,7 @@ private:
     GameTileList tiles;
     GameTileList selectedTiles;
     
+    HintButton *hintButton;
     StageProgressBar *stageProgressBar;
     
     IntList numbers;

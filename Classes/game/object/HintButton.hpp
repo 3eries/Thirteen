@@ -24,6 +24,7 @@ private:
     bool init() override;
     
     void onClick();
+    void updateHintCount();
     
 private:
     CC_SYNTHESIZE(SBCallback, onHintListener, OnHintListener);

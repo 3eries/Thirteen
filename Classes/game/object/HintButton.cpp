@@ -8,7 +8,10 @@
 #include "HintButton.hpp"
 
 #include "Define.h"
-#include "GameConfiguration.hpp"
+#include "User.hpp"
+#include "SceneManager.h"
+
+#include "GetHintPopup.hpp"
 
 USING_NS_CC;
 using namespace cocos2d::ui;
@@ -47,7 +50,27 @@ bool HintButton::init() {
     
     // 힌트 아이템 개수
     // game_bg_hint_number.png Vec2TL(88, -23) , Size(32, 32)
+    hintCountView = Sprite::create(DIR_IMG_GAME + "game_bg_hint_number.png");
+    hintCountView->setAnchorPoint(ANCHOR_M);
+    hintCountView->setPosition(contentView->convertToNodeSpace(Vec2TL(88, -23)));
+    contentView->addChild(hintCountView);
+    
     // 9 size:27 Vec2TL(88, -23) , Size(14, 20)
+    hintCountLabel = Label::createWithTTF("", FONT_ROBOTO_BLACK, 27, Size::ZERO,
+                                          TextHAlignment::CENTER, TextVAlignment::CENTER);
+    hintCountLabel->setTextColor(Color4B::WHITE);
+    hintCountLabel->setAnchorPoint(ANCHOR_M);
+    hintCountLabel->setPosition(Vec2MC(hintCountView->getContentSize(), 0, 0));
+    hintCountView->addChild(hintCountLabel);
+ 
+    {
+        auto listener = EventListenerCustom::create(DIRECTOR_EVENT_UPDATE_HINT_COUNT, [=](EventCustom *event) {
+            this->updateHintCount();
+        });
+        getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
+    }
+    
+    updateHintCount();
     
     // 터치 이벤트
     setTouchEnabled(true);
@@ -56,7 +79,7 @@ bool HintButton::init() {
        
         switch( eventType ) {
             case Widget::TouchEventType::BEGAN: {
-                contentView->setScale(1 - ButtonZoomScale::NORMAL);
+                contentView->setScale(1 + ButtonZoomScale::NORMAL);
             } break;
             
             case Widget::TouchEventType::ENDED:
@@ -69,12 +92,52 @@ bool HintButton::init() {
     });
     
     addClickEventListener([=](Ref*) {
-        onHintListener();
+        this->onClick();
     });
     
     return true;
 }
 
+/**
+ * 버튼이 클릭되었습니다
+ */
 void HintButton::onClick() {
     
+    // 힌트 없음, 광고 보기
+    if( User::getHintCount() == 0 ) {
+        auto popup = GetHintPopup::create();
+        SceneManager::getInstance()->getScene()->addChild(popup, ZOrder::POPUP_BOTTOM);
+        
+        // 힌트 획득 리스너
+        popup->setOnGetListener([=](int amount) {
+            
+            User::getHint(amount);
+            
+            hintCountView->runAction(Sequence::create(ScaleTo::create(0.1f, 1.2f),
+                                                      ScaleTo::create(0.1f, 1.0f), nullptr));
+        });
+    }
+    // 힌트 사용
+    else {
+        User::useHint();
+        onHintListener();
+    }
+}
+
+/**
+ * 힌트 개수를 업데이트 합니다
+ */
+void HintButton::updateHintCount() {
+    
+    hintCountView->stopAllActions();
+    int count = User::getHintCount();
+    
+    if( count == 0 ) {
+        hintCountView->setVisible(false);
+    } else {
+        hintCountView->setVisible(true);
+        
+        hintCountLabel->stopAllActions();
+        hintCountLabel->setString(TO_STRING(count));
+    }
 }

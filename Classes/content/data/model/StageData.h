@@ -126,6 +126,10 @@ struct StageData {
         return true;
     }
     
+    int getTileId(const TilePosition &p) const {
+        return ((int)p.x + 1) + ((int)p.y * tileColumns);
+    }
+    
     std::string toString() {
         std::string str = "StageData {\n";
         str += STR_FORMAT("\tstage: %d, clearCondition: %d\n", stage, clearCondition);

@@ -145,6 +145,7 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
                     auto move = MoveTo::create(TILE_MOVE_DURATION, convertTilePosition(tilePos));
                     auto callFunc = CallFunc::create([=]() {
                         tile->setTilePosition(tilePos);
+                        tile->setTileId(level.getTileId(tilePos));
                     });
                     tile->runAction(Sequence::create(move, callFunc, nullptr));
                 }
@@ -164,15 +165,29 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
  */
 void GameView::onHint() {
     
+    hintButton->setTouchEnabled(false);
+    
     auto patterns = getMadePatterns();
+    CCASSERT(patterns.size() > 0, "GameView::onHint error: 메이드 패턴 없음");
+    
     Log::i("GameView onHint patterns: %d", (int)patterns.size());
     
-    if( patterns.size() > 0 ) {
-        auto pattern = patterns[0];
-        
-        for( auto tile : pattern ) {
-            tile->yap();
-        }
+    // 셔플
+    random_shuffle(patterns.begin(), patterns.end());
+    
+    // 패턴 크기 오름차순
+    sort(patterns.begin(), patterns.end(), [](const MadePattern &p1, const MadePattern &p2) -> bool {
+        return p1.size() < p2.size();
+    });
+    
+    // 힌트 표시
+    auto pattern = patterns[0];
+    
+    for( auto tile : pattern ) {
+        tile->setSelected(true);
+        tile->updateSelectedLine(TILE_HINT_LINE_COLOR, [=](GameTile *tile) -> bool {
+            return SBCollection::contains(pattern, tile);
+        });
     }
 }
 
@@ -214,11 +229,13 @@ void GameView::updateTileMap(const StageData &stage) {
     
     for( auto tileData : stage.tiles ) {
         if( !tileData.isEmpty ) {
+            /*
             auto bg = Sprite::create(DIR_IMG_GAME + "game_tile.png");
             bg->setColor(Color3B::BLACK);
             bg->setAnchorPoint(ANCHOR_M);
             bg->setPosition(convertTilePosition(tileData.p));
             tileMap->addChild(bg, -1);
+            */
             
             addTile(tileData);
         }
@@ -253,6 +270,7 @@ void GameView::addTile(const TileData &tileData) {
     auto tile = GameTile::create();
     tile->setAnchorPoint(ANCHOR_M);
     tile->setTilePosition(tileData.p);
+    tile->setTileId(GAME_MANAGER->getStage().getTileId(tileData.p));
     tile->setNumber(getRandomNumber());
     tileMap->addChild(tile);
     
@@ -402,8 +420,38 @@ void GameView::recursiveMadePattern(GameTile *anchorTile, MadePattern &pattern, 
 }
 
 vector<GameView::MadePattern> GameView::getMadePatterns() {
+
+    CCLOG("MADE PATTERN START");
     
     vector<MadePattern> patterns;
+    
+    auto contains = [=](const MadePattern &pattern, vector<MadePattern> patterns) -> bool {
+      
+        for( auto p : patterns ) {
+            if( p.size() != pattern.size() ) {
+                continue;
+            }
+            
+            // 리스트 비교
+            bool equals = true;
+            
+            for( int i = 0; i < p.size(); ++i ) {
+                auto t1 = p[i];
+                auto t2 = pattern[i];
+                
+                if( t1->getTileId() != t2->getTileId() ) {
+                    equals = false;
+                    break;
+                }
+            }
+            
+            if( equals ) {
+                return true;
+            }
+        }
+        
+        return false;
+    };
     
     for( auto tile : tiles ) {
         int number = 0;
@@ -412,50 +460,25 @@ vector<GameView::MadePattern> GameView::getMadePatterns() {
         recursiveMadePattern(tile, pattern, number);
         
         if( number == 13 ) {
-            patterns.push_back(pattern);
-        }
-    }
-    
-    // TODO:
-    // 중복 패턴 제거
-    
-    /*
-    auto getAdjacentTiles = [=](GameTile *anchorTile) -> GameTileList {
-        
-        GameTileList adjacentTiles;
-        auto anchorTilePos = anchorTile->getTilePosition();
-        
-        for( auto tile : tiles ) {
-            if( anchorTile == tile ) {
-                continue;
+            // 타일 아이디 오름차순 정렬
+            sort(pattern.begin(), pattern.end(), [](GameTile *t1, GameTile *t2) -> bool {
+                return t1->getTileId() < t2->getTileId();
+            });
+            
+            string str = "";
+            for( auto tile : pattern) {
+                str += STR_FORMAT("%d,", tile->getTileId());
             }
             
-            auto diff = anchorTilePos - tile->getTilePosition();
-            diff.x = fabsf(diff.x);
-            diff.y = fabsf(diff.y);
-            
-            if( (diff.x == 0 && diff.y == 1) || (diff.y == 0 && diff.x == 1) ) {
-                adjacentTiles.push_back(tile);
-            }
-        }
-        
-        return adjacentTiles;
-    };
-    
-    for( auto firstTile : tiles ) {
-        int num = firstTile->getNumber();
-        auto adjacentTiles = getAdjacentTiles(firstTile);
-        
-        for( auto adjacentTile : adjacentTiles ) {
-            num += adjacentTile->getNumber();
-            
-            if( num == 13 ) {
-                
+            if( !contains(pattern, patterns) ) {
+                CCLOG("%s", str.c_str());
+                patterns.push_back(pattern);
             }
         }
     }
-    */
-     
+    
+    CCLOG("MADE PATTERN END");
+    
     return patterns;
 }
 
@@ -585,6 +608,14 @@ bool GameView::onTouchBegan(Touch *touch, Event*) {
         return false;
     }
     
+    // 힌트 UI 되돌리기
+    hintButton->setTouchEnabled(true);
+    
+    for( auto tile : tiles ) {
+        tile->setSelected(false);
+    }
+    
+    // 타일 선택
     for( auto tile : tiles ) {
         auto tileBox = SB_BOUNDING_BOX_IN_WORLD(tile);
         
@@ -656,7 +687,7 @@ void GameView::onTouchCancelled(Touch *touch, Event *e) {
 void GameView::initBg() {
 
     // 힌트
-    auto hintButton = HintButton::create();
+    hintButton = HintButton::create();
     addChild(hintButton);
     
     hintButton->setOnHintListener(CC_CALLBACK_0(GameView::onHint, this));

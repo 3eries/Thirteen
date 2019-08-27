@@ -59,9 +59,11 @@ void GameConfiguration::parse(const string &json) {
     
     // game value
     firstCoin            = doc["first_coin"].GetInt();
+    firstHint            = doc["first_hint"].GetInt();
     maxScore             = doc["max_score"].GetInt();
     
     CCLOG("\tstoreUrl: %s", storeUrl.c_str());
     CCLOG("\tmoreGamesUrl: %s", moreGamesUrl.c_str());
+    CCLOG("\tfirstHint: %d", firstHint);
     CCLOG("========== PARSE END (game_config.json)  ==========");
 }

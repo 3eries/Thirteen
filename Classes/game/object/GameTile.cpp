@@ -13,6 +13,8 @@
 USING_NS_CC;
 using namespace std;
 
+#define DEBUG_TILE_ID               0
+
 GameTile* GameTile::create() {
     
     auto tile = new GameTile();
@@ -94,6 +96,27 @@ void GameTile::setTilePosition(const TilePosition &p) {
     setPosition(convertTilePosition(p));
 }
 
+void GameTile::setTileId(int tileId) {
+    
+    this->tileId = tileId;
+    
+#if DEBUG_TILE_ID
+    auto label = getChildByTag<Label*>(419);
+    
+    if( label ) {
+        label->setString(TO_STRING(tileId));
+    } else {
+        label = Label::createWithTTF(TO_STRING(tileId), FONT_ROBOTO_BLACK, 25, Size::ZERO,
+                                     TextHAlignment::CENTER, TextVAlignment::BOTTOM);
+        label->setTag(419);
+        label->setTextColor(TILE_NUMBER_NORMAL_COLOR);
+        label->setAnchorPoint(ANCHOR_MB);
+        label->setPosition(Vec2BC(TILE_CONTENT_SIZE, 0, 0));
+        addChild(label);
+    }
+#endif
+}
+
 void GameTile::setNumber(int number) {
     
     this->number = number;
@@ -126,6 +149,92 @@ void GameTile::setNearTile(GameTile *left, GameTile *right, GameTile *top, GameT
     this->right = right;
     this->top = top;
     this->bottom = bottom;
+}
+
+void GameTile::updateSelectedLine(const Color3B &lineColor,
+                                  function<bool(GameTile*)> isTileSelected) {
+    
+    // 선택된 경우 테두리 생성
+    selectedLine->removeAllChildren();
+    
+    const float LINE_SIZE = TILE_SELECTED_LINE_SIZE;
+    
+    Vec2 origin;
+    Vec2 destination = getContentSize();
+    
+    auto addLine = [=](Vec2 origin, Vec2 destination) {
+        auto line = DrawNode::create();
+        line->setAnchorPoint(Vec2::ZERO);
+        line->setPosition(Vec2::ZERO);
+        line->setContentSize(getContentSize());
+        line->drawSolidRect(origin, destination, Color4F(lineColor));
+        selectedLine->addChild(line);
+    };
+    
+    auto _isTileSelected = [isTileSelected](GameTile *tile) -> bool {
+        return tile && isTileSelected(tile);
+    };
+    
+    // left
+    if( _isTileSelected(left) ) {
+        // bottom
+        if( !_isTileSelected(bottom) || !_isTileSelected(left->getBottom()) ) {
+            addLine(Vec2(origin.x + LINE_SIZE, origin.y), Vec2(-TILE_PADDING, LINE_SIZE));
+        }
+        // top
+        if( !_isTileSelected(top) || !_isTileSelected(left->getTop()) ) {
+            addLine(Vec2(origin.x + LINE_SIZE, destination.y),
+                    Vec2(-TILE_PADDING, destination.y - LINE_SIZE));
+        }
+    } else {
+        addLine(origin, Vec2(LINE_SIZE, destination.y));
+    }
+    
+    // right
+    if( _isTileSelected(right) ) {
+        // bottom
+        if( !_isTileSelected(bottom) || !_isTileSelected(right->getBottom()) ) {
+            addLine(Vec2(destination.x, origin.y), Vec2(destination.x + TILE_PADDING, LINE_SIZE));
+        }
+        // top
+        if( !_isTileSelected(top) || !_isTileSelected(right->getTop()) ) {
+            addLine(destination, Vec2(destination.x + TILE_PADDING, destination.y - LINE_SIZE));
+        }
+    } else {
+        addLine(Vec2(origin.x + destination.x, origin.y),
+                Vec2(destination.x - LINE_SIZE, destination.y));
+    }
+    
+    // top
+    if( _isTileSelected(top) ) {
+        // left
+        if( !_isTileSelected(left) || !_isTileSelected(top->getLeft()) ) {
+            addLine(Vec2(origin.x, destination.y - LINE_SIZE),
+                    Vec2(LINE_SIZE, destination.y + TILE_PADDING));
+        }
+        // right
+        if( !_isTileSelected(right) || !_isTileSelected(top->getRight()) ) {
+            addLine(Vec2(destination.x, destination.y - LINE_SIZE),
+                    Vec2(destination.x - LINE_SIZE, destination.y + TILE_PADDING));
+        }
+    } else {
+        addLine(Vec2(origin.x, destination.y), Vec2(destination.x, destination.y - LINE_SIZE));
+    }
+    
+    // bottom
+    if( _isTileSelected(bottom) ) {
+        // left
+        if( !_isTileSelected(left) || !_isTileSelected(bottom->getLeft()) ) {
+            addLine(Vec2(origin.x, LINE_SIZE), Vec2(LINE_SIZE, -TILE_PADDING));
+        }
+        // right
+        if( !_isTileSelected(right) || !_isTileSelected(bottom->getRight()) ) {
+            addLine(Vec2(destination.x, LINE_SIZE),
+                    Vec2(destination.x - LINE_SIZE, -TILE_PADDING));
+        }
+    } else {
+        addLine(origin, Vec2(destination.x, LINE_SIZE));
+    }
 }
 
 void GameTile::updateSelectedLine() {
@@ -212,13 +321,6 @@ void GameTile::updateSelectedLine() {
     } else {
         addLine(origin, Vec2(destination.x, LINE_SIZE));
     }
-}
-
-void GameTile::yap() {
-
-    auto scale1 = ScaleTo::create(1.0f, 2.0f);
-    auto scale2 = ScaleTo::create(1.0f, 1.0f);
-    numberLabel->runAction(RepeatForever::create(Sequence::create(scale1, scale2, nullptr)));
 }
 
 /**

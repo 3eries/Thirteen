@@ -30,18 +30,21 @@ public:
     void clear();
     
     void setTilePosition(const TilePosition &p);
+    void setTileId(int tileId);
     void setNumber(int number);
     void setSelected(bool isSelected);
     void setNearTile(GameTile *left, GameTile *right, GameTile *top, GameTile *bottom);
     
+    void updateSelectedLine(const cocos2d::Color3B &lineColor,
+                            std::function<bool(GameTile*)> isTileSelected);
     void updateSelectedLine();
-    void yap();
     
     void runNumberEnterAction();
     void runNumberExitAction();
     
 private:
     CC_SYNTHESIZE_READONLY(TilePosition, tilePos, TilePosition);
+    CC_SYNTHESIZE_READONLY(int, tileId, TileId);
     CC_SYNTHESIZE_READONLY(int, number, Number);
     SB_SYNTHESIZE_READONLY_BOOL(selected, Selected);
     
