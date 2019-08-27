@@ -81,7 +81,7 @@ void GameTile::remove() {
 void GameTile::clear() {
     
     runAction(ScaleTo::create(TILE_EXIT_DURATION, 0)); // scale
-    runAction(FadeOut::create(TILE_EXIT_DURATION));    // fade out
+    // runAction(FadeOut::create(TILE_EXIT_DURATION));    // fade out
     
     SBDirector::postDelayed(this, [=]() {
         this->setScale(1);
