@@ -16,6 +16,7 @@
 #include "GameView.hpp"
 
 #include "CommonLoadingBar.hpp"
+#include "ui/ClearPopup.hpp"
 
 USING_NS_CC;
 USING_NS_SB;
@@ -138,15 +139,10 @@ void GameScene::onStageChanged(const StageData &stage) {
  */
 void GameScene::onStageClear(const StageData &stage) {
 
-    // 다음 스테이지 버튼 노출
-    auto nextBtn = SBButton::create(DIR_IMG_GAME + "scratch_btn_next.png");
-    nextBtn->setZoomScale(ButtonZoomScale::WEAK);
-    // nextBtn->setZoomScale(0);
-    nextBtn->setAnchorPoint(ANCHOR_M);
-    nextBtn->setOnClickListener([=](Node*) {
-        SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
-        nextBtn->removeFromParent();
-
+    // 클리어 팝업
+    auto popup = ClearPopup::create();
+    popup->setOnNextListener([=]() {
+        
         // 마지막 스테이지 클리어한 경우, 1스테이지로 복귀
         if( stage.stage == Database::getLastStage().stage ) {
             GAME_MANAGER->setStage(User::getClearStage()+1);
@@ -156,19 +152,7 @@ void GameScene::onStageClear(const StageData &stage) {
             GameManager::onMoveNextStageFinished();
         }
     });
-    addChild(nextBtn);
-    
-    // 연출 진행되는 동안 버튼 터치 방지
-    nextBtn->setTouchEnabled(false);
-    
-    // 화면 아래에서 올라오는 연출
-    nextBtn->setPosition(Vec2BC(0, -nextBtn->getContentSize().height*0.5f));
-    
-    auto moveIn = MoveTo::create(0.2f, Vec2BC(0, 205));
-    auto callFunc = CallFunc::create([=]() {
-        nextBtn->setTouchEnabled(true);
-    });
-    nextBtn->runAction(Sequence::create(moveIn, callFunc, nullptr));
+    SceneManager::getInstance()->getScene()->addChild(popup, ZOrder::POPUP_BOTTOM);
 }
 
 /**

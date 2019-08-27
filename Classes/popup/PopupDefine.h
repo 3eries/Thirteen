@@ -21,6 +21,7 @@ enum class PopupType {
     SETTING,
     PAUSE,
     GET_HINT,
+    GAME_CLEAR,
     GAME_RESULT,
     CONTINUE,
 };
