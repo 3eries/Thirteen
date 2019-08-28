@@ -173,12 +173,17 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
  */
 void GameView::onHint() {
     
-    hintButton->setTouchEnabled(false);
-    
     auto patterns = getMadePatterns();
-    CCASSERT(patterns.size() > 0, "GameView::onHint error: 메이드 패턴 없음");
+    // CCASSERT(patterns.size() > 0, "GameView::onHint error: 메이드 패턴 없음");
     
     Log::i("GameView onHint patterns: %d", (int)patterns.size());
+    
+    if( patterns.size() == 0 ) {
+        MessageBox("메이드 패턴 없음!", "힌트 사용 에러");
+        return;
+    }
+
+    hintButton->setTouchEnabled(false);
     
     // 셔플
     random_shuffle(patterns.begin(), patterns.end());
