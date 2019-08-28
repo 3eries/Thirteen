@@ -135,8 +135,7 @@ void MainScene::onClick(Node *sender) {
             
         // 게임 시작
         case Tag::BTN_START: {
-            GAME_MANAGER->init();
-            replaceScene(SceneType::GAME);
+            replaceGameScene();
         } break;
             
         // 설정
@@ -151,6 +150,17 @@ void MainScene::onClick(Node *sender) {
         default:
             break;
     }
+}
+
+/**
+ * 게임씬으로 전환
+ */
+void MainScene::replaceGameScene() {
+    
+    SB_SAFE_HIDE(getChildByTag(Tag::BTN_SETTING));
+    
+    GAME_MANAGER->init();
+    replaceScene(SceneType::GAME);
 }
 
 /**
