@@ -18,16 +18,24 @@ void SBAnalytics::init() {
 
 void SBAnalytics::setCurrentScreen(const string &screen, const string &screenClass) {
     
+#if !defined(COCOS2D_DEBUG) || COCOS2D_DEBUG == 0
+    
 #if SB_PLUGIN_USE_FIREBASE_ANALYTICS
     FirebaseAnalytics::setCurrentScreen(screen, screenClass);
-#endif
+#endif // SB_PLUGIN_USE_FIREBASE_ANALYTICS
+    
+#endif // COCOS2D_DEBUG == 0
 }
 
 void SBAnalytics::logEvent(const string &event, const EventParams &params) {
 
+#if !defined(COCOS2D_DEBUG) || COCOS2D_DEBUG == 0
+    
 #if SB_PLUGIN_USE_FIREBASE_ANALYTICS
     FirebaseAnalytics::logEvent(event, params);
-#endif
+#endif // SB_PLUGIN_USE_FIREBASE_ANALYTICS
+    
+#endif // COCOS2D_DEBUG == 0
 }
 
 string SBAnalytics::getNumberRange(int n, int begin, int end, int range) {
