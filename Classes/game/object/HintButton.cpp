@@ -14,6 +14,7 @@
 #include "GetHintPopup.hpp"
 
 USING_NS_CC;
+USING_NS_SB;
 using namespace cocos2d::ui;
 using namespace std;
 
@@ -75,6 +76,9 @@ bool HintButton::init() {
     
     updateHintCount();
     
+    // 광고 로드됐는지 체크
+    schedule(CC_CALLBACK_1(HintButton::checkAdLoaded, this), 0.05f, "CHECK_AD_LOADED");
+    
     // 터치 이벤트
     setTouchEnabled(true);
     
@@ -108,20 +112,22 @@ void HintButton::onClick() {
     
     // 힌트 없음, 광고 보기
     if( User::getHintCount() == 0 ) {
-        SBAnalytics::logEvent(ANALYTICS_EVENT_HINT_GET_POPUP);
-        
-        auto popup = GetHintPopup::create();
-        SceneManager::getInstance()->getScene()->addChild(popup, ZOrder::POPUP_BOTTOM);
-        
-        // 힌트 획득 리스너
-        popup->setOnGetListener([=](int amount) {
+        if( AdsHelper::isRewardedVideoLoaded() ) {
+            SBAnalytics::logEvent(ANALYTICS_EVENT_HINT_GET_POPUP);
             
-            SBAnalytics::logEvent(ANALYTICS_EVENT_HINT_GET);
-            User::getHint(amount);
+            auto popup = GetHintPopup::create();
+            SceneManager::getInstance()->getScene()->addChild(popup, ZOrder::POPUP_BOTTOM);
             
-            hintCountView->runAction(Sequence::create(ScaleTo::create(0.1f, 1.2f),
-                                                      ScaleTo::create(0.1f, 1.0f), nullptr));
-        });
+            // 힌트 획득 리스너
+            popup->setOnGetListener([=](int amount) {
+                
+                SBAnalytics::logEvent(ANALYTICS_EVENT_HINT_GET);
+                User::getHint(amount);
+                
+                hintCountView->runAction(Sequence::create(ScaleTo::create(0.1f, 1.2f),
+                                                          ScaleTo::create(0.1f, 1.0f), nullptr));
+            });
+        }
     }
     // 힌트 사용
     else {
@@ -147,5 +153,15 @@ void HintButton::updateHintCount() {
         
         hintCountLabel->stopAllActions();
         hintCountLabel->setString(TO_STRING(count));
+    }
+}
+
+void HintButton::checkAdLoaded(float dt) {
+    
+    if( User::getHintCount() == 0 ) {
+        hintPlusIcon->setVisible(AdsHelper::isRewardedVideoLoaded());
+        // TODO: 광고 없음 아이콘
+    } else {
+        // TODO: 광고 없음 아이콘 hide
     }
 }

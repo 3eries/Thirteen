@@ -26,6 +26,8 @@ private:
     void onClick();
     void updateHintCount();
     
+    void checkAdLoaded(float dt);
+    
 private:
     CC_SYNTHESIZE(SBCallback, onHintListener, OnHintListener);
     
