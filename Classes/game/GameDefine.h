@@ -77,7 +77,7 @@ enum GameState {
 };
 
 #define                 GAME_BG_COLOR                   cocos2d::Color3B(0, 17, 17)
-#define                 LEVEL_REFRESH_DURATION          2.0f
+#define                 LEVEL_REFRESH_DURATION          1.0f
 #define                 MOVE_NEXT_LEVEL_DURATION        0.5f
 
 //////////// Tile

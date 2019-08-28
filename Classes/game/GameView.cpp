@@ -156,7 +156,12 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
             
             // 이동 완료
             SBDirector::postDelayed(this, [=]() {
-                this->updateNearTile();
+                // 메이드 불가능하면 새로고침
+                if( this->getMadePatterns().size() == 0 ) {
+                    this->refresh();
+                } else {
+                    this->updateNearTile();
+                }
             }, TILE_MOVE_DURATION+0.05f);
             
         }, TILE_EXIT_DURATION, true);
@@ -192,6 +197,71 @@ void GameView::onHint() {
             return SBCollection::contains(pattern, tile);
         }, TILE_HINT_LINE_COLOR, true);
     }
+}
+
+/**
+ * 새로 고침
+ */
+void GameView::refresh() {
+    
+    SBDirector::getInstance()->setScreenTouchLocked(true);
+    
+    auto popup = SBNodeUtils::createZeroSizeNode();
+    addChild(popup, ZOrder::POPUP_BOTTOM);
+    
+    auto bg = LayerColor::create(Color::POPUP_BG);
+    popup->addChild(bg);
+    
+    auto icon = Sprite::create(DIR_IMG_GAME + "game_ui_refresh.png");
+    icon->setAnchorPoint(ANCHOR_M);
+    icon->setPosition(Vec2MC(0, 0));
+    popup->addChild(icon);
+    
+    // 팝업 연출
+    bg->setOpacity(0);
+    bg->runAction(FadeTo::create(0.15f, Color::POPUP_BG.a));
+    
+    icon->setPositionY(icon->getPositionY() + SB_WIN_SIZE.height);
+    icon->runAction(MoveTo::create(EffectDuration::POPUP_SLIDE_FAST, Vec2MC(0,0)));
+    
+    // 맵 슬라이드 연출
+    SBDirector::postDelayed(this, [=]() {
+
+        // 현재 맵 캡쳐
+        double t = SBSystemUtils::getCurrentTimeSeconds();
+
+        auto image = utils::captureNode(tileMap);
+        auto texture = new Texture2D();
+        texture->initWithImage(image);
+
+        auto currentMap = Sprite::createWithTexture(texture);
+        currentMap->setAnchorPoint(tileMap->getAnchorPoint());
+        currentMap->setPosition(tileMap->getPosition());
+        tileMap->getParent()->addChild(currentMap, tileMap->getLocalZOrder());
+
+        CC_SAFE_RELEASE(texture);
+        CC_SAFE_RELEASE(image);
+
+        CCLOG("capture dt: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
+
+        // 맵 업데이트
+        updateTileMap(GAME_MANAGER->getStage());
+
+        // 슬라이드 연출
+        const float DURATION = LEVEL_REFRESH_DURATION - EffectDuration::POPUP_SLIDE_FAST;
+
+        auto move = MoveBy::create(DURATION, Vec2(0, -tileMap->getContentSize().height));
+        currentMap->runAction(Sequence::create(move, RemoveSelf::create(), nullptr));
+
+        tileMap->setPositionY(tileMap->getPositionY() + tileMap->getContentSize().height + TILE_PADDING);
+        tileMap->runAction(MoveTo::create(DURATION, Vec2::ZERO));
+
+    }, EffectDuration::POPUP_SLIDE_FAST);
+    
+    SBDirector::postDelayed(this, [=]() {
+        popup->removeFromParent();
+        SBDirector::getInstance()->setScreenTouchLocked(false);
+    }, LEVEL_REFRESH_DURATION);
 }
 
 /**
@@ -231,8 +301,10 @@ void GameView::updateTileMap(const StageData &stage) {
     resetNumberEngine();
     
     // UI 업데이트
-    tileMap->setContentSize(getTileContentSize(stage.tileRows, stage.tileColumns));
-    tileMap->getStencil()->setContentSize(tileMap->getContentSize());
+    auto tileMapSize = getTileContentSize(stage.tileRows, stage.tileColumns);
+    tileMapClippingNode->setContentSize(tileMapSize);
+    tileMapClippingNode->getStencil()->setContentSize(tileMapSize);
+    tileMap->setContentSize(tileMapSize);
     
     for( auto tileData : stage.tiles ) {
         if( !tileData.isEmpty ) {
@@ -753,11 +825,17 @@ void GameView::initTileMap() {
     stencil->setPosition(Vec2::ZERO);
     stencil->setContentSize(TILE_MAP_CONTENT_SIZE);
     
-    tileMap = ClippingNode::create(stencil);
-    tileMap->setAnchorPoint(ANCHOR_M);
-    tileMap->setPosition(Vec2MC(0,0));
+    tileMapClippingNode = ClippingNode::create(stencil);
+    tileMapClippingNode->setAnchorPoint(ANCHOR_M);
+    tileMapClippingNode->setPosition(Vec2MC(0,0));
+    tileMapClippingNode->setContentSize(TILE_MAP_CONTENT_SIZE);
+    addChild(tileMapClippingNode);
+    
+    tileMap = Node::create();
+    tileMap->setAnchorPoint(Vec2::ZERO);
+    tileMap->setPosition(Vec2::ZERO);
     tileMap->setContentSize(TILE_MAP_CONTENT_SIZE);
-    addChild(tileMap);
+    tileMapClippingNode->addChild(tileMap);
 }
 
 /**

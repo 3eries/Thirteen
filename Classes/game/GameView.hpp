@@ -37,6 +37,7 @@ private:
     
     void onNumberClear(GameTileList selectedTiles);
     void onHint();
+    void refresh();
     
     void selectTile(GameTile *tile);
     
@@ -62,7 +63,10 @@ private:
     
 private:
     bool isTileMapUpdateLocked;
-    cocos2d::ClippingNode *tileMap;
+    
+    cocos2d::ClippingNode* tileMapClippingNode;
+    cocos2d::Node*         tileMap;
+    
     GameTileList tiles;
     GameTileList selectedTiles;
     
