@@ -20,7 +20,7 @@
 #endif
 
 #ifndef SB_PLUGIN_USE_IAP
-#define SB_PLUGIN_USE_IAP 0
+#define SB_PLUGIN_USE_IAP 1
 #endif
 
 #ifndef SB_PLUGIN_USE_PLAY
