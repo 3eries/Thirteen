@@ -16,7 +16,7 @@
 #endif
 
 #ifndef SB_PLUGIN_USE_ADS
-#define SB_PLUGIN_USE_ADS 0
+#define SB_PLUGIN_USE_ADS 1
 #endif
 
 #ifndef SB_PLUGIN_USE_IAP

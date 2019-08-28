@@ -60,6 +60,7 @@ void GameConfiguration::parse(const string &json) {
     // game value
     firstCoin            = doc["first_coin"].GetInt();
     firstHint            = doc["first_hint"].GetInt();
+    adRewardHint         = doc["ad_reward_hint"].GetInt();
     maxScore             = doc["max_score"].GetInt();
     
     CCLOG("\tstoreUrl: %s", storeUrl.c_str());

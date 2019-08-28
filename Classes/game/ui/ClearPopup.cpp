@@ -8,6 +8,8 @@
 #include "ClearPopup.hpp"
 
 #include "Define.h"
+#include "User.hpp"
+#include "../GameManager.hpp"
 
 USING_NS_CC;
 USING_NS_SB;
@@ -131,5 +133,29 @@ void ClearPopup::onEnterActionFinished() {
     touchNode->addClickEventListener([=](Ref*) {
         this->onClick();
     });
+    
+    // 전면 광고 노출
+    if( !User::isRemovedAds() ) {
+        auto level = GAME_MANAGER->getStage();
+        
+        if( level.stage >= 4 && AdsHelper::isInterstitialLoaded() ) {
+            SBDirector::getInstance()->setScreenTouchLocked(true);
+            SBDirector::postDelayed(this, [=]() {
+                
+                auto listener = AdListener::create(AdType::INTERSTITIAL);
+                listener->setTarget(this);
+                listener->onAdOpened = [=]() {
+                };
+                listener->onAdClosed = [=]() {
+                    // 전면 광고 닫힌 후 0.2초 후에 터치 재개
+                    SBDirector::postDelayed(this, [=]() {
+                        SBDirector::getInstance()->setScreenTouchLocked(false);
+                    }, 0.2f);
+                };
+                AdsHelper::showInterstitial(listener);
+                
+            }, 0.2f);
+        }
+    }
 }
 

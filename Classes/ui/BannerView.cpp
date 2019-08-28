@@ -43,20 +43,29 @@ bool BannerView::init() {
     bg->addChild(moreGames);
     
     moreGames->setOnClickListener([=](Node*) {
-        CCLOG("Banner MoreGames");
         
         SBAnalytics::logEvent(ANALYTICS_EVENT_MORE_GAMES);
         Application::getInstance()->openURL(GAME_CONFIG->getMoreGamesUrl());
     });
     
     // 배너 광고 로드 시 more games 버튼 숨김
-    auto listener = AdListener::create(AdType::BANNER);
-    listener->setTarget(this);
-    listener->setForever(true);
-    listener->onAdLoaded = [=]() {
-        moreGames->setVisible(false);
-    };
-    AdsHelper::getInstance()->getEventDispatcher()->addListener(listener);
+    {
+        auto listener = AdListener::create(AdType::BANNER);
+        listener->setTarget(this);
+        listener->setForever(true);
+        listener->onAdLoaded = [=]() {
+            moreGames->setVisible(false);
+        };
+        AdsHelper::getInstance()->getEventDispatcher()->addListener(listener);
+    }
+    
+    // 광고 제거 이벤트
+    {
+        auto listener = EventListenerCustom::create(DIRECTOR_EVENT_REMOVE_ADS, [=](EventCustom *event) {
+            this->setVisible(false);
+        });
+        getEventDispatcher()->addEventListenerWithSceneGraphPriority(listener, this);
+    }
     
     return true;
 }

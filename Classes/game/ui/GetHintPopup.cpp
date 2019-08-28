@@ -8,7 +8,9 @@
 #include "GetHintPopup.hpp"
 
 #include "Define.h"
+#include "GameConfiguration.hpp"
 #include "User.hpp"
+#include "SceneManager.h"
 
 USING_NS_CC;
 USING_NS_SB;
@@ -24,8 +26,6 @@ onGetListener(nullptr) {
 }
 
 GetHintPopup::~GetHintPopup() {
-    
-    iap::IAPHelper::getInstance()->removeListener(this);
 }
 
 bool GetHintPopup::init() {
@@ -75,9 +75,32 @@ void GetHintPopup::initContentView() {
 
 void GetHintPopup::onClick() {
     
-    // TODO: 리워드 광고
-    onGetListener(2);
-    dismissWithAction();
+    // 광고 노출
+    if( AdsHelper::isRewardedVideoLoaded() ) {
+        SBDirector::getInstance()->setScreenTouchLocked(true);
+        
+        auto listener = RewardedVideoAdListener::create();
+        listener->setTarget(this);
+        listener->onAdOpened = [=]() {
+        };
+        listener->onAdClosed = [=]() {
+            // 보상
+            if( listener->isRewarded() ) {
+                onGetListener(GAME_CONFIG->getAdRewardHint());
+                dismissWithAction();
+            }
+            
+            // 광고 닫힌 후 0.2초 후에 터치 재개
+            SBDirector::postDelayed(SceneManager::getScene(), [=]() {
+                SBDirector::getInstance()->setScreenTouchLocked(false);
+            }, 0.2f);
+        };
+        AdsHelper::showRewardedVideo(listener);
+    }
+    // 광고 없을 시 팝업 종료
+    else {
+        dismissWithAction();
+    }
 }
 
 /**

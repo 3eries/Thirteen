@@ -159,8 +159,24 @@ void MainScene::replaceGameScene() {
     
     SB_SAFE_HIDE(getChildByTag(Tag::BTN_SETTING));
     
-    GAME_MANAGER->init();
-    replaceScene(SceneType::GAME);
+    auto onAdClosed = [=]() {
+        GAME_MANAGER->init();
+        replaceScene(SceneType::GAME);
+    };
+    
+    // 최초 실행이 아닐때 전면 광고 노출
+    if( !SBDirector::isFirstRun() &&
+        !User::isRemovedAds() && AdsHelper::isInterstitialLoaded() ) {
+        SBDirector::getInstance()->setScreenTouchLocked(true);
+        
+        auto listener = AdListener::create(AdType::INTERSTITIAL);
+        listener->setTarget(this);
+        listener->onAdClosed = onAdClosed;
+        AdsHelper::showInterstitial(listener);
+        
+    } else {
+        onAdClosed();
+    }
 }
 
 /**

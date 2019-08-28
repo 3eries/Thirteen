@@ -9,5 +9,6 @@
     },
     "first_coin": 30,
     "first_hint":2,
+    "ad_reward_hint":2,
     "max_score": 9999
 }

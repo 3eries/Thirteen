@@ -33,6 +33,7 @@ private:
     
     CC_SYNTHESIZE_READONLY(int, firstCoin, FirstCoin);                  // 최초 코인
     CC_SYNTHESIZE_READONLY(int, firstHint, FirstHint);                  // 최초 힌트
+    CC_SYNTHESIZE_READONLY(int, adRewardHint, AdRewardHint);            // 광고 보상 힌트
     CC_SYNTHESIZE_READONLY(int, maxScore, MaxScore);                    // 최대 스코어
 };
 
