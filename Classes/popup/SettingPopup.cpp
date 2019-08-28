@@ -9,9 +9,9 @@
 #include "Define.h"
 #include "User.hpp"
 #include "UserDefaultKey.h"
+#include "GameConfiguration.hpp"
 
 #include "SceneManager.h"
-#include "GameUIHelper.hpp"
 
 USING_NS_CC;
 USING_NS_SB;
@@ -21,14 +21,11 @@ using namespace std;
 static const float FADE_DURATION    = 0.15f;
 static const float SLIDE_DURATION   = EffectDuration::POPUP_SLIDE_FAST;
 
-SettingPopup::SettingPopup() : BasePopup(PopupType::SETTING),
-onClickMenuListener(nullptr) {
+SettingPopup::SettingPopup() : BasePopup(PopupType::SETTING) {
     
 }
 
 SettingPopup::~SettingPopup() {
-    
-    iap::IAPHelper::getInstance()->removeListener(this);
 }
 
 bool SettingPopup::init() {
@@ -37,27 +34,6 @@ bool SettingPopup::init() {
         return false;
     }
     
-    // IAP 리스너
-    {
-        auto onRemoveAds = [=]() {
-            stoneBg->getChildByTag(Tag::REMOVE_ADS)->setVisible(false);
-        };
-        
-        // purchase listener
-        auto purchaseListener = iap::PurchaseListener::create();
-        purchaseListener->setForever(true);
-        purchaseListener->onRemoveAds = onRemoveAds;
-        
-        iap::IAPHelper::getInstance()->addListener(this, purchaseListener);
-        
-        // restore listener
-        auto restoreListener = iap::RestoreListener::create();
-        restoreListener->setForever(true);
-        restoreListener->onRemoveAds = onRemoveAds;
-        
-        iap::IAPHelper::getInstance()->addListener(this, restoreListener);
-    }
-     
     return true;
 }
 
@@ -66,6 +42,18 @@ void SettingPopup::onEnter() {
     BasePopup::onEnter();
     
     runEnterAction();
+}
+
+bool SettingPopup::onBackKeyReleased() {
+    
+    if( !BasePopup::onBackKeyReleased() ) {
+        return false;
+    }
+    
+    SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
+    dismissWithAction();
+    
+    return true;
 }
 
 void SettingPopup::initBackgroundView() {
@@ -79,26 +67,22 @@ void SettingPopup::initContentView() {
     
     BasePopup::initContentView();
     
-    stoneBg = Sprite::create(DIR_IMG_COMMON + "RSP_popup_bg_settings.png");
-    stoneBg->setAnchorPoint(ANCHOR_M);
-    stoneBg->setPosition(Vec2MC(0, 60));
-    addContentChild(stoneBg);
+    const bool isRemovedAds = User::isRemovedAds();
     
-    const Size bgSize(stoneBg->getContentSize());
-    
-    // title
-    auto title = Sprite::create(DIR_IMG_COMMON + "RSP_popup_title_settings.png");
-    title->setAnchorPoint(ANCHOR_M);
-    title->setPosition(Vec2MC(bgSize, 0, 256));
-    stoneBg->addChild(title);
+    // common_bg_setting.png Vec2MC(0, 0) , Size(542, 380)
+    popupBg = Sprite::create(DIR_IMG_COMMON + "common_bg_setting.png");
+    popupBg->setAnchorPoint(ANCHOR_M);
+    popupBg->setPosition(Vec2MC(0, 0));
+    addContentChild(popupBg);
     
     // 효과음
-    auto effectBtn = SBToggleButton::create(DIR_IMG_COMMON + "RSP_btn_effect_off.png",
-                                            DIR_IMG_COMMON + "RSP_btn_effect.png");
+    // common_btn_effect_on.png Vec2MC(-166, 85) , Size(154, 154)
+    auto effectBtn = SBToggleButton::create(DIR_IMG_COMMON + "common_btn_effect_off.png",
+                                            DIR_IMG_COMMON + "common_btn_effect_on.png");
     effectBtn->setZoomScale(ButtonZoomScale::NORMAL);
     effectBtn->setAnchorPoint(ANCHOR_M);
-    effectBtn->setPosition(Vec2MC(bgSize, -172, 124));
-    stoneBg->addChild(effectBtn);
+    effectBtn->setPosition(Vec2MC(-166, 85));
+    addContentChild(effectBtn);
     
     auto audioEngine = SBAudioEngine::getInstance();
     
@@ -112,12 +96,13 @@ void SettingPopup::initContentView() {
     });
     
     // 배경음
-    auto bgmBtn = SBToggleButton::create(DIR_IMG_COMMON + "RSP_btn_bgm_off.png",
-                                         DIR_IMG_COMMON + "RSP_btn_bgm.png");
+    // common_btn_bgm_on.png Vec2MC(0, 85) , Size(154, 154)
+    auto bgmBtn = SBToggleButton::create(DIR_IMG_COMMON + "common_btn_bgm_off.png",
+                                         DIR_IMG_COMMON + "common_btn_bgm_on.png");
     bgmBtn->setZoomScale(ButtonZoomScale::NORMAL);
     bgmBtn->setAnchorPoint(ANCHOR_M);
-    bgmBtn->setPosition(Vec2MC(bgSize, 0, 124));
-    stoneBg->addChild(bgmBtn);
+    bgmBtn->setPosition(Vec2MC(0, 85));
+    addContentChild(bgmBtn);
     
     bgmBtn->setSelected(!audioEngine->isBGMMute());
     bgmBtn->setOnSelectedListener([=](bool isSelected) -> bool {
@@ -128,53 +113,79 @@ void SettingPopup::initContentView() {
         return false;
     });
     
-    // 닫기 버튼
-    auto closeBtn = SBButton::create(DIR_IMG_COMMON + "RSP_btn_go_back.png");
-    closeBtn->setZoomScale(ButtonZoomScale::NORMAL);
-    closeBtn->setAnchorPoint(ANCHOR_MR);
-    closeBtn->setPosition(Vec2TR(-66 + (100*0.5f), -62));
-    addChild(closeBtn, 1);
+    // how to play
+    // common_btn_how_to_play.png Vec2MC(166, 85) , Size(154, 154)
+    auto howToPlayBtn = SBButton::create(DIR_IMG_COMMON + "common_btn_how_to_play.png");
+    howToPlayBtn->setZoomScale(ButtonZoomScale::NORMAL);
+    howToPlayBtn->setAnchorPoint(ANCHOR_M);
+    howToPlayBtn->setPosition(Vec2MC(166, 85));
+    addContentChild(howToPlayBtn);
     
-    closeBtn->setOnClickListener([=](Node*) {
+    howToPlayBtn->setOnClickListener([=](Node*) {
+        
+        // TODO:
         SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
-        this->dismissWithAction();
     });
     
-    // 기타 메뉴
-    {
-        SBUIInfo infos[] = {
-            SBUIInfo(Tag::LEADER_BOARD,      ANCHOR_M,   Vec2MC(bgSize, -88, -42),   "RSP_btn_ranking.png"),
-            SBUIInfo(Tag::RESTORE_PURCHASE,  ANCHOR_M,   Vec2MC(bgSize, 88, -42),    "RSP_btn_restore.png"),
-            SBUIInfo(Tag::REMOVE_ADS,        ANCHOR_M,   Vec2MC(bgSize, 0, -171),    "RSP_btn_remove_ads.png"),
-            SBUIInfo(Tag::HOW_TO_PLAY,       ANCHOR_M,   Vec2MC(bgSize, 0, -259),    "RSP_btn_how_to_play.png"),
-        };
-        
-        for( int i = 0; i < sizeof(infos)/sizeof(SBUIInfo); ++i ) {
-            auto info = infos[i];
-            
-            auto btn = SBButton::create(DIR_IMG_COMMON + info.file);
-            btn->setZoomScale(ButtonZoomScale::NORMAL);
-            info.apply(btn);
-            stoneBg->addChild(btn);
-            
-            btn->setOnClickListener([=](Node*) {
-                
-                SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
-                this->performListener((Tag)info.tag);
-            });
-        }
-        
-        if( User::isRemovedAds() ) {
-            stoneBg->getChildByTag(Tag::REMOVE_ADS)->setVisible(false);
-        }
-    }
-}
-
-void SettingPopup::performListener(Tag tag) {
+    // more games
+    // common_btn_3eries.png Vec2MC(0, -85) , Size(154, 154)
+    // common_btn_3eries.png Vec2MC(-83, -85) , Size(154, 154)
+    auto moreGames = SBButton::create(DIR_IMG_COMMON + "common_btn_3eries.png");
+    moreGames->setZoomScale(0);
+    moreGames->setAnchorPoint(ANCHOR_M);
+    moreGames->setPosition(isRemovedAds ? Vec2MC(-83, -85) : Vec2MC(0, -85));
+    addContentChild(moreGames);
     
-    retain();
-    onClickMenuListener(tag);
-    release();
+    moreGames->setOnClickListener([=](Node*) {
+        SBAnalytics::logEvent(ANALYTICS_EVENT_MORE_GAMES);
+        Application::getInstance()->openURL(GAME_CONFIG->getMoreGamesUrl());
+    });
+    
+    // remove ads
+    // common_btn_remove_ads.png Vec2MC(-166, -85) , Size(154, 154)
+    if( !isRemovedAds ) {
+        auto removeAdsBtn = SBButton::create(DIR_IMG_COMMON + "common_btn_remove_ads.png");
+        removeAdsBtn->setZoomScale(ButtonZoomScale::NORMAL);
+        removeAdsBtn->setAnchorPoint(ANCHOR_M);
+        removeAdsBtn->setPosition(Vec2MC(-166, -85));
+        addContentChild(removeAdsBtn);
+        
+        removeAdsBtn->setOnClickListener([=](Node*) {
+            SBDirector::getInstance()->setScreenTouchLocked(true);
+            
+            auto listener = iap::PurchaseListener::create();
+            listener->setTarget(this);
+            listener->onPurchased = [=](const iap::Item &item) {
+                User::removeAds();
+                this->dismissWithAction();
+            };
+            
+            listener->onFinished = [=](bool result) {
+                SBDirector::postDelayed(this, [=]() {
+                    SBDirector::getInstance()->setScreenTouchLocked(false);
+                }, 0.2f);
+            };
+            
+            iap::IAPHelper::purchaseRemoveAds(listener);
+        });
+    }
+    
+    // restore purchases
+    // common_btn_restore.png Vec2MC(166, -85) , Size(154, 154)
+    // common_btn_restore.png Vec2MC(83, -85) , Size(154, 154)
+    auto restoreBtn = SBButton::create(DIR_IMG_COMMON + "common_btn_restore.png");
+    restoreBtn->setZoomScale(ButtonZoomScale::NORMAL);
+    restoreBtn->setAnchorPoint(ANCHOR_M);
+    restoreBtn->setPosition(isRemovedAds ? Vec2MC(83, -85) : Vec2MC(166, -85));
+    addContentChild(restoreBtn);
+    
+    restoreBtn->setOnClickListener([=](Node*) {
+        if( iap::IAPHelper::isReady() ) {
+            iap::IAPHelper::restore(nullptr);
+        }
+        
+        this->dismissWithAction();
+    });
 }
 
 /**
@@ -222,7 +233,7 @@ void SettingPopup::onEnterActionFinished() {
     
     BasePopup::onEnterActionFinished();
     
-    // 비석 바깥 영역 터치 시 팝업 종료
+    // 배경 바깥 영역 터치 시 팝업 종료
     auto touchNode = SBNodeUtils::createTouchNode();
     addChild(touchNode);
     
@@ -231,10 +242,9 @@ void SettingPopup::onEnterActionFinished() {
         this->dismissWithAction();
     });
     
-    // auto box = SBNodeUtils::getBoundingBoxInWorld(stoneBg);
-    auto stoneTouchNode = SBNodeUtils::createTouchNode();
-    stoneTouchNode->setAnchorPoint(stoneBg->getAnchorPoint());
-    stoneTouchNode->setPosition(stoneBg->getPosition());
-    stoneTouchNode->setContentSize(stoneBg->getContentSize());
-    addChild(stoneTouchNode);
+    auto bgTouchNode = SBNodeUtils::createTouchNode();
+    bgTouchNode->setAnchorPoint(popupBg->getAnchorPoint());
+    bgTouchNode->setPosition(popupBg->getPosition());
+    bgTouchNode->setContentSize(popupBg->getContentSize());
+    addChild(bgTouchNode);
 }

@@ -167,56 +167,8 @@ void MainScene::replaceGameScene() {
  * 설정 팝업 노출
  */
 void MainScene::showSettingPopup() {
-   
-    return;
     
     auto popup = SettingPopup::create();
-    popup->setOnClickMenuListener([=](SettingPopup::Tag tag) {
-        
-        switch( tag ) {
-            // leader board
-            case SettingPopup::Tag::LEADER_BOARD: {
-                if( superbomb::PluginPlay::isSignedIn() ) {
-                    superbomb::PluginPlay::showAllLeaderboards();
-                } else {
-                    superbomb::PluginPlay::signIn();
-                }
-                // popup->dismissWithAction();
-            } break;
-                
-            // restore purchase
-            case SettingPopup::Tag::RESTORE_PURCHASE: {
-                if( iap::IAPHelper::isReady() ) {
-                    iap::IAPHelper::restore(nullptr);
-                }
-            } break;
-                
-            // remove ads
-            case SettingPopup::Tag::REMOVE_ADS: {
-                if( iap::IAPHelper::isReady() ) {
-                    auto loadingBar = CommonLoadingBar::create();
-                    loadingBar->setUIDelay(0.1f);
-                    loadingBar->show();
-                    
-                    auto listener = iap::PurchaseListener::create();
-                    listener->setTarget(this);
-                    listener->onPurchased = [=](const iap::Item &item) {
-                    };
-                    listener->onFinished = [=](bool result) {
-                        loadingBar->dismissWithDelay(0);
-                    };
-                    
-                    iap::IAPHelper::purchaseRemoveAds(listener);
-                }
-            } break;
-                
-            // how to play
-            case SettingPopup::Tag::HOW_TO_PLAY: {
-            } break;
-                
-            default: break;
-        }
-    });
     SceneManager::getScene()->addChild(popup, ZOrder::POPUP_MIDDLE);
 }
 

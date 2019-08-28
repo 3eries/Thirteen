@@ -17,14 +17,6 @@
 
 class SettingPopup : public BasePopup {
 public:
-    enum Tag {
-        LEADER_BOARD       = 100,   // 리더 보드
-        RESTORE_PURCHASE,           // 구매 아이템 복원
-        REMOVE_ADS,                 // 광고 제거 아이템 구매
-        HOW_TO_PLAY,                // 게임 가이드
-    };
-    
-public:
     CREATE_FUNC(SettingPopup);
     ~SettingPopup();
     
@@ -33,11 +25,10 @@ private:
     
     bool init() override;
     void onEnter() override;
+    bool onBackKeyReleased() override;
     
     void initBackgroundView() override;
     void initContentView() override;
-    
-    void performListener(Tag tag);
     
     void runEnterAction(SBCallback onFinished = nullptr) override;
     void runExitAction(SBCallback onFinished = nullptr) override;
@@ -45,9 +36,7 @@ private:
     void onEnterActionFinished() override;
     
 private:
-    CC_SYNTHESIZE(std::function<void(Tag)>, onClickMenuListener,
-                  OnClickMenuListener);
-    cocos2d::Node *stoneBg;
+    cocos2d::Node *popupBg;
 };
 
 #endif /* SettingPopup_hpp */

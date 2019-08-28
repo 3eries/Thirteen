@@ -16,6 +16,8 @@
 #include "GameView.hpp"
 
 #include "CommonLoadingBar.hpp"
+#include "SettingPopup.hpp"
+
 #include "ui/ClearPopup.hpp"
 
 USING_NS_CC;
@@ -186,7 +188,8 @@ void GameScene::onClick(Node *sender) {
     
     switch( sender->getTag() ) {
         case Tag::BTN_SETTING: {
-            // GameManager::onGamePause();
+            auto popup = SettingPopup::create();
+            SceneManager::getScene()->addChild(popup, ZOrder::POPUP_MIDDLE);
         } break;
     }
 }
