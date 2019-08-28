@@ -143,13 +143,14 @@ void GameScene::onStageClear(const StageData &stage) {
     auto popup = ClearPopup::create();
     popup->setOnNextListener([=]() {
         
+        popup->dismiss();
+        
         // 마지막 스테이지 클리어한 경우, 1스테이지로 복귀
         if( stage.stage == Database::getLastStage().stage ) {
             GAME_MANAGER->setStage(User::getClearStage()+1);
             GameManager::onStageChanged();
         } else {
             GameManager::onMoveNextStage();
-            GameManager::onMoveNextStageFinished();
         }
     });
     SceneManager::getInstance()->getScene()->addChild(popup, ZOrder::POPUP_BOTTOM);

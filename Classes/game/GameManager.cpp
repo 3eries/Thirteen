@@ -389,8 +389,7 @@ void GameManager::onStageClear(bool isSkipped) {
 void GameManager::onMoveNextStage() {
     
     instance->setStage(instance->stage.stage+1);
-    getEventDispatcher()->dispatchCustomEvent(GAME_EVENT_MOVE_NEXT_STAGE,
-                                              &instance->stage);
+    getEventDispatcher()->dispatchCustomEvent(GAME_EVENT_MOVE_NEXT_STAGE, &instance->stage);
 }
 
 /**
@@ -398,8 +397,7 @@ void GameManager::onMoveNextStage() {
  */
 void GameManager::onMoveNextStageFinished() {
     
-    getEventDispatcher()->dispatchCustomEvent(GAME_EVENT_MOVE_NEXT_STAGE_FINISHED,
-                                              &instance->stage);
+    getEventDispatcher()->dispatchCustomEvent(GAME_EVENT_MOVE_NEXT_STAGE_FINISHED, &instance->stage);
     onStageChanged();
 }
 

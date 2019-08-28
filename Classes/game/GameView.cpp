@@ -10,6 +10,7 @@
 #include "Define.h"
 #include "GameDefine.h"
 #include "ContentManager.hpp"
+#include "SceneManager.h"
 
 #include "object/HintButton.hpp"
 #include "object/StageProgressBar.hpp"
@@ -18,7 +19,8 @@ USING_NS_CC;
 USING_NS_SB;
 using namespace std;
 
-GameView::GameView() {
+GameView::GameView() :
+isTileMapUpdateLocked(false) {
 }
 
 GameView::~GameView() {
@@ -96,6 +98,7 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
     
     if( isLevelClear ) {
         GameManager::onStageClear();
+        return;
     }
     
     // 타일 클리어
@@ -215,6 +218,10 @@ void GameView::selectTile(GameTile *tile) {
  */
 void GameView::updateTileMap(const StageData &stage) {
     
+    if( isTileMapUpdateLocked ) {
+        return;
+    }
+    
     // 이전 타일 제거
     tileMap->removeAllChildren();
     tiles.clear();
@@ -243,9 +250,13 @@ void GameView::updateTileMap(const StageData &stage) {
     
     updateNearTile();
     
-    // 패턴 검증
+    // 메이드 패턴 없으면 재귀
     auto patterns = getMadePatterns();
     Log::i("GameView updateTileMap patterns: %d", (int)patterns.size());
+    
+    if( patterns.size() == 0 ) {
+        updateTileMap(stage);
+    }
 }
 
 /**
@@ -422,6 +433,7 @@ void GameView::recursiveMadePattern(GameTile *anchorTile, MadePattern &pattern, 
 vector<GameView::MadePattern> GameView::getMadePatterns() {
 
     CCLOG("MADE PATTERN START");
+    double t = SBSystemUtils::getCurrentTimeSeconds();
     
     vector<MadePattern> patterns;
     
@@ -477,7 +489,7 @@ vector<GameView::MadePattern> GameView::getMadePatterns() {
         }
     }
     
-    CCLOG("MADE PATTERN END");
+    CCLOG("MADE PATTERN END -> dt: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
     
     return patterns;
 }
@@ -560,6 +572,7 @@ void GameView::onStageChanged(const StageData &stage) {
     clearCount = 0;
     
     updateTileMap(stage);
+    isTileMapUpdateLocked = false;
 }
 
 /**
@@ -583,14 +596,46 @@ void GameView::onStageClear(const StageData &stage) {
  */
 void GameView::onMoveNextStage() {
     
+    // 현재 맵 캡쳐
+    double t = SBSystemUtils::getCurrentTimeSeconds();
+
+    auto image = utils::captureNode(tileMap);
+    auto texture = new Texture2D();
+    texture->initWithImage(image);
+
+    auto currentMap = Sprite::createWithTexture(texture);
+    currentMap->setAnchorPoint(ANCHOR_M);
+    currentMap->setPosition(Vec2MC(0,0));
+    SceneManager::getScene()->addChild(currentMap);
+
+    CC_SAFE_RELEASE(texture);
+    CC_SAFE_RELEASE(image);
+
+    CCLOG("capture dt: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
+    
+    // 다음 레벨로 변경
+    auto nextLevel = GAME_MANAGER->getStage();
+    
+    updateTileMap(nextLevel);
+    isTileMapUpdateLocked = true;
+    
+    // 맵 슬라이드 연출
+    auto move = MoveBy::create(MOVE_NEXT_LEVEL_DURATION, Vec2(-SB_WIN_SIZE.width, 0));
+    currentMap->runAction(Sequence::create(move, RemoveSelf::create(), nullptr));
+    
+    tileMap->setPositionX(tileMap->getPositionX() + SB_WIN_SIZE.width);
+    tileMap->runAction(move->clone());
+    
+    // 연출 완료
+    SBDirector::postDelayed(this, [=]() {
+        GameManager::onMoveNextStageFinished();
+    }, MOVE_NEXT_LEVEL_DURATION, true);
 }
 
 /**
  * 다음 스테이지로 이동 완료
  */
 void GameView::onMoveNextStageFinished() {
-    
-    stageProgressBar->setVisible(true);
 }
 
 /**
@@ -726,6 +771,8 @@ void GameView::initGameListener() {
         GAME_EVENT_STAGE_CHANGED,
         GAME_EVENT_STAGE_RESTART,
         GAME_EVENT_STAGE_CLEAR,
+        GAME_EVENT_MOVE_NEXT_STAGE,
+        GAME_EVENT_MOVE_NEXT_STAGE_FINISHED,
     });
     
     GameManager::addEventListener(events, [=](GameEvent event, void *userData) {
@@ -749,6 +796,9 @@ void GameView::initGameListener() {
                 auto stage = (StageData*)userData;
                 this->onStageClear(*stage);
             } break;
+                
+            case GameEvent::MOVE_NEXT_STAGE:            this->onMoveNextStage();          break;
+            case GameEvent::MOVE_NEXT_STAGE_FINISHED:   this->onMoveNextStageFinished();  break;
                 
             default: break;
         }

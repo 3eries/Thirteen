@@ -38,6 +38,9 @@ public:
     void onStageRestart(const StageData &stage);
     void onStageClear(const StageData &stage);
     
+    void onMoveNextStage();
+    void onMoveNextStageFinished();
+    
 private:
     cocos2d::ProgressTimer *gage;
     cocos2d::Label *levelLabel;

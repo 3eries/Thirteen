@@ -67,6 +67,8 @@ void StageProgressBar::initGameListener() {
         GAME_EVENT_STAGE_CHANGED,
         GAME_EVENT_STAGE_RESTART,
         GAME_EVENT_STAGE_CLEAR,
+        GAME_EVENT_MOVE_NEXT_STAGE,
+        GAME_EVENT_MOVE_NEXT_STAGE_FINISHED,
     });
     
     GameManager::addEventListener(events, [=](GameEvent event, void *userData) {
@@ -86,6 +88,9 @@ void StageProgressBar::initGameListener() {
                 auto stage = (StageData*)userData;
                 this->onStageClear(*stage);
             } break;
+                
+            case GameEvent::MOVE_NEXT_STAGE:            this->onMoveNextStage();          break;
+            case GameEvent::MOVE_NEXT_STAGE_FINISHED:   this->onMoveNextStageFinished();  break;
                 
             default: break;
         }
@@ -132,5 +137,21 @@ void StageProgressBar::onStageRestart(const StageData &stage) {
 void StageProgressBar::onStageClear(const StageData &stage) {
 }
 
+/**
+ * 다음 스테이지로 이동
+ */
+void StageProgressBar::onMoveNextStage() {
+    
+    auto updatePercentage = [=](float f) {
+        gage->setPercentage(f);
+    };
+    auto numberAction = ActionFloat::create(MOVE_NEXT_LEVEL_DURATION, 100, 0, updatePercentage);
+    gage->runAction(numberAction);
+}
 
+/**
+ * 다음 스테이지로 이동 완료
+ */
+void StageProgressBar::onMoveNextStageFinished() {
+}
 

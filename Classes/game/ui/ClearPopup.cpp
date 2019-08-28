@@ -74,8 +74,9 @@ void ClearPopup::onClick() {
     
     SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
     
+    retain();
     onNextListener();
-    dismiss();
+    release();
 }
 
 /**

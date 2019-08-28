@@ -61,6 +61,7 @@ private:
     TilePositionList getValidColumnTilePositions(int x);
     
 private:
+    bool isTileMapUpdateLocked;
     cocos2d::ClippingNode *tileMap;
     GameTileList tiles;
     GameTileList selectedTiles;
