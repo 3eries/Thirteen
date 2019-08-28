@@ -11,7 +11,7 @@
 #include "User.hpp"
 #include "SceneManager.h"
 
-#include "GetHintPopup.hpp"
+#include "../ui/GetHintPopup.hpp"
 
 USING_NS_CC;
 USING_NS_SB;
