@@ -29,8 +29,9 @@ private:
 private:
     CC_SYNTHESIZE(SBCallback, onHintListener, OnHintListener);
     
-    cocos2d::Node *hintCountView;
-    cocos2d::Label *hintCountLabel;
+    cocos2d::Node*   hintCountView;
+    cocos2d::Label*  hintCountLabel;
+    cocos2d::Sprite* hintPlusIcon;
 };
 
 #endif /* HintButton_hpp */

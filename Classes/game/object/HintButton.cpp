@@ -49,13 +49,16 @@ bool HintButton::init() {
     contentView->addChild(bg);
     
     // 힌트 아이템 개수
-    // game_bg_hint_number.png Vec2TL(88, -23) , Size(32, 32)
     hintCountView = Sprite::create(DIR_IMG_GAME + "game_bg_hint_number.png");
     hintCountView->setAnchorPoint(ANCHOR_M);
     hintCountView->setPosition(contentView->convertToNodeSpace(Vec2TL(88, -23)));
     contentView->addChild(hintCountView);
     
-    // 9 size:27 Vec2TL(88, -23) , Size(14, 20)
+    hintPlusIcon = Sprite::create(DIR_IMG_GAME + "game_bg_hint_number_plus.png");
+    hintPlusIcon->setAnchorPoint(ANCHOR_M);
+    hintPlusIcon->setPosition(hintCountView->getPosition());
+    contentView->addChild(hintPlusIcon);
+    
     hintCountLabel = Label::createWithTTF("", FONT_ROBOTO_BLACK, 27, Size::ZERO,
                                           TextHAlignment::CENTER, TextVAlignment::CENTER);
     hintCountLabel->setTextColor(Color4B::WHITE);
@@ -134,8 +137,10 @@ void HintButton::updateHintCount() {
     
     if( count == 0 ) {
         hintCountView->setVisible(false);
+        hintPlusIcon->setVisible(true);
     } else {
         hintCountView->setVisible(true);
+        hintPlusIcon->setVisible(false);
         
         hintCountLabel->stopAllActions();
         hintCountLabel->setString(TO_STRING(count));

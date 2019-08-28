@@ -185,9 +185,9 @@ void GameView::onHint() {
     
     for( auto tile : pattern ) {
         tile->setSelected(true);
-        tile->updateSelectedLine(TILE_HINT_LINE_COLOR, [=](GameTile *tile) -> bool {
+        tile->updateSelectedLine([=](GameTile *tile) -> bool {
             return SBCollection::contains(pattern, tile);
-        });
+        }, TILE_HINT_LINE_COLOR, true);
     }
 }
 

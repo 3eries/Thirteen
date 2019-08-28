@@ -101,7 +101,7 @@ static const std::vector<cocos2d::Color3B> TILE_COLORS({
 
 #define                 TILE_SELECTED_LINE_SIZE             6
 #define                 TILE_SELECTED_LINE_COLOR            cocos2d::Color3B(0, 255, 36)
-#define                 TILE_HINT_LINE_COLOR                cocos2d::Color3B(255, 36, 0)
+#define                 TILE_HINT_LINE_COLOR                cocos2d::Color3B(255, 0, 25)
 
 #define                 TILE_NUMBER_NORMAL_COLOR            cocos2d::Color4B(0,0,0,255)
 #define                 TILE_NUMBER_SELECTED_COLOR          cocos2d::Color4B(255,255,255,255)

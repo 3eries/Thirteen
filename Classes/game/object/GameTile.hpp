@@ -35,8 +35,9 @@ public:
     void setSelected(bool isSelected);
     void setNearTile(GameTile *left, GameTile *right, GameTile *top, GameTile *bottom);
     
-    void updateSelectedLine(const cocos2d::Color3B &lineColor,
-                            std::function<bool(GameTile*)> isTileSelected);
+    void updateSelectedLine(std::function<bool(GameTile*)> isTileSelected,
+                            const cocos2d::Color3B &lineColor,
+                            bool withAction = false);
     void updateSelectedLine();
     
     void runNumberEnterAction();

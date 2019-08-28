@@ -60,6 +60,7 @@ bool GameTile::init() {
     addChild(numberLabel);
     
     selectedLine = Node::create();
+    selectedLine->setCascadeOpacityEnabled(true);
     selectedLine->setAnchorPoint(ANCHOR_M);
     selectedLine->setPosition(Vec2MC(TILE_CONTENT_SIZE, 0, 0));
     selectedLine->setContentSize(TILE_CONTENT_SIZE);
@@ -137,6 +138,7 @@ void GameTile::setSelected(bool isSelected) {
     bg->setVisible(!isSelected);
     numberLabel->setTextColor(isSelected ? TILE_NUMBER_SELECTED_COLOR : TILE_NUMBER_NORMAL_COLOR);
     
+    selectedLine->stopAllActions();
     selectedLine->removeAllChildren();
     
     // FIXME: 디버그용 코드
@@ -151,11 +153,14 @@ void GameTile::setNearTile(GameTile *left, GameTile *right, GameTile *top, GameT
     this->bottom = bottom;
 }
 
-void GameTile::updateSelectedLine(const Color3B &lineColor,
-                                  function<bool(GameTile*)> isTileSelected) {
+void GameTile::updateSelectedLine(function<bool(GameTile*)> isTileSelected,
+                                  const Color3B &lineColor, bool withAction) {
     
     // 선택된 경우 테두리 생성
     selectedLine->removeAllChildren();
+    
+    if( withAction ) {
+    }
     
     const float LINE_SIZE = TILE_SELECTED_LINE_SIZE;
     
