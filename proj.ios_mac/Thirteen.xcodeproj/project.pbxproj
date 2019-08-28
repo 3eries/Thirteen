@@ -21,6 +21,8 @@
 		1D5D5AF82309D96900A30FBB /* GameTile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5D5AF62309D96900A30FBB /* GameTile.cpp */; };
 		1D5D5AFB2309D9E800A30FBB /* StageProgressBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5D5AF92309D9E800A30FBB /* StageProgressBar.cpp */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
+		1D610A632316954C0042F5D0 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D610A622316954C0042F5D0 /* MediaPlayer.framework */; };
+		1D610A65231695550042F5D0 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D610A64231695540042F5D0 /* GameController.framework */; };
 		1D9CDDBE22E8A34D00106DA2 /* PatchManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CDCED22E8A34A00106DA2 /* PatchManager.cpp */; };
 		1D9CDDBF22E8A34D00106DA2 /* Define.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CDCEE22E8A34A00106DA2 /* Define.cpp */; };
 		1D9CDDC022E8A34D00106DA2 /* FunnyHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CDCF022E8A34A00106DA2 /* FunnyHelper.cpp */; };
@@ -184,6 +186,8 @@
 		1D5D5AF92309D9E800A30FBB /* StageProgressBar.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StageProgressBar.cpp; sourceTree = "<group>"; };
 		1D5D5AFA2309D9E800A30FBB /* StageProgressBar.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = StageProgressBar.hpp; sourceTree = "<group>"; };
 		1D6058910D05DD3D006BFB54 /* Thirteen-mobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Thirteen-mobile.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D610A622316954C0042F5D0 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/MediaPlayer.framework; sourceTree = DEVELOPER_DIR; };
+		1D610A64231695540042F5D0 /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/GameController.framework; sourceTree = DEVELOPER_DIR; };
 		1D9CDCED22E8A34A00106DA2 /* PatchManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PatchManager.cpp; sourceTree = "<group>"; };
 		1D9CDCEE22E8A34A00106DA2 /* Define.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Define.cpp; sourceTree = "<group>"; };
 		1D9CDCEF22E8A34A00106DA2 /* Define.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Define.h; sourceTree = "<group>"; };
@@ -406,6 +410,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1D610A65231695550042F5D0 /* GameController.framework in Frameworks */,
+				1D610A632316954C0042F5D0 /* MediaPlayer.framework in Frameworks */,
 				1D9CDF4E22E8A78900106DA2 /* StoreKit.framework in Frameworks */,
 				294D0D641D0D56D500F7F5D4 /* CoreText.framework in Frameworks */,
 				ED545A7C1B68A1F400C3958E /* libiconv.dylib in Frameworks */,
@@ -991,6 +997,8 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1D610A64231695540042F5D0 /* GameController.framework */,
+				1D610A622316954C0042F5D0 /* MediaPlayer.framework */,
 				1D9CDF4D22E8A78900106DA2 /* StoreKit.framework */,
 				294D0D631D0D56D500F7F5D4 /* CoreText.framework */,
 				ED545A7D1B68A1FA00C3958E /* libiconv.dylib */,
