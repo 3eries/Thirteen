@@ -42,26 +42,19 @@ static const std::string ANALYTICS_SCREEN_GAME                      = "game";
 
 static const std::string ANALYTICS_EVENT_CREDIT                     = "credit";                     // 크레딧 화면 진입
 static const std::string ANALYTICS_EVENT_MORE_GAMES                 = "more_games";                 // 게임 더보기 클릭
-
-static const std::string ANALYTICS_EVENT_NEW_PUZZLE_CLEAR           = "new_puzzle_clear";
-static const std::string ANALYTICS_EVENT_ALL_NORMAL_PUZZLE_CLEAR    = "all_normal_puzzle_clear";
-static const std::string ANALYTICS_EVENT_ALL_PUZZLE_CLEAR           = "all_puzzle_clear";
-static const std::string ANALYTICS_EVENT_PUZZLE_SELECT              = "puzzle_select";
-static const std::string ANALYTICS_EVENT_PUZZLE_VIEW_ADS            = "puzzle_view_ads";
-static const std::string ANALYTICS_EVENT_PUZZLE_PLAY                = "puzzle_play";                // 퍼즐 시작
-static const std::string ANALYTICS_EVENT_PUZZLE_RETRY               = "puzzle_retry";               // 퍼즐 다시하기
-static const std::string ANALYTICS_EVENT_PUZZLE_GIVE_UP             = "puzzle_give_up";             // 퍼즐 포기
-static const std::string ANALYTICS_EVENT_PUZZLE_CLEAR               = "puzzle_clear";               // 퍼즐 클리어
-static const std::string ANALYTICS_EVENT_PUZZLE_THUMBNAIL           = "puzzle_thumbnail";           // 인게임 -> 퍼즐 썸네일 클릭
-
 static const std::string ANALYTICS_EVENT_REVIEW_POPUP               = "review_popup";               // 리뷰 팝업 진입
-static const std::string ANALYTICS_EVENT_ITEM_BOX_CLICK             = "item_box_click";             // 아이템 상자 클릭
-static const std::string ANALYTICS_EVENT_ITEM_USE                   = "item_use";                   // 아이템 사용
 
-static const std::string ANALYTICS_EVENT_PARAM_PUZZLE_ID            = "puzzle_id";                  // 퍼즐 아이디
-static const std::string ANALYTICS_EVENT_PARAM_DIFFICULTY           = "difficulty";                 // 난이도
+static const std::string ANALYTICS_EVENT_LEVEL_PLAY                 = "level_play";
+static const std::string ANALYTICS_EVENT_LEVEL_CLEAR                = "level_clear";
+static const std::string ANALYTICS_EVENT_LEVEL_REFRESH              = "level_refresh";
+
+static const std::string ANALYTICS_EVENT_HINT_USE                   = "hint_use";                   // 힌트 사용
+static const std::string ANALYTICS_EVENT_HINT_GET_POPUP             = "hint_get_popup";             // 힌트 획득 팝업 노출
+static const std::string ANALYTICS_EVENT_HINT_GET                   = "hint_get";                   // 힌트 획득
+
+static const std::string ANALYTICS_EVENT_PARAM_LEVEL                = "level";
+static const std::string ANALYTICS_EVENT_PARAM_LEVEL_RANGE          = "level_range";
 static const std::string ANALYTICS_EVENT_PARAM_SUMMARY              = "summary";                    // 요약
-static const std::string ANALYTICS_EVENT_PARAM_ITEM_NAME            = "item_name";                  // 아이템 이름
 
 // Leaderboard
 // 현재는 아이디를 사용하지만, 추후 plugin_config.json에 이름과 아이디를 정의하여 사용

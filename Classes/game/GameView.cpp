@@ -197,12 +197,20 @@ void GameView::onHint() {
             return SBCollection::contains(pattern, tile);
         }, TILE_HINT_LINE_COLOR, true);
     }
+    
+    // 통계 이벤트
+    SBAnalytics::EventParams params;
+    params[ANALYTICS_EVENT_PARAM_LEVEL] = SBAnalytics::EventParam(TO_STRING(GAME_MANAGER->getStage().stage));
+    
+    SBAnalytics::logEvent(ANALYTICS_EVENT_HINT_USE, params);
 }
 
 /**
  * 새로 고침
  */
 void GameView::refresh() {
+    
+    const auto level = GAME_MANAGER->getStage();
     
     SBDirector::getInstance()->setScreenTouchLocked(true);
     
@@ -245,7 +253,7 @@ void GameView::refresh() {
         CCLOG("capture dt: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
 
         // 맵 업데이트
-        updateTileMap(GAME_MANAGER->getStage());
+        updateTileMap(level);
 
         // 슬라이드 연출
         const float DURATION = LEVEL_REFRESH_DURATION - EffectDuration::POPUP_SLIDE_FAST;
@@ -262,6 +270,12 @@ void GameView::refresh() {
         popup->removeFromParent();
         SBDirector::getInstance()->setScreenTouchLocked(false);
     }, LEVEL_REFRESH_DURATION);
+    
+    // 통계 이벤트
+    SBAnalytics::EventParams params;
+    params[ANALYTICS_EVENT_PARAM_LEVEL] = SBAnalytics::EventParam(TO_STRING(level.stage));
+    
+    SBAnalytics::logEvent(ANALYTICS_EVENT_LEVEL_REFRESH, params);
 }
 
 /**

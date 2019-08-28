@@ -108,12 +108,15 @@ void HintButton::onClick() {
     
     // 힌트 없음, 광고 보기
     if( User::getHintCount() == 0 ) {
+        SBAnalytics::logEvent(ANALYTICS_EVENT_HINT_GET_POPUP);
+        
         auto popup = GetHintPopup::create();
         SceneManager::getInstance()->getScene()->addChild(popup, ZOrder::POPUP_BOTTOM);
         
         // 힌트 획득 리스너
         popup->setOnGetListener([=](int amount) {
             
+            SBAnalytics::logEvent(ANALYTICS_EVENT_HINT_GET);
             User::getHint(amount);
             
             hintCountView->runAction(Sequence::create(ScaleTo::create(0.1f, 1.2f),

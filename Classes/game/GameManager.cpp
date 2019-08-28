@@ -325,9 +325,11 @@ void GameManager::onStageChanged() {
     getEventDispatcher()->dispatchCustomEvent(GAME_EVENT_STAGE_CHANGED, &stage);
     
     // 통계 이벤트
-#if !defined(COCOS2D_DEBUG) || COCOS2D_DEBUG == 0
-    // SBAnalytics::logEvent(FA_EVENT_STAGE_PLAY);
-#endif
+    SBAnalytics::EventParams params;
+    params[ANALYTICS_EVENT_PARAM_LEVEL] = SBAnalytics::EventParam(TO_STRING(stage.stage));
+    params[ANALYTICS_EVENT_PARAM_LEVEL_RANGE] = SBAnalytics::EventParam(SBAnalytics::getNumberRange(stage.stage, 1, 5, 5));
+
+    SBAnalytics::logEvent(ANALYTICS_EVENT_LEVEL_PLAY, params);
 }
 
 /**
@@ -339,11 +341,6 @@ void GameManager::onStageRestart() {
     Log::i("GameManager::onStageRestart stage: %d", stage.stage);
     
     getEventDispatcher()->dispatchCustomEvent(GAME_EVENT_STAGE_RESTART, &stage);
-    
-    // 통계 이벤트
-#if !defined(COCOS2D_DEBUG) || COCOS2D_DEBUG == 0
-    SBAnalytics::logEvent(FA_EVENT_STAGE_PLAY);
-#endif
 }
 
 /**
@@ -365,22 +362,11 @@ void GameManager::onStageClear(bool isSkipped) {
     }
     
     // 통계 이벤트
-#if !defined(COCOS2D_DEBUG) || COCOS2D_DEBUG == 0
-//    // stage_clear
-//    SBAnalytics::EventParams params;
-//    params[FA_EVENT_PARAM_STAGE] = SBAnalytics::EventParam(TO_STRING(stage.stage));
-//    params[FA_EVENT_PARAM_STAGE_RANGE] = SBAnalytics::EventParam(SBAnalytics::getNumberRange(stage.stage, 1, 5, 5));
-//
-//    SBAnalytics::logEvent(FA_EVENT_STAGE_CLEAR, params);
-//
-//    // stage_skip
-//    if( isSkipped ) {
-//        SBAnalytics::EventParams params;
-//        params[FA_EVENT_PARAM_STAGE] = SBAnalytics::EventParam(TO_STRING(stage.stage));
-//
-//        SBAnalytics::logEvent(FA_EVENT_STAGE_SKIP, params);
-//    }
-#endif
+    SBAnalytics::EventParams params;
+    params[ANALYTICS_EVENT_PARAM_LEVEL] = SBAnalytics::EventParam(TO_STRING(stage.stage));
+    params[ANALYTICS_EVENT_PARAM_LEVEL_RANGE] = SBAnalytics::EventParam(SBAnalytics::getNumberRange(stage.stage, 1, 5, 5));
+    
+    SBAnalytics::logEvent(ANALYTICS_EVENT_LEVEL_CLEAR, params);
 }
 
 /**
