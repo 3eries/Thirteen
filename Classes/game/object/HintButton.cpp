@@ -110,6 +110,8 @@ bool HintButton::init() {
  */
 void HintButton::onClick() {
     
+    SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
+    
     // 힌트 없음, 광고 보기
     if( User::getHintCount() == 0 ) {
         if( AdsHelper::isRewardedVideoLoaded() ) {
