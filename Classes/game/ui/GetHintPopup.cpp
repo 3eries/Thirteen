@@ -87,8 +87,9 @@ void GetHintPopup::onClick() {
             // 보상
             if( listener->isRewarded() ) {
                 onGetListener(GAME_CONFIG->getAdRewardHint());
-                dismissWithAction();
             }
+            
+            this->dismissWithAction();
             
             // 광고 닫힌 후 0.2초 후에 터치 재개
             SBDirector::postDelayed(SceneManager::getScene(), [=]() {
