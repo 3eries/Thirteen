@@ -269,7 +269,7 @@ void GameView::refresh() {
         updateTileMap(level);
 
         // 슬라이드 연출
-        const float DURATION = LEVEL_REFRESH_DURATION - EffectDuration::POPUP_SLIDE_FAST;
+        const float DURATION = LEVEL_REFRESH_DURATION * 0.7f;
 
         auto move = MoveBy::create(DURATION, Vec2(0, -tileMap->getContentSize().height));
         currentMap->runAction(Sequence::create(move, RemoveSelf::create(), nullptr));
