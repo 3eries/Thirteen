@@ -753,9 +753,7 @@ bool GameView::onTouchBegan(Touch *touch, Event*) {
     
     // 타일 선택
     for( auto tile : tiles ) {
-        auto tileBox = SB_BOUNDING_BOX_IN_WORLD(tile);
-        
-        if( tileBox.containsPoint(p) ) {
+        if( isContainsPoint(tile, p) ) {
             selectTile(tile);
         }
     }
@@ -779,9 +777,7 @@ void GameView::onTouchMoved(Touch *touch, Event*) {
             continue;
         }
         
-        auto tileBox = SB_BOUNDING_BOX_IN_WORLD(tile);
-        
-        if( tileBox.containsPoint(p) ) {
+        if( isContainsPoint(tile, p) ) {
             selectTile(tile);
         }
     }
@@ -815,6 +811,20 @@ void GameView::onTouchCancelled(Touch *touch, Event *e) {
     }
     
     selectedTiles.clear();
+}
+
+bool GameView::isContainsPoint(GameTile *tile, const Vec2 &p) {
+    
+    auto tileBox = SB_BOUNDING_BOX_IN_WORLD(tile);
+    
+    if( !tileBox.containsPoint(p) ) {
+        return false;
+    }
+    
+    auto tileCenter = Vec2(tileBox.getMidX(), tileBox.getMidY());
+    auto dist = tileCenter.getDistance(p);
+    
+    return dist <= TILE_CONTENT_SIZE.height*0.5f;
 }
 
 /**

@@ -98,6 +98,8 @@ private:
     void onTouchEnded(cocos2d::Touch *touch, cocos2d::Event*);
     void onTouchCancelled(cocos2d::Touch *touch, cocos2d::Event*);
     
+    bool isContainsPoint(GameTile *tile, const cocos2d::Vec2 &p);
+    
 private:
     bool isTouchLocked;
 };
