@@ -26,6 +26,7 @@ private:
     bool init() override;
     
     void onEnter() override;
+    bool onBackKeyReleased() override;
     
     void initBackgroundView() override;
     void initContentView() override;
@@ -40,7 +41,7 @@ private:
     
 private:
     CC_SYNTHESIZE(SBCallback, onExitAppListener, OnExitAppListener);
-    cocos2d::Node *stoneBg;
+    cocos2d::Node *popupBg;
 };
 
 #endif /* ExitAlertPopup_hpp */

@@ -3,6 +3,12 @@ package com.superbomb.plugins;
 import android.app.Activity;
 import android.content.Intent;
 
+import com.superbomb.plugins.ads.AdsManager;
+import com.superbomb.plugins.firebase.Analytics;
+import com.superbomb.plugins.iap.IAPHelper;
+// import com.superbomb.plugins.gps.GameHelper;
+// import com.superbomb.plugins.iap.IAPHelper;
+
 import org.cocos2dx.lib.Cocos2dxActivity;
 
 import java.util.ArrayList;
@@ -29,10 +35,10 @@ public class PluginManager {
 
         PluginManager mgr = getInstance();
         mgr.context = context;
-        // mgr.listeners.add(Analytics.getInstance());
+        mgr.listeners.add(Analytics.getInstance());
         // mgr.listeners.add(GameHelper.getInstance());
-//        mgr.listeners.add(AdsManager.getInstance());
-//        mgr.listeners.add(IAPHelper.getInstance());
+        mgr.listeners.add(AdsManager.getInstance());
+        mgr.listeners.add(IAPHelper.getInstance());
 
         for( PluginListener listener : mgr.listeners ) {
             listener.init(context);

@@ -8,7 +8,7 @@
 
 #include "Define.h"
 #include "SceneManager.h"
-#include "GameUIHelper.hpp"
+#include "ResourceHelper.hpp"
 
 USING_NS_CC;
 using namespace cocos2d::ui;
@@ -39,6 +39,18 @@ void ExitAlertPopup::onEnter() {
     BasePopup::onEnter();
 }
 
+bool ExitAlertPopup::onBackKeyReleased() {
+    
+    if( !BasePopup::onBackKeyReleased() ) {
+        return false;
+    }
+    
+    SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
+    dismissWithAction();
+    
+    return true;
+}
+
 void ExitAlertPopup::initBackgroundView() {
     
     BasePopup::initBackgroundView();
@@ -50,27 +62,19 @@ void ExitAlertPopup::initContentView() {
     
     BasePopup::initContentView();
     
-    // RSP_popup_bg_give_up.png Vec2MC(0, 0) , Size(552, 568)
-    stoneBg = Sprite::create(DIR_IMG_COMMON + "RSP_popup_bg_give_up.png");
-    stoneBg->setAnchorPoint(ANCHOR_M);
-    stoneBg->setPosition(Vec2MC(0, 0));
-    addContentChild(stoneBg);
-    
-    const Size SIZE(stoneBg->getContentSize());
-    
-    // title
-    // RSP_popup_title_give_up.png Vec2MC(0, 210) , Size(392, 60)
-    auto title = Sprite::create(DIR_IMG_COMMON + "RSP_popup_title_give_up.png");
-    title->setAnchorPoint(ANCHOR_M);
-    title->setPosition(Vec2MC(SIZE, 0, 210));
-    stoneBg->addChild(title);
+    // bg
+    popupBg = Sprite::create(DIR_IMG_COMMON + "common_bg_exit.png");
+    popupBg->setAnchorPoint(ANCHOR_M);
+    popupBg->setPosition(Vec2MC(0, 0));
+    addContentChild(popupBg);
     
     // YES
-    auto yesBtn = SBButton::create("YES", FONT_COMMODORE, 50);
-    yesBtn->setAnchorPoint(ANCHOR_MR);
-    yesBtn->setPosition(Vec2MC(SIZE, -60, -150));
-    yesBtn->setContentSize(Size(100, 80));
-    stoneBg->addChild(yesBtn);
+    // common_btn_yes.png Vec2MC(-88, -76) , Size(164, 98)
+    auto yesBtn = SBButton::create(DIR_IMG_COMMON + "common_btn_yes.png");
+    yesBtn->setZoomScale(ButtonZoomScale::NORMAL);
+    yesBtn->setAnchorPoint(ANCHOR_M);
+    yesBtn->setPosition(Vec2MC(-88, -76));
+    addContentChild(yesBtn);
     
     yesBtn->setOnClickListener([=](Node*) {
         
@@ -79,11 +83,12 @@ void ExitAlertPopup::initContentView() {
     });
     
     // NO
-    auto noBtn = SBButton::create("NO", FONT_COMMODORE, 50);
-    noBtn->setAnchorPoint(ANCHOR_ML);
-    noBtn->setPosition(Vec2MC(SIZE, 60, -150));
-    noBtn->setContentSize(Size(100, 80));
-    stoneBg->addChild(noBtn);
+    // common_btn_nope.png Vec2MC(88, -76) , Size(164, 98)
+    auto noBtn = SBButton::create(DIR_IMG_COMMON + "common_btn_nope.png");
+    noBtn->setZoomScale(ButtonZoomScale::NORMAL);
+    noBtn->setAnchorPoint(ANCHOR_M);
+    noBtn->setPosition(Vec2MC(88, -76));
+    addContentChild(noBtn);
     
     noBtn->setOnClickListener([=](Node*) {
         
@@ -147,20 +152,19 @@ void ExitAlertPopup::onEnterActionFinished() {
     
     BasePopup::onEnterActionFinished();
     
-    // 비석 바깥 영역 터치 시 팝업 종료
+    // 배경 바깥 영역 터치 시 팝업 종료
     auto touchNode = SBNodeUtils::createTouchNode();
     addChild(touchNode);
     
     touchNode->addClickEventListener([=](Ref*) {
+        SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
         this->dismissWithAction();
     });
     
-    // auto box = SBNodeUtils::getBoundingBoxInWorld(stoneBg);
-    
-    auto stoneTouchNode = SBNodeUtils::createTouchNode();
-    stoneTouchNode->setAnchorPoint(stoneBg->getAnchorPoint());
-    stoneTouchNode->setPosition(stoneBg->getPosition());
-    stoneTouchNode->setContentSize(stoneBg->getContentSize());
-    addChild(stoneTouchNode);
+    auto bgTouchNode = SBNodeUtils::createTouchNode();
+    bgTouchNode->setAnchorPoint(popupBg->getAnchorPoint());
+    bgTouchNode->setPosition(popupBg->getPosition());
+    bgTouchNode->setContentSize(popupBg->getContentSize());
+    addChild(bgTouchNode);
 }
 

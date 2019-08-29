@@ -9,7 +9,10 @@
 
 #include "Define.h"
 #include "User.hpp"
+#include "PopupManager.hpp"
 #include "../GameManager.hpp"
+
+#include "ExitAlertPopup.hpp"
 
 USING_NS_CC;
 USING_NS_SB;
@@ -49,8 +52,13 @@ bool ClearPopup::onBackKeyReleased() {
         return false;
     }
     
+    // 앱 종료 알림 팝업 생성
     SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
-    dismissWithAction();
+    
+    auto popup = (ExitAlertPopup*)PopupManager::show(PopupType::EXIT_APP);
+    popup->setOnExitAppListener([=]() {
+        SBSystemUtils::exitApp();
+    });
     
     return true;
 }

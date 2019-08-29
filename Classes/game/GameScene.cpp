@@ -129,7 +129,13 @@ bool GameScene::onBackKeyReleased() {
         return false;
     }
     
-    return true;
+    // 설정 팝업 생성
+    if( PopupManager::getInstance()->getPopupCount() == 0 ) {
+        onClick(getChildByTag(Tag::BTN_SETTING));
+        return true;
+    }
+    
+    return false;
 }
 
 /**
@@ -187,6 +193,8 @@ void GameScene::checkReview() {
  * 버튼 클릭
  */
 void GameScene::onClick(Node *sender) {
+    
+    SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
     
     switch( sender->getTag() ) {
         case Tag::BTN_SETTING: {

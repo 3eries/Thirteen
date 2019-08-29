@@ -10,7 +10,7 @@ android {
         minSdkVersion PROP_MIN_SDK_VERSION
         targetSdkVersion PROP_TARGET_SDK_VERSION
         versionCode 1
-        versionName "0.1.1"
+        versionName "0.0.1"
 
         externalNativeBuild {
             if (PROP_BUILD_TYPE == 'ndk-build') {
@@ -127,5 +127,12 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':libcocos2dx')
 
-    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'com.google.firebase:firebase-core:17.0.1'
+    // ads
+    implementation 'com.google.android.gms:play-services-ads:18.1.0'
+    // billing
+    implementation 'com.android.billingclient:billing:2.0.2'
 }
+
+apply plugin: 'com.google.gms.google-services'  // Google Play services Gradle plugin

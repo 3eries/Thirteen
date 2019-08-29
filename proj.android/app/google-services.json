@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "733655056862",
+    "firebase_url": "https://thirteen-dafd7.firebaseio.com",
+    "project_id": "thirteen-dafd7",
+    "storage_bucket": "thirteen-dafd7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:733655056862:android:f57a46da8febbb28",
+        "android_client_info": {
+          "package_name": "com.superbomb.series.Thirteen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "733655056862-2ug3g8giaqh0r6of94jratskhdhp4651.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhLInmatsjUM0fcdj8k7XAN4jSABrRJFo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "733655056862-2ug3g8giaqh0r6of94jratskhdhp4651.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "733655056862-phbdnhmg5mhf1eqv909l12eb530ikt34.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.3eries.Thirteen"
+              }
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-9699962520672188~7389000315"
+    }
+  ],
+  "configuration_version": "1"
+}

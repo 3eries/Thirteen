@@ -5,10 +5,10 @@
             "test": 0,
             "test_devices": ["0A16B70F54452DD393143983A218FB9A"],
             "auto_load_interval": 30,
-            "app_id": "ca-app-pub-9699962520672188~9791832258",
-            "banner_unit_id": "ca-app-pub-9699962520672188/5502654338",
-            "interstitial_unit_id": "ca-app-pub-9699962520672188/5661015551",
-            "rewarded_video_unit_id": "ca-app-pub-9699962520672188/7037002321",
+            "app_id": "ca-app-pub-9699962520672188~7389000315",
+            "banner_unit_id": "ca-app-pub-9699962520672188/7361080156",
+            "interstitial_unit_id": "ca-app-pub-9699962520672188/5370531000",
+            "rewarded_video_unit_id": "ca-app-pub-9699962520672188/9664999239",
             "placements": {
                 "vungle": []
             }
