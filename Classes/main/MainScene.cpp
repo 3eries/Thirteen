@@ -48,12 +48,14 @@ bool MainScene::init() {
     initMenu();
     
     // 개발 버전 표기
+    /*
     auto versionLabel = Label::createWithTTF(DEV_VERSION, FONT_ROBOTO_BLACK, 30, Size::ZERO,
                                              TextHAlignment::RIGHT, TextVAlignment::BOTTOM);
     versionLabel->setTextColor(Color4B::WHITE);
     versionLabel->setAnchorPoint(ANCHOR_BR);
     versionLabel->setPosition(Vec2BR(0,120));
     addChild(versionLabel, INT_MAX);
+    */
     
     return true;
 }
@@ -282,9 +284,9 @@ void MainScene::initMenu() {
     
     // 탭하여 시작
     // auto tapToStart = Sprite::create(DIR_IMG_MAIN + "scratch_taptostart.png");
-    auto tapToStart = Label::createWithTTF("TAP TO START", FONT_ROBOTO_BLACK, 50, Size::ZERO,
+    auto tapToStart = Label::createWithTTF("TAP TO START", FONT_ROBOTO_BLACK, 40, Size::ZERO,
                                            TextHAlignment::CENTER, TextVAlignment::CENTER);
-    tapToStart->setTextColor(Color4B::WHITE);
+    tapToStart->setTextColor(Color4B(239, 255, 233, 255));
     tapToStart->setAnchorPoint(ANCHOR_M);
     tapToStart->setPosition(Vec2BC(0, 250));
     addChild(tapToStart);
