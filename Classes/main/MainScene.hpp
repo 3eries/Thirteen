@@ -18,7 +18,7 @@
 class MainScene : public BaseScene {
 private:
     enum Tag {
-        BTN_TITLE           = 100,
+        BTN_CREDIT           = 100,
         BTN_START,
         BTN_SETTING,
         BTN_TEST,

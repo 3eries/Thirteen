@@ -126,7 +126,7 @@ void MainScene::onClick(Node *sender) {
     
     switch( sender->getTag() ) {
         // 크레딧
-        case Tag::BTN_TITLE: {        
+        case Tag::BTN_CREDIT: {
             SBAnalytics::logEvent(ANALYTICS_EVENT_CREDIT);
             
             auto popup = PopupManager::show(PopupType::CREDIT);
@@ -199,6 +199,18 @@ void MainScene::initBg() {
         auto bannerView = BannerView::create();
         addChild(bannerView, SBZOrder::TOP);
     }
+    
+    // 크레딧
+    auto creditBtn = SBNodeUtils::createTouchNode();
+    creditBtn->setTag(Tag::BTN_CREDIT);
+    creditBtn->setAnchorPoint(ANCHOR_M);
+    creditBtn->setPosition(Vec2MC(0, 200));
+    creditBtn->setContentSize(Size(SB_WIN_SIZE.width*0.6f, 200));
+    addChild(creditBtn, SBZOrder::MIDDLE);
+    
+    creditBtn->addClickEventListener([=](Ref*) {
+        this->onClick(creditBtn);
+    });
 }
 
 void MainScene::initTitle() {
@@ -283,7 +295,6 @@ void MainScene::initTitle() {
 void MainScene::initMenu() {
     
     // 탭하여 시작
-    // auto tapToStart = Sprite::create(DIR_IMG_MAIN + "scratch_taptostart.png");
     auto tapToStart = Label::createWithTTF("TAP TO START", FONT_ROBOTO_BLACK, 40, Size::ZERO,
                                            TextHAlignment::CENTER, TextVAlignment::CENTER);
     tapToStart->setTextColor(Color4B(239, 255, 233, 255));

@@ -27,8 +27,8 @@ static const vector<Member> MEMBERS = {
     Member("main_character_01.png", "GMACHINEE", "PROGRAMMING"),
     Member("main_character_02.png", "W0N",       "DESIGN"),
     Member("main_character_03.png", "B3O",       "ART"),
-    Member("main_character_04.png", "naconeee",  "TRANSLATION"),
-    Member("main_character_05.png", "JUNN",      "PROMOTIONAL VIDEO"),
+//    Member("main_character_04.png", "naconeee",  "TRANSLATION"),
+//    Member("main_character_05.png", "JUNN",      "PROMOTIONAL VIDEO"),
 };
 
 CreditPopup::CreditPopup() : BasePopup(PopupType::CREDIT) {
@@ -102,20 +102,14 @@ void CreditPopup::onEnterActionFinished() {
 void CreditPopup::initBackgroundView() {
     
     BasePopup::initBackgroundView();
+    
+    setBackgroundColor(Color4B(0,0,0,255*0.9f));
 }
 
 void CreditPopup::initCredit() {
     
-    // bg
-    auto bg = Sprite::create(DIR_IMG_COMMON + "common_bg_cover.png");
-    bg->setAnchorPoint(ANCHOR_M);
-    bg->setPosition(Vec2MC(0,0));
-    bg->setScaleX(SB_WIN_SIZE.width / bg->getContentSize().width);
-    bg->setScaleY(SB_WIN_SIZE.height / bg->getContentSize().height);
-    addChild(bg);
-    
     // 배너 영역을 고려하여 컨텐트뷰를 높인다
-    getContentView()->setPosition(getContentView()->getPosition() + Vec2(0,60));
+    // getContentView()->setPosition(getContentView()->getPosition() + Vec2(0,60));
     
     // Title
     auto title = Sprite::create(DIR_IMG_MAIN + "main_title_3eries.png");
@@ -154,12 +148,14 @@ void CreditPopup::initCredit() {
         Vec2MC(10, -476),
     };
     
+    Vec2 temp(0,-100);
+    
     for( int i = 0; i < MEMBERS.size(); ++i ) {
         auto member = members[i];
         
         auto icon = Sprite::create(DIR_IMG_MAIN + member.image);
         icon->setAnchorPoint(ANCHOR_M);
-        icon->setPosition(iconPos[i]);
+        icon->setPosition(iconPos[i] + temp);
         addContentChild(icon);
         
         // 아이콘 연출
@@ -178,7 +174,7 @@ void CreditPopup::initCredit() {
         job->enableOutline(Color4B(0,0,0,255), 4);
         job->setOverflow(Label::Overflow::SHRINK);
         job->setAnchorPoint(ANCHOR_ML);
-        job->setPosition(jobPos[i] + Vec2(-355*0.5f, 4));
+        job->setPosition(jobPos[i] + Vec2(-355*0.5f, 4) + temp);
         addContentChild(job);
         
         auto name = Label::createWithTTF(member.name, FONT_RETRO, 45, job->getDimensions(),
@@ -186,7 +182,7 @@ void CreditPopup::initCredit() {
         name->setTextColor(Color4B(255,255,255,255));
         name->enableOutline(Color4B(0,0,0,255), 4);
         name->setAnchorPoint(ANCHOR_ML);
-        name->setPosition(Vec2(job->getPosition().x, namePos[i].y) + Vec2(0, 4));
+        name->setPosition(Vec2(job->getPosition().x, namePos[i].y) + Vec2(0, 4) + temp);
         addContentChild(name);
     }
 }
