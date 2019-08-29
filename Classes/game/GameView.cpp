@@ -92,6 +92,7 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
     int clearCondition = level.clearCondition;
     
     stageProgressBar->setPercentage(((float)clearCount / clearCondition) * 100, true);
+    stageProgressBar->setClearCount(clearCount, clearCondition);
     
     // 레벨 클리어 체크
     bool isLevelClear = (clearCount == clearCondition);

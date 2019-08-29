@@ -12,6 +12,8 @@
 USING_NS_CC;
 using namespace std;
 
+static const string SCHEDULER_TOGGLE_GAGE_TEXT = "SCHEDULER_TOGGLE_GAGE_TEXT";
+
 StageProgressBar::StageProgressBar() {
 }
 
@@ -32,6 +34,13 @@ bool StageProgressBar::init() {
     initGameListener();
     
     return true;
+}
+
+void StageProgressBar::onEnter() {
+    
+    Node::onEnter();
+    
+    onStageChanged(GAME_MANAGER->getStage());
 }
 
 void StageProgressBar::initUI() {
@@ -59,6 +68,14 @@ void StageProgressBar::initUI() {
     levelLabel->setAnchorPoint(ANCHOR_M);
     levelLabel->setPosition(Vec2MC(gageBg->getContentSize(), 0, 0));
     gageBg->addChild(levelLabel);
+    
+    clearCountLabel = Label::createWithTTF("0 / 0", FONT_ROBOTO_BLACK, 39, Size::ZERO,
+                                           TextHAlignment::CENTER, TextVAlignment::CENTER);
+    clearCountLabel->setVisible(false);
+    clearCountLabel->setTextColor(Color4B::BLACK);
+    clearCountLabel->setAnchorPoint(ANCHOR_M);
+    clearCountLabel->setPosition(Vec2MC(gageBg->getContentSize(), 0, 0));
+    gageBg->addChild(clearCountLabel);
 }
 
 void StageProgressBar::initGameListener() {
@@ -97,6 +114,26 @@ void StageProgressBar::initGameListener() {
     }, this);
 }
 
+void StageProgressBar::startToggleGageTextScheduler() {
+    
+    stopToggleGageTextScheduler();
+    
+    schedule([=](float dt) {
+        
+        levelLabel->setVisible(!levelLabel->isVisible());
+        clearCountLabel->setVisible(!levelLabel->isVisible());
+        
+    }, 3, SCHEDULER_TOGGLE_GAGE_TEXT);
+}
+
+void StageProgressBar::stopToggleGageTextScheduler() {
+    
+    unschedule(SCHEDULER_TOGGLE_GAGE_TEXT);
+    
+    levelLabel->setVisible(true);
+    clearCountLabel->setVisible(false);
+}
+
 void StageProgressBar::setPercentage(float percentage, bool withAction) {
     
     gage->stopAllActions();
@@ -114,13 +151,21 @@ void StageProgressBar::setPercentage(float percentage, bool withAction) {
     }
 }
 
+void StageProgressBar::setClearCount(int clearCount, int clearCondition) {
+ 
+    clearCountLabel->setString(STR_FORMAT("%d / %d", clearCount, clearCondition));
+}
+
 /**
  * 스테이지 변경
  */
 void StageProgressBar::onStageChanged(const StageData &stage) {
     
     setPercentage(0);
+    setClearCount(0, stage.clearCondition);
+    
     levelLabel->setString(STR_FORMAT("LEVEL %d", stage.stage));
+    startToggleGageTextScheduler();
 }
 
 /**
@@ -135,6 +180,8 @@ void StageProgressBar::onStageRestart(const StageData &stage) {
  * 스테이지 클리어
  */
 void StageProgressBar::onStageClear(const StageData &stage) {
+    
+    stopToggleGageTextScheduler();
 }
 
 /**
