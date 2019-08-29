@@ -34,6 +34,7 @@ private:
     cocos2d::Node*   hintCountView;
     cocos2d::Label*  hintCountLabel;
     cocos2d::Sprite* hintPlusIcon;
+    cocos2d::Sprite* hintDisabledIcon;
 };
 
 #endif /* HintButton_hpp */

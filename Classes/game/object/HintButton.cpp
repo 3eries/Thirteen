@@ -60,6 +60,12 @@ bool HintButton::init() {
     hintPlusIcon->setPosition(hintCountView->getPosition());
     contentView->addChild(hintPlusIcon);
     
+    hintDisabledIcon = Sprite::create(DIR_IMG_GAME + "game_bg_hint_number_dis.png");
+    hintDisabledIcon->setVisible(false);
+    hintDisabledIcon->setAnchorPoint(ANCHOR_M);
+    hintDisabledIcon->setPosition(hintCountView->getPosition());
+    contentView->addChild(hintDisabledIcon);
+    
     hintCountLabel = Label::createWithTTF("", FONT_ROBOTO_BLACK, 27, Size::ZERO,
                                           TextHAlignment::CENTER, TextVAlignment::CENTER);
     hintCountLabel->setTextColor(Color4B::WHITE);
@@ -162,8 +168,8 @@ void HintButton::checkAdLoaded(float dt) {
     
     if( User::getHintCount() == 0 ) {
         hintPlusIcon->setVisible(AdsHelper::isRewardedVideoLoaded());
-        // TODO: 광고 없음 아이콘
+        hintDisabledIcon->setVisible(!hintPlusIcon->isVisible());
     } else {
-        // TODO: 광고 없음 아이콘 hide
+        hintDisabledIcon->setVisible(false);
     }
 }
