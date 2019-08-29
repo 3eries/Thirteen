@@ -91,7 +91,7 @@ static const std::vector<cocos2d::Color3B> TILE_COLORS({
     cocos2d::Color3B(136, 219, 163),
     cocos2d::Color3B(37, 128, 228),
     cocos2d::Color3B(225, 59, 106),
-    cocos2d::Color3B(82, 79, 79),
+    cocos2d::Color3B(110, 107, 107),
     cocos2d::Color3B(25, 144, 144),
     cocos2d::Color3B(188, 255, 255),
     cocos2d::Color3B(131, 87, 208),

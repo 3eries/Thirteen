@@ -121,6 +121,8 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
     
     // 타일 이동
     if( !isLevelClear ) {
+        isTouchLocked = true;
+        
         SBDirector::postDelayed(this, [=]() {
             for( auto it = clearTilesMap.begin(); it != clearTilesMap.end(); ++it ) {
                 auto x = it->first;
@@ -157,6 +159,9 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
             
             // 이동 완료
             SBDirector::postDelayed(this, [=]() {
+                
+                this->isTouchLocked = false;
+                
                 // 메이드 불가능하면 새로고침
                 if( this->getMadePatterns().size() == 0 ) {
                     this->refresh();
@@ -165,7 +170,7 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
                 }
             }, TILE_MOVE_DURATION+0.05f);
             
-        }, TILE_EXIT_DURATION, true);
+        }, TILE_EXIT_DURATION);
     }
 }
 
@@ -218,9 +223,7 @@ void GameView::refresh() {
     
     const auto level = GAME_MANAGER->getStage();
     
-    SBDirector::getInstance()->setScreenTouchLocked(true);
-    
-    auto popup = SBNodeUtils::createZeroSizeNode();
+    auto popup = SBNodeUtils::createTouchNode();
     addChild(popup, ZOrder::POPUP_BOTTOM);
     
     auto bg = LayerColor::create(Color::POPUP_BG);
@@ -274,7 +277,6 @@ void GameView::refresh() {
     
     SBDirector::postDelayed(this, [=]() {
         popup->removeFromParent();
-        SBDirector::getInstance()->setScreenTouchLocked(false);
     }, LEVEL_REFRESH_DURATION);
     
     // 통계 이벤트
