@@ -134,6 +134,8 @@ void ClearPopup::onEnterActionFinished() {
     
     BasePopup::onEnterActionFinished();
     
+    SBAudioEngine::playEffect(SOUND_LEVEL_CLEAR);
+    
     // 화면 터치 이벤트
     auto touchNode = SBNodeUtils::createTouchNode();
     addChild(touchNode);

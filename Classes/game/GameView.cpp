@@ -86,6 +86,8 @@ void GameView::cleanup() {
  */
 void GameView::onNumberClear(GameTileList selectedTiles) {
     
+    // SBAudioEngine::playEffect(SOUND_NUMBER_MADE);
+    
     auto level = GAME_MANAGER->getStage();
     
     ++clearCount;
@@ -244,6 +246,8 @@ void GameView::refresh() {
     // 맵 슬라이드 연출
     SBDirector::postDelayed(this, [=]() {
 
+        SBAudioEngine::playEffect(SOUND_TILE_REFRESH);
+        
         // 현재 맵 캡쳐
         double t = SBSystemUtils::getCurrentTimeSeconds();
 
@@ -296,6 +300,8 @@ void GameView::selectTile(GameTile *tile) {
     if( !isSelectableTile(tile) ) {
         return;
     }
+    
+    SBAudioEngine::playEffect(SOUND_TILE_SELECT);
     
     tile->setSelected(true);
     selectedTiles.push_back(tile);
