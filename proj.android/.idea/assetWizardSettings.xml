@@ -51,7 +51,7 @@
                                             <option name="values">
                                               <map>
                                                 <entry key="color" value="000000" />
-                                                <entry key="scalingPercent" value="67" />
+                                                <entry key="scalingPercent" value="54" />
                                               </map>
                                             </option>
                                           </PersistentState>
@@ -62,8 +62,8 @@
                                   <option name="values">
                                     <map>
                                       <entry key="backgroundAssetType" value="COLOR" />
-                                      <entry key="backgroundColor" value="ffffff" />
-                                      <entry key="foregroundImage" value="$PROJECT_DIR$/../../../../3eries_icon_1024.png" />
+                                      <entry key="backgroundColor" value="001111" />
+                                      <entry key="foregroundImage" value="$USER_HOME$/Downloads/게임아이콘13_1024_04.png" />
                                     </map>
                                   </option>
                                 </PersistentState>
