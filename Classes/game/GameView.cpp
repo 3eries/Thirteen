@@ -100,7 +100,7 @@ void GameView::cleanup() {
  */
 void GameView::onNumberClear(GameTileList selectedTiles) {
     
-    // SBAudioEngine::playEffect(SOUND_NUMBER_MADE);
+    SBAudioEngine::playEffect(SOUND_NUMBER_MADE);
     
     auto level = GAME_MANAGER->getStage();
     
@@ -328,7 +328,7 @@ void GameView::selectTile(GameTile *tile) {
 /**
  * 타일맵 업데이트
  */
-void GameView::updateTileMap(const StageData &stage) {
+void GameView::updateTileMap(const StageData &level) {
     
     if( isTileMapUpdateLocked ) {
         return;
@@ -339,16 +339,16 @@ void GameView::updateTileMap(const StageData &stage) {
     tiles.clear();
     
     // 초기화
-    numbers = stage.numbers;
+    numbers = level.numbers;
     resetNumberEngine();
     
     // UI 업데이트
-    auto tileMapSize = getTileContentSize(stage.tileRows, stage.tileColumns);
+    auto tileMapSize = getTileContentSize(level.tileRows, level.tileColumns);
     tileMapClippingNode->setContentSize(tileMapSize);
     tileMapClippingNode->getStencil()->setContentSize(tileMapSize);
     tileMap->setContentSize(tileMapSize);
     
-    for( auto tileData : stage.tiles ) {
+    for( auto tileData : level.tiles ) {
         if( !tileData.isEmpty ) {
             /*
             auto bg = Sprite::create(DIR_IMG_GAME + "game_tile.png");
@@ -369,7 +369,7 @@ void GameView::updateTileMap(const StageData &stage) {
     Log::i("GameView updateTileMap patterns: %d", (int)patterns.size());
     
     if( patterns.size() == 0 ) {
-        updateTileMap(stage);
+        updateTileMap(level);
     }
 }
 

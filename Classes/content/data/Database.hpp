@@ -31,12 +31,17 @@ private:
     void parseLevelJson();
     
 public:
+    static StageDataList       getOriginalStages();
     static StageDataList       getStages();
     static StageData           getStage(int stage);
     static StageData           getFirstStage();
     static StageData           getLastStage();
+    
+    static StageData           addVirtualLevel();
+    static StageData           createVirtualLevel();
 
 private:
+    StageDataList originStages;
     StageDataList stages;
 };
 

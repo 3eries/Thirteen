@@ -29,7 +29,7 @@ GameTile* GameTile::create() {
 }
 
 GameTile::GameTile() :
-number(0),
+number(INVALID_TILE_NUMBER),
 selected(false),
 left(nullptr), right(nullptr), top(nullptr), bottom(nullptr) {
 }

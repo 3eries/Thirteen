@@ -42,7 +42,7 @@ private:
     
     void selectTile(GameTile *tile);
     
-    void updateTileMap(const StageData &stage);
+    void updateTileMap(const StageData &level);
     void updateNearTile();
     
     void addTile(const TileData &tileData);

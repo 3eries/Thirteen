@@ -353,7 +353,7 @@ void GameManager::onStageClear(bool isSkipped) {
     
     // 클리어한 스테이지 저장
     if( stage.stage <= Database::getLastStage().stage ) {
-        // User::setClearStage(stage.stage);
+        User::setClearStage(stage.stage);
     }
     
     if( !isSkipped ) {
@@ -373,6 +373,11 @@ void GameManager::onStageClear(bool isSkipped) {
  * 다음 스테이지로 이동
  */
 void GameManager::onMoveNextStage() {
+    
+    // 마지막 레벨인 경우 가상 레벨 추가
+    if( instance->stage.stage == Database::getLastStage().stage ) {
+        Database::addVirtualLevel();
+    }
     
     instance->setStage(instance->stage.stage+1);
     getEventDispatcher()->dispatchCustomEvent(GAME_EVENT_MOVE_NEXT_STAGE, &instance->stage);

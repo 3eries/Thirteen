@@ -76,11 +76,11 @@ bool GameScene::init() {
 
 void GameScene::onEnter() {
     
+    GAME_MANAGER->setStage(User::getClearStage()+1);
+    
     BaseScene::onEnter();
     
     GameManager::onGameEnter();
-    // GAME_MANAGER->setStage(User::getClearStage()+1);
-    GAME_MANAGER->setStage(1);
     GameManager::onGameStart();
 }
 
@@ -155,13 +155,7 @@ void GameScene::onStageClear(const StageData &stage) {
         
         popup->dismiss();
         
-        // 마지막 스테이지 클리어한 경우, 1스테이지로 복귀
-        if( stage.stage == Database::getLastStage().stage ) {
-            GAME_MANAGER->setStage(User::getClearStage()+1);
-            GameManager::onStageChanged();
-        } else {
-            GameManager::onMoveNextStage();
-        }
+        GameManager::onMoveNextStage();
     });
     SceneManager::getInstance()->getScene()->addChild(popup, ZOrder::POPUP_BOTTOM);
 }

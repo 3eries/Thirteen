@@ -10,6 +10,8 @@
 #include "cocos2d.h"
 #include "superbomb.h"
 
+#define INVALID_TILE_NUMBER         0
+
 typedef cocos2d::Vec2 TilePosition;
 typedef std::vector<TilePosition> TilePositionList;
 
@@ -34,7 +36,10 @@ struct StageData {
     int             tileRows;                // 타일 가로줄 수
     int             tileColumns;             // 타일 세로줄 수
     
-    StageData() : stage(0), numberWeightSum(0) {}
+    // 가상 레벨에서 사용하는 변수
+    bool            isVirtual;
+    
+    StageData() : stage(0), numberWeightSum(0), isVirtual(false) {}
     
     void parse(const rapidjson::Value &v, rapidjson::Document::AllocatorType &allocator) {
         
@@ -116,14 +121,18 @@ struct StageData {
         return stage == 0;
     }
     
-    bool isTileEmpty(const TilePosition &p) const {
+    TileData getTile(const TilePosition &p) const {
         for( auto tile : tiles ) {
             if( tile.p.equals(p) ) {
-                return tile.isEmpty;
+                return tile;
             }
         }
         
-        return true;
+        return TileData();
+    }
+    
+    bool isTileEmpty(const TilePosition &p) const {
+        return getTile(p).isEmpty;
     }
     
     int getTileId(const TilePosition &p) const {
