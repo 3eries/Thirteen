@@ -29,6 +29,7 @@ private:
     
     bool init() override;
     void onEnter() override;
+    void onEnterTransitionDidFinish() override;
     void cleanup() override;
     
     void initBg();

@@ -124,6 +124,7 @@
 		1DCD692923168F850039BF87 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1DCD692823168F840039BF87 /* GoogleService-Info.plist */; };
 		1DEDA9B022EDF5B3001F68ED /* SBSkeletonAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1DEDA9AE22EDF5B3001F68ED /* SBSkeletonAnimation.cpp */; };
 		1DEDA9B522EE046E001F68ED /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1DEDA9B722EE046E001F68ED /* InfoPlist.strings */; };
+		1DF0D2F82318EABD00EA555B /* HowToPlayPopup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1DF0D2F62318EABD00EA555B /* HowToPlayPopup.cpp */; };
 		1DF5F4E00D08C38300B7A737 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DF5F4DF0D08C38300B7A737 /* UIKit.framework */; };
 		288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 288765A40DF7441C002DB57D /* CoreGraphics.framework */; };
 		294D0D641D0D56D500F7F5D4 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 294D0D631D0D56D500F7F5D4 /* CoreText.framework */; };
@@ -380,6 +381,8 @@
 		1DEDA9AF22EDF5B3001F68ED /* SBSkeletonAnimation.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = SBSkeletonAnimation.hpp; sourceTree = "<group>"; };
 		1DEDA9B622EE046E001F68ED /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		1DEDA9B822EE048A001F68ED /* ko */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ko; path = ko.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1DF0D2F62318EABD00EA555B /* HowToPlayPopup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HowToPlayPopup.cpp; sourceTree = "<group>"; };
+		1DF0D2F72318EABD00EA555B /* HowToPlayPopup.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = HowToPlayPopup.hpp; sourceTree = "<group>"; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		294D0D631D0D56D500F7F5D4 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreText.framework; sourceTree = DEVELOPER_DIR; };
@@ -619,6 +622,8 @@
 				1D9CDD2B22E8A34B00106DA2 /* ReviewPopup.hpp */,
 				1D9CDD2C22E8A34B00106DA2 /* SettingPopup.cpp */,
 				1D9CDD2422E8A34B00106DA2 /* SettingPopup.hpp */,
+				1DF0D2F62318EABD00EA555B /* HowToPlayPopup.cpp */,
+				1DF0D2F72318EABD00EA555B /* HowToPlayPopup.hpp */,
 			);
 			path = popup;
 			sourceTree = "<group>";
@@ -1244,6 +1249,7 @@
 				1D5D5AF42309D94800A30FBB /* GameManager.cpp in Sources */,
 				1D9CDDFA22E8A34D00106DA2 /* SBPlatformHelper-ios.mm in Sources */,
 				1D9CDDDA22E8A34D00106DA2 /* SBBasePopup.cpp in Sources */,
+				1DF0D2F82318EABD00EA555B /* HowToPlayPopup.cpp in Sources */,
 				1D9CDDF922E8A34D00106DA2 /* SBAnalytics.cpp in Sources */,
 				1DAA5BE622EFEF5100D0C06B /* GLES-Render.cpp in Sources */,
 				1D9CDE0A22E8A34D00106DA2 /* ConsentManager.cpp in Sources */,

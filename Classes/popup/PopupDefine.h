@@ -19,6 +19,7 @@ enum class PopupType {
     UPDATE_COMING_SOON,
     SHOP,
     SETTING,
+    HOW_TO_PLAY,
     PAUSE,
     GET_HINT,
     GAME_CLEAR,

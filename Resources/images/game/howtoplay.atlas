@@ -1,0 +1,97 @@
+
+howtoplay.png
+size: 2048,512
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+bg_popup
+  rotate: false
+  xy: 2, 174
+  size: 556, 329
+  orig: 556, 329
+  offset: 0, 0
+  index: -1
+bg_popup_cover
+  rotate: false
+  xy: 560, 174
+  size: 556, 329
+  orig: 556, 329
+  offset: 0, 0
+  index: -1
+bg_tile
+  rotate: false
+  xy: 1118, 197
+  size: 84, 84
+  orig: 84, 84
+  offset: 0, 0
+  index: -1
+bg_tile_select1
+  rotate: false
+  xy: 1570, 419
+  size: 84, 84
+  orig: 84, 84
+  offset: 0, 0
+  index: -1
+bg_tile_select2
+  rotate: false
+  xy: 370, 88
+  size: 178, 84
+  orig: 178, 84
+  offset: 0, 0
+  index: -1
+bg_tile_select3
+  rotate: false
+  xy: 2, 2
+  size: 272, 84
+  orig: 272, 84
+  offset: 0, 0
+  index: -1
+bg_tile_select4
+  rotate: false
+  xy: 2, 88
+  size: 366, 84
+  orig: 366, 84
+  offset: 0, 0
+  index: -1
+hand1
+  rotate: false
+  xy: 1344, 283
+  size: 224, 220
+  orig: 224, 220
+  offset: 0, 0
+  index: -1
+hand2
+  rotate: false
+  xy: 1118, 283
+  size: 224, 220
+  orig: 224, 220
+  offset: 0, 0
+  index: -1
+number_1
+  rotate: false
+  xy: 276, 2
+  size: 84, 84
+  orig: 84, 84
+  offset: 0, 0
+  index: -1
+number_3
+  rotate: false
+  xy: 550, 88
+  size: 84, 84
+  orig: 84, 84
+  offset: 0, 0
+  index: -1
+number_4
+  rotate: false
+  xy: 1204, 197
+  size: 84, 84
+  orig: 84, 84
+  offset: 0, 0
+  index: -1
+number_5
+  rotate: false
+  xy: 1570, 333
+  size: 84, 84
+  orig: 84, 84
+  offset: 0, 0
+  index: -1

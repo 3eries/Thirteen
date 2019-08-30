@@ -15,6 +15,8 @@
 #include "object/HintButton.hpp"
 #include "object/StageProgressBar.hpp"
 
+#include "HowToPlayPopup.hpp"
+
 USING_NS_CC;
 USING_NS_SB;
 using namespace std;
@@ -72,6 +74,18 @@ void GameView::onEnter() {
     Node::onEnter();
     
     onStageChanged(GAME_MANAGER->getStage());
+}
+
+void GameView::onEnterTransitionDidFinish() {
+    
+    Node::onEnterTransitionDidFinish();
+    
+    // 튜토리얼
+    if( GAME_MANAGER->getStage().stage == 1 ) {
+        auto howToPlayPopup = HowToPlayPopup::create();
+        howToPlayPopup->setTutorial(true);
+        SceneManager::getScene()->addChild(howToPlayPopup, ZOrder::POPUP_MIDDLE);
+    }
 }
 
 void GameView::cleanup() {

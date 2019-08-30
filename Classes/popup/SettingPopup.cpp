@@ -10,8 +10,9 @@
 #include "User.hpp"
 #include "UserDefaultKey.h"
 #include "GameConfiguration.hpp"
-
 #include "SceneManager.h"
+
+#include "HowToPlayPopup.hpp"
 
 USING_NS_CC;
 USING_NS_SB;
@@ -123,8 +124,12 @@ void SettingPopup::initContentView() {
     
     howToPlayBtn->setOnClickListener([=](Node*) {
         
-        // TODO:
         SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
+        
+        this->dismiss();
+        
+        auto howToPlayPopup = HowToPlayPopup::create();
+        SceneManager::getScene()->addChild(howToPlayPopup, ZOrder::POPUP_MIDDLE);
     });
     
     // more games
