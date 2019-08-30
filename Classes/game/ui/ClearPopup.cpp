@@ -96,6 +96,11 @@ void ClearPopup::runEnterAction(SBCallback onFinished) {
     
     BasePopup::runEnterAction(SLIDE_DURATION, onFinished);
     
+    // 효과음
+    SBDirector::postDelayed(this, [=]() {
+        SBAudioEngine::playEffect(SOUND_LEVEL_CLEAR);
+    }, SLIDE_DURATION*0.5f);
+    
     // 배경 fade in
     runBackgroundFadeInAction(nullptr, FADE_DURATION);
     
@@ -133,8 +138,6 @@ void ClearPopup::runExitAction(SBCallback onFinished) {
 void ClearPopup::onEnterActionFinished() {
     
     BasePopup::onEnterActionFinished();
-    
-    SBAudioEngine::playEffect(SOUND_LEVEL_CLEAR);
     
     // 화면 터치 이벤트
     auto touchNode = SBNodeUtils::createTouchNode();
