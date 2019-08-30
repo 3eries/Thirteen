@@ -116,7 +116,7 @@ static const std::string SOUND_BGM_GAME             = DIR_SOUND + "bgm_02.mp3";
 static const std::string SOUND_BUTTON_CLICK         = DIR_SOUND + "effect_01.mp3";
 static const std::string SOUND_TILE_SELECT          = DIR_SOUND + "effect_02.mp3";
 static const std::string SOUND_NUMBER_MADE          = DIR_SOUND + "effect_03.mp3";
-static const std::string SOUND_TILE_REFRESH         = DIR_SOUND + "effect_04.wav";
+static const std::string SOUND_TILE_REFRESH         = DIR_SOUND + "effect_04.mp3";
 static const std::string SOUND_LEVEL_CLEAR          = DIR_SOUND + "effect_05.mp3";
 
 // 좌표 및 크기
