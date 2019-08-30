@@ -28,19 +28,12 @@ bool BannerView::init() {
     setPosition(Vec2::ZERO);
     setContentSize(Size::ZERO);
     
-    auto bg = Sprite::create(DIR_IMG_COMMON + "common_banner_bg.png");
-    bg->setAnchorPoint(ANCHOR_MB);
-    bg->setPosition(Vec2BC(0,0));
-    addChild(bg);
-    
-    bg->addChild(SBNodeUtils::createBackgroundNode(bg, Color4B::BLACK));
-    
     // more games 버튼
     moreGames = SBButton::create(DIR_IMG_COMMON + "common_banner_more_games.png");
     moreGames->setZoomScale(0);
-    moreGames->setAnchorPoint(ANCHOR_M);
-    moreGames->setPosition(Vec2MC(bg->getContentSize(), 0,0));
-    bg->addChild(moreGames);
+    moreGames->setAnchorPoint(ANCHOR_MB);
+    moreGames->setPosition(Vec2BC(0,0));
+    addChild(moreGames);
     
     moreGames->setOnClickListener([=](Node*) {
         
