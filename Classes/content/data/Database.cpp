@@ -81,20 +81,24 @@ void Database::parseLevelJson() {
     // log
     for( auto stage : stages ) {
         CCLOG("%s", stage.toString().c_str());
+        CCLOG("%s", stage.getTileMapString().c_str());
     }
     
-    // valid
-//    for( int i = 0; i < 3; ++i ) {
-//        addVirtualLevel();
-//    }
-    //
+    // 가상 레벨 추가
+    int virtualLevelCount = (User::getClearStage()+1) - getLastStage().stage;
     
-    // 가상 스테이지 추가
-    int addCount = (User::getClearStage()+1) - getLastStage().stage;
-    CCLOG("addCount: %d", addCount);
-    
-    for( int i = 0; i < addCount; ++i ) {
-        addVirtualLevel();
+    if( virtualLevelCount > 0 ) {
+        CCLOG("========== VIRTUAL LEVEL ADD START ==========");
+        CCLOG("COUNT: %d", virtualLevelCount);
+        
+        double t = SBSystemUtils::getCurrentTimeSeconds();
+        
+        for( int i = 0; i < virtualLevelCount; ++i ) {
+            addVirtualLevel();
+        }
+        
+        CCLOG("dt: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
+        CCLOG("========== VIRTUAL LEVEL ADD END ==========");
     }
 }
 
@@ -154,6 +158,8 @@ StageData Database::addVirtualLevel() {
  */
 StageData Database::createVirtualLevel() {
     
+    CCLOG("========== CREATE VIRTUAL LEVEL START ==========");
+    
     auto levels = getOriginalStages();
     auto randomLevel = levels[arc4random() % levels.size()];
     
@@ -161,42 +167,16 @@ StageData Database::createVirtualLevel() {
     level.isVirtual = true;
     level.stage = getLastStage().stage+1;
     
-    // 타일 개수 설정
+    // 타일 설정
     level.tileRows = SBMath::random(2, 10);
     level.tileColumns = SBMath::random(2, 7);
-    level.numberWeightSum = 100;
     
     int totalTileCount = level.tileRows * level.tileColumns;
     int removeTileCount = (totalTileCount <= 16) ? 0 : totalTileCount * (SBMath::random(3,5) * 0.1f);
     int tileCount = totalTileCount - removeTileCount;
     
-    if( tileCount <= 10 ) {
-        level.numbers       = IntList({ 5,8 });
-        level.numberWeights = IntList({ 50,50 });
-    }
-    else if( tileCount <= 20 ) {
-        level.numbers       = IntList({ 2,3,4 });
-        level.numberWeights = IntList({ 33,34,33 });
-    }
-    else if( tileCount <= 30 ) {
-        level.numbers       = IntList({ 2,3,4,5 });
-        level.numberWeights = IntList({ 20,35,25,20 });
-    }
-    else if( tileCount <= 50 ) {
-        level.numbers       = IntList({ 1,2,3,6,7, });
-        level.numberWeights = IntList({ 10,25,35,15,15 });
-    }
-    else {
-        level.numbers       = IntList({ 1,2,3,5,8,10,12 });
-        level.numberWeights = IntList({ 7,20,30,15,15,8,5 });
-    }
-    
-    level.clearCondition = round(totalTileCount / 3.3f);
-    level.clearCondition *= (level.clearCondition <= 2) ? 2 : 1;
-    
-    CCLOG("createVirtualLevel: %d, totalTileCount: %d, removeTileCount: %d",
+    CCLOG("LEVEL: %d, totalTileCount: %d, removeTileCount: %d",
           level.stage, totalTileCount, removeTileCount);
-    CCLOG("%s", level.toString().c_str());
     
     for( int y = 0; y < level.tileRows; ++y ) {
         for( int x = 0; x < level.tileColumns; ++x ) {
@@ -209,12 +189,13 @@ StageData Database::createVirtualLevel() {
         }
     }
     
+    // 랜덤하게 타일 제거
     if( removeTileCount > 0 ) {
         auto removeAnchorTile = level.tiles[arc4random() % level.tiles.size()].p;
         
         TilePositionList removePosList;
         removePosList.push_back(removeAnchorTile);
-
+        
         for( int i = 0; i < removeTileCount-1; ++i ) {
             auto safeAdd = [=](TilePositionList &posList, const TilePosition &p) -> bool {
                 // 맵 범위 체크
@@ -252,20 +233,126 @@ StageData Database::createVirtualLevel() {
                 return tile.p.equals(removePos);
             });
         }
+        
+        CCLOG("삭제 후");
+        CCLOG("%s", level.getTileMapString().c_str());
+        
+        // 타일 규격 재설정
+        auto isEmpty = [](TileDataList tiles) -> bool {
+          
+            for( auto tile : tiles ) {
+                if( !tile.isEmpty ) {
+                    return false;
+                }
+            }
+            
+            return true;
+        };
+        
+        // 가로줄 비었는지 체크
+        for( int y = 0; y < level.tileRows; ) {
+            auto rowTiles = level.getRowTiles(y);
+            
+            // 비어있는줄 삭제
+            if( isEmpty(rowTiles) ) {
+                for( auto removeTile : rowTiles ) {
+                    SBCollection::remove(level.tiles, [removeTile](const TileData &tile) -> bool {
+                        return tile.p.equals(removeTile.p);
+                    });
+                }
+                
+                // 한칸씩 당김
+                for( int yy = y+1; yy < level.tileRows; ++yy ) {
+                    for( auto &tile : level.tiles ) {
+                        if( tile.p.y == yy ) {
+                            tile.p.y -= 1;
+                        }
+                    }
+                }
+                --level.tileRows;
+                
+            } else {
+                ++y;
+            }
+        }
+    
+        // 세로줄 비었는지 체크
+        for( int x = 0; x < level.tileColumns; ) {
+            auto columnTiles = level.getColumnTiles(x);
+            
+            // 비어있는줄 삭제
+            if( isEmpty(columnTiles) ) {
+                for( auto removeTile : columnTiles ) {
+                    SBCollection::remove(level.tiles, [removeTile](const TileData &tile) -> bool {
+                        return tile.p.equals(removeTile.p);
+                    });
+                }
+                
+                // 한칸씩 당김
+                for( int xx = x+1; xx < level.tileColumns; ++xx ) {
+                    for( auto &tile : level.tiles ) {
+                        if( tile.p.x == xx ) {
+                            tile.p.x -= 1;
+                        }
+                    }
+                }
+                --level.tileColumns;
+                
+            } else {
+                ++x;
+            }
+        }
+    }
+    
+    /*
+    if( level.tileRows != tileRows ) {
+        CCLOG("가로 %d줄 삭제", level.tileRows - tileRows);
+    }
+    
+    if( level.tileColumns != tileColumns ) {
+        CCLOG("세로 %d줄 삭제", level.tileColumns - tileColumns);
+    }
+    
+    level.tileRows = tileRows;
+    level.tileColumns = tileColumns;
+    */
+    
+    // clearCondition 설정
+    level.clearCondition = round(totalTileCount / 3.3f);
+    level.clearCondition *= (level.clearCondition <= 2) ? 2 : 1;
+    
+    // numbers 설정
+    level.numberWeightSum = 100;
+    
+    if( tileCount <= 10 ) {
+        vector<IntList> numbers({
+            IntList({ 5,8 }), IntList({ 6,7 }), IntList({ 4,9 }),
+            IntList({ 10,3 }), IntList({ 11,2 }), IntList({ 12,1 }),
+        });
+        level.numbers       = numbers[arc4random() % numbers.size()];
+        level.numberWeights = IntList({ 50,50 });
+    }
+    else if( tileCount <= 20 ) {
+        level.numbers       = IntList({ 2,3,4 });
+        level.numberWeights = IntList({ 33,34,33 });
+    }
+    else if( tileCount <= 30 ) {
+        level.numbers       = IntList({ 2,3,4,5 });
+        level.numberWeights = IntList({ 20,35,25,20 });
+    }
+    else if( tileCount <= 50 ) {
+        level.numbers       = IntList({ 1,2,3,6,7, });
+        level.numberWeights = IntList({ 10,25,35,15,15 });
+    }
+    else {
+        level.numbers       = IntList({ 1,2,3,5,8,10,12 });
+        level.numberWeights = IntList({ 7,20,30,15,15,8,5 });
     }
     
     // log
-    for( int y = 0; y < level.tileRows; ++y ) {
-        string str = "[";
-        
-        for( int x = 0; x < level.tileColumns; ++x ) {
-            auto tile = level.getTile(TilePosition(x,y));
-            str += STR_FORMAT("%d", !tile.isEmpty ? 1 : 0);
-        }
-        
-        str += "]";
-        CCLOG("%s", str.c_str());
-    }
+    CCLOG("%s", level.toString().c_str());
+    CCLOG("%s", level.getTileMapString().c_str());
+    CCLOG("========== CREATE VIRTUAL LEVEL END ==========");
     
     return level;
 }

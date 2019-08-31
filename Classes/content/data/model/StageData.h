@@ -88,8 +88,6 @@ struct StageData {
         CCASSERT(numbers.size() == numberWeights.size(), "StageData number error: 숫자 리스트와 가중치 리스트의 크기가 다릅니다.");
         
         // tile
-        CCLOG("LEVEL %d", stage);
-        
         auto tileList = v["tile"].GetArray();
         tileRows = tileList.Size();
         tileColumns = tileList[0].GetArray().Size();
@@ -98,22 +96,14 @@ struct StageData {
             auto row = tileList[i].GetArray();
             int y = tileRows - i - 1;
             
-            std::string str = "[";
-            
             for( int x = 0; x < row.Size(); ++x ) {
                 TileData tile;
                 tile.p.x = x;
                 tile.p.y = y;
                 tile.isEmpty = (row[x].GetInt() == 0 );
                 
-                // str += STR_FORMAT("%d(%d,%d)", !tile.isEmpty ? 1 : 0, (int)x, (int)y);
-                str += STR_FORMAT("%d", !tile.isEmpty ? 1 : 0);
-                
                 tiles.push_back(tile);
             }
-            
-            str += "]";
-            CCLOG("%s", str.c_str());
         }
     }
     
@@ -128,7 +118,31 @@ struct StageData {
             }
         }
         
-        return TileData();
+        TileData tile;
+        tile.p = p;
+        return tile;
+    }
+    
+    TileDataList getRowTiles(int y) const {
+    
+        TileDataList rowTiles;
+        
+        for( int x = 0; x < tileColumns; ++x ) {
+            rowTiles.push_back(getTile(TilePosition(x,y)));
+        }
+        
+        return rowTiles;
+    }
+    
+    TileDataList getColumnTiles(int x) const {
+        
+        TileDataList columnTiles;
+        
+        for( int y = 0; y < tileRows; ++y ) {
+            columnTiles.push_back(getTile(TilePosition(x,y)));
+        }
+        
+        return columnTiles;
     }
     
     bool isTileEmpty(const TilePosition &p) const {
@@ -140,8 +154,8 @@ struct StageData {
     }
     
     std::string toString() {
-        std::string str = "StageData {\n";
-        str += STR_FORMAT("\tstage: %d, clearCondition: %d\n", stage, clearCondition);
+        std::string str = "LevelData {\n";
+        str += STR_FORMAT("\tlevel: %d, clearCondition: %d\n", stage, clearCondition);
         str += STR_FORMAT("\ttileSize: %dx%d\n", tileColumns, tileRows);
         
         str += "\tnumbers: ";
@@ -155,8 +169,28 @@ struct StageData {
             str += STR_FORMAT("%d,", n);
         }
         str += "\n";
-        
         str += "}";
+        
+        return str;
+    }
+    
+    std::string getTileMapString() {
+        std::string str = STR_FORMAT("LEVEL %d\n", stage);
+        
+        for( int y = tileRows-1; y >= 0; --y ) {
+            str += "[";
+            
+            for( int x = 0; x < tileColumns; ++x ) {
+                auto tile = getTile(TilePosition(x,y));
+                str += STR_FORMAT("%d", !tile.isEmpty ? 1 : 0);
+            }
+            
+            str += "]";
+            
+            if( y > 0 ) {
+                str += "\n";
+            }
+        }
         
         return str;
     }
