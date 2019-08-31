@@ -154,6 +154,28 @@ public:
     }
     
     /**
+     * isEqual
+     */
+    template <class T, class F>
+    static bool isEqual(std::vector<T> list1, std::vector<T> list2, F func) {
+        
+        if( list1.size() != list2.size() ) {
+            return false;
+        }
+        
+        for( int i = 0; i < list1.size(); ++i ) {
+            auto o1 = list1[i];
+            auto o2 = list2[i];
+            
+            if( !func(o1,o2) ) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
      * random
      */
     template <class T>

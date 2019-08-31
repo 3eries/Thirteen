@@ -60,7 +60,7 @@ bool GameView::init() {
         addChild(btn, INT_MAX);
         
         btn->addClickEventListener([=](Ref*) {
-            this->updateTileMap(GAME_MANAGER->getStage());
+            this->updateMadePatterns();
         });
     }
     
@@ -166,6 +166,7 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
                     
                     auto move = MoveTo::create(TILE_MOVE_DURATION, convertTilePosition(tilePos));
                     auto callFunc = CallFunc::create([=]() {
+                        
                         tile->setTilePosition(tilePos);
                         tile->setTileId(level.getTileId(tilePos));
                     });
@@ -178,13 +179,16 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
                 
                 SBDirector::getInstance()->setScreenTouchLocked(false);
                 
+                // 타일 업데이트
+                this->updateNearTile();
+                this->updateMadePatterns();
+                
                 // 메이드 불가능하면 새로고침
-                if( this->getMadePatterns().size() == 0 ) {
+                if( madePatterns.size() == 0 ) {
                     this->refresh();
-                } else {
-                    this->updateNearTile();
                 }
-            }, TILE_MOVE_DURATION+0.05f);
+                
+            }, TILE_MOVE_DURATION+0.1f);
             
         }, TILE_EXIT_DURATION);
     }
@@ -195,19 +199,23 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
  */
 void GameView::onHint() {
     
-    auto patterns = getMadePatterns();
-    // CCASSERT(patterns.size() > 0, "GameView::onHint error: 메이드 패턴 없음");
+    // CCASSERT(madePatterns() > 0, "GameView::onHint error: 메이드 패턴 없음");
     
-    Log::i("GameView onHint patterns: %d", (int)patterns.size());
+    Log::i("GameView onHint patterns: %d", (int)madePatterns.size());
     
-    if( patterns.size() == 0 ) {
-        MessageBox("메이드 패턴 없음!", "힌트 사용 에러");
+    if( madePatterns.size() == 0 ) {
+        SBAnalytics::logError("use hint error: no maid pattern");
+        // MessageBox("메이드 패턴 없음!", "힌트 사용 에러");
+        
+        refresh();
+        
         return;
     }
 
     hintButton->setTouchEnabled(false);
     
     // 셔플
+    auto patterns = madePatterns;
     random_shuffle(patterns.begin(), patterns.end());
     
     // 패턴 크기 오름차순
@@ -280,7 +288,7 @@ void GameView::refresh() {
         CCLOG("capture dt: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
 
         // 맵 업데이트
-        updateTileMap(level);
+        this->updateTileMap(level);
 
         // 슬라이드 연출
         const float DURATION = LEVEL_REFRESH_DURATION * 0.7f;
@@ -350,25 +358,42 @@ void GameView::updateTileMap(const StageData &level) {
     
     for( auto tileData : level.tiles ) {
         if( !tileData.isEmpty ) {
-            /*
-            auto bg = Sprite::create(DIR_IMG_GAME + "game_tile.png");
-            bg->setColor(Color3B::BLACK);
-            bg->setAnchorPoint(ANCHOR_M);
-            bg->setPosition(convertTilePosition(tileData.p));
-            tileMap->addChild(bg, -1);
-            */
-            
             addTile(tileData);
         }
     }
     
+    //
+    {
+        map<int,int> currentNumberCounts;
+        
+        for( auto tile : tiles ) {
+            int n = tile->getNumber();
+            if( n == INVALID_TILE_NUMBER ) {
+                continue;
+            }
+            
+            if( currentNumberCounts.find(n) == currentNumberCounts.end() ) {
+                currentNumberCounts[n] = 1;
+            } else {
+                currentNumberCounts[n] = currentNumberCounts[n]+1;
+            }
+        }
+        
+        for( auto it = currentNumberCounts.begin(); it != currentNumberCounts.end(); ++it ) {
+            float per = ((float)it->second / tiles.size()) * 100.0f;
+            Log::i("getRandomNumber current number %d: %.2f%%", it->first, per);
+        }
+    }
+    //
+    
     updateNearTile();
+    updateMadePatterns();
     
     // 메이드 패턴 없으면 재귀
-    auto patterns = getMadePatterns();
-    Log::i("GameView updateTileMap patterns: %d", (int)patterns.size());
+    Log::i("GameView updateTileMap patterns: %d", (int)madePatterns.size());
     
-    if( patterns.size() == 0 ) {
+    if( madePatterns.size() == 0 ) {
+        SBAnalytics::logDebug("recursive update tile map");
         updateTileMap(level);
     }
 }
@@ -446,7 +471,7 @@ bool GameView::isSelectableTile(GameTile *tile) {
     return isAdjacent;
 }
 
-#define PRINT_SIMULATION_NUMBER     1
+#define PRINT_SIMULATION_NUMBER     0
 #define NUMBER_SIMULATION_COUNT     10000
 
 void GameView::resetNumberEngine() {
@@ -522,90 +547,106 @@ int GameView::getRandomNumber() {
     //    return numbers[0];
 }
 
+#pragma mark- Tile
+
 void GameView::recursiveMadePattern(GameTile *anchorTile, MadePattern &pattern, int &sum) {
     
-    if( !anchorTile || sum >= 13 ) {
+    if( !anchorTile || sum == 13 ) {
         return;
     }
     
-    // 이미 등록된 타일
-    for( auto patternTile : pattern ) {
-        if( anchorTile == patternTile ) {
+    // 신규 타일만 계산
+    if( !SBCollection::contains(pattern, anchorTile) ) {
+        if( sum + anchorTile->getNumber() <= 13 ) {
+            sum += anchorTile->getNumber();
+            pattern.push_back(anchorTile);
+        }
+        // 13 초과 하는 경우 정지
+        else {
             return;
         }
     }
     
-    sum += anchorTile->getNumber();
-    pattern.push_back(anchorTile);
-    
-    recursiveMadePattern(anchorTile->getLeft(), pattern, sum);
-    recursiveMadePattern(anchorTile->getRight(), pattern, sum);
-    recursiveMadePattern(anchorTile->getTop(), pattern, sum);
-    recursiveMadePattern(anchorTile->getBottom(), pattern, sum);
+    auto recursiveNearTile = [this](GameTile *nearTile, MadePattern &pattern, int &sum) {
+      
+        if( !SBCollection::contains(pattern, nearTile) ) {
+            this->recursiveMadePattern(nearTile, pattern, sum);
+        }
+    };
+
+    recursiveNearTile(anchorTile->getLeft(), pattern, sum);
+    recursiveNearTile(anchorTile->getRight(), pattern, sum);
+    recursiveNearTile(anchorTile->getTop(), pattern, sum);
+    recursiveNearTile(anchorTile->getBottom(), pattern, sum);
+//    recursiveMadePattern(anchorTile->getLeft(), pattern, sum);
+//    recursiveMadePattern(anchorTile->getRight(), pattern, sum);
+//    recursiveMadePattern(anchorTile->getTop(), pattern, sum);
+//    recursiveMadePattern(anchorTile->getBottom(), pattern, sum);
 }
 
-vector<GameView::MadePattern> GameView::getMadePatterns() {
-
-    CCLOG("MADE PATTERN START");
+void GameView::updateMadePatterns() {
+    
+    CCLOG("========== UPDATE MADE PATTERNS START ==========");
     double t = SBSystemUtils::getCurrentTimeSeconds();
+
+    madePatterns.clear();
     
-    vector<MadePattern> patterns;
-    
-    auto contains = [=](const MadePattern &pattern, vector<MadePattern> patterns) -> bool {
-      
-        for( auto p : patterns ) {
-            if( p.size() != pattern.size() ) {
-                continue;
-            }
-            
-            // 리스트 비교
-            bool equals = true;
-            
-            for( int i = 0; i < p.size(); ++i ) {
-                auto t1 = p[i];
-                auto t2 = pattern[i];
-                
-                if( t1->getTileId() != t2->getTileId() ) {
-                    equals = false;
-                    break;
-                }
-            }
-            
-            if( equals ) {
+    auto contains = [=](const MadePattern &pattern) -> bool {
+
+        for( auto p : madePatterns ) {
+            auto compare = [](GameTile *t1, GameTile *t2) -> bool {
+                return t1->getTileId() == t2->getTileId();
+            };
+
+            if( SBCollection::isEqual(p, pattern, compare) ){
                 return true;
             }
         }
-        
+
         return false;
     };
-    
+
     for( auto tile : tiles ) {
-        int number = 0;
-        MadePattern pattern;
-        
-        recursiveMadePattern(tile, pattern, number);
-        
-        if( number == 13 ) {
-            // 타일 아이디 오름차순 정렬
-            sort(pattern.begin(), pattern.end(), [](GameTile *t1, GameTile *t2) -> bool {
-                return t1->getTileId() < t2->getTileId();
-            });
+        auto checkPattern = [=](GameTile *nearTile) {
             
-            string str = "";
-            for( auto tile : pattern) {
-                str += STR_FORMAT("%d,", tile->getTileId());
+            if( !nearTile ) {
+                return;
             }
             
-            if( !contains(pattern, patterns) ) {
-                CCLOG("%s", str.c_str());
-                patterns.push_back(pattern);
+            MadePattern pattern;
+            pattern.push_back(tile);
+            pattern.push_back(nearTile);
+            
+            int number = getTileNumberSum(pattern);
+            this->recursiveMadePattern(nearTile, pattern, number);
+
+            if( number == 13 ) {
+                // 타일 아이디 오름차순 정렬
+                sort(pattern.begin(), pattern.end(), [](GameTile *t1, GameTile *t2) -> bool {
+                    return t1->getTileId() < t2->getTileId();
+                });
+
+                string str = "";
+                for( auto tile : pattern ) {
+                    str += STR_FORMAT("%d,", tile->getTileId());
+                }
+
+                if( !contains(pattern) ) {
+                    CCLOG("%s", str.c_str());
+                    madePatterns.push_back(pattern);
+                }
             }
-        }
+        };
+        
+        checkPattern(tile->getLeft());
+        checkPattern(tile->getRight());
+        checkPattern(tile->getTop());
+        checkPattern(tile->getBottom());
     }
     
-    CCLOG("MADE PATTERN END -> dt: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
-    
-    return patterns;
+    CCLOG("patterns: %d", (int)madePatterns.size());
+    CCLOG("dt: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
+    CCLOG("========== UPDATE MADE PATTERNS END ==========");
 }
 
 GameTile* GameView::getTile(const TilePosition &p) {
@@ -652,6 +693,19 @@ TilePositionList GameView::getValidColumnTilePositions(int x) {
     
     return posList;
 }
+
+int GameView::getTileNumberSum(GameTileList tiles) {
+    
+    int sum = 0;
+    
+    for( auto tile : tiles ) {
+        sum += tile->getNumber();
+    }
+    
+    return sum;
+}
+
+#pragma mark- Game Event
 
 /**
  * 게임 리셋
@@ -710,6 +764,14 @@ void GameView::onStageClear(const StageData &stage) {
  */
 void GameView::onMoveNextStage() {
     
+//    GameTileList currentGameTiles;
+//
+//    // 다음 레벨로 변경
+//    auto nextLevel = GAME_MANAGER->getStage();
+//
+//    updateTileMap(nextLevel);
+//    isTileMapUpdateLocked = true;
+    
     // 현재 맵 캡쳐
     double t = SBSystemUtils::getCurrentTimeSeconds();
 
@@ -726,17 +788,17 @@ void GameView::onMoveNextStage() {
     CC_SAFE_RELEASE(image);
 
     CCLOG("capture dt: %f", SBSystemUtils::getCurrentTimeSeconds() - t);
-    
+
     // 다음 레벨로 변경
     auto nextLevel = GAME_MANAGER->getStage();
-    
+
     updateTileMap(nextLevel);
     isTileMapUpdateLocked = true;
-    
+
     // 맵 슬라이드 연출
     auto move = MoveBy::create(MOVE_NEXT_LEVEL_DURATION, Vec2(-SB_WIN_SIZE.width, 0));
     currentMap->runAction(Sequence::create(move, RemoveSelf::create(), nullptr));
-    
+
     tileMap->setPositionX(tileMap->getPositionX() + SB_WIN_SIZE.width);
     tileMap->runAction(move->clone());
     
@@ -751,6 +813,8 @@ void GameView::onMoveNextStage() {
  */
 void GameView::onMoveNextStageFinished() {
 }
+
+#pragma mark- Touch Event
 
 /**
  * 터치 시작

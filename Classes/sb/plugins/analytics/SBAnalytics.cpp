@@ -13,6 +13,10 @@
 USING_NS_SB;
 using namespace std;
 
+const string SBAnalytics::EVENT_DEBUG                      = "series_debug";
+const string SBAnalytics::EVENT_ERROR                      = "series_error";
+const string SBAnalytics::EVENT_PARAM_MESSAGE              = "message";
+
 void SBAnalytics::init() {
 }
 
@@ -36,6 +40,26 @@ void SBAnalytics::logEvent(const string &event, const EventParams &params) {
 #endif // SB_PLUGIN_USE_FIREBASE_ANALYTICS
     
 #endif // COCOS2D_DEBUG == 0
+}
+
+void SBAnalytics::logDebug(const string &msg) {
+    
+    EventParams params;
+    params[EVENT_PARAM_MESSAGE] = msg;
+    
+#if SB_PLUGIN_USE_FIREBASE_ANALYTICS
+    FirebaseAnalytics::logEvent(EVENT_DEBUG, params);
+#endif // SB_PLUGIN_USE_FIREBASE_ANALYTICS
+}
+
+void SBAnalytics::logError(const string &msg) {
+    
+    EventParams params;
+    params[EVENT_PARAM_MESSAGE] = msg;
+    
+#if SB_PLUGIN_USE_FIREBASE_ANALYTICS
+    FirebaseAnalytics::logEvent(EVENT_ERROR, params);
+#endif // SB_PLUGIN_USE_FIREBASE_ANALYTICS
 }
 
 string SBAnalytics::getNumberRange(int n, int begin, int end, int range) {

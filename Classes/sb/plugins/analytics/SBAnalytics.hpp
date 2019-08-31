@@ -16,13 +16,22 @@
 
 class SBAnalytics {
 public:
+    static const std::string EVENT_DEBUG;
+    static const std::string EVENT_ERROR;
+    static const std::string EVENT_PARAM_MESSAGE;
+    
+    typedef cocos2d::ValueMap EventParams;
+    typedef cocos2d::Value    EventParam;
+    
+public:
     static void init();
     static void setCurrentScreen(const std::string &screen,
                                  const std::string &screenClass = "");
     
-    typedef cocos2d::ValueMap EventParams;
-    typedef cocos2d::Value    EventParam;
     static void logEvent(const std::string &event, const EventParams &params = EventParams());
+    
+    static void logDebug(const std::string &msg);
+    static void logError(const std::string &msg);
     
     static std::string getNumberRange(int n, int begin, int end, int range);
 };

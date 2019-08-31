@@ -53,14 +53,28 @@ private:
     void resetNumberEngine();
     int getRandomNumber();
     
-    typedef GameTileList MadePattern;
+private:
+    HintButton *hintButton;
+    StageProgressBar *stageProgressBar;
+    
+    IntList numbers;
+    std::mt19937 numberEngine;
+    
+    int clearCount; // 클리어 횟수
+
+#pragma mark- Tile
+private:
+    typedef GameTileList             MadePattern;
+    typedef std::vector<MadePattern> MadePatternList;
     
     void recursiveMadePattern(GameTile *anchorTile, MadePattern &pattern, int &sum);
-    std::vector<MadePattern> getMadePatterns();
+    void updateMadePatterns();
     
     GameTile*        getTile(const TilePosition &p);
     GameTileList     getColumnTiles(int x);
     TilePositionList getValidColumnTilePositions(int x);
+    
+    static int getTileNumberSum(GameTileList tiles);
     
 private:
     bool isTileMapUpdateLocked;
@@ -71,15 +85,9 @@ private:
     GameTileList tiles;
     GameTileList selectedTiles;
     
-    HintButton *hintButton;
-    StageProgressBar *stageProgressBar;
+    MadePatternList madePatterns;
     
-    IntList numbers;
-    std::mt19937 numberEngine;
-    
-    int clearCount; // 클리어 횟수
-    
-// Game Event
+#pragma mark- Game Event
 public:
     void onGameReset();
     void onGamePause();
@@ -92,7 +100,7 @@ public:
     void onMoveNextStage();
     void onMoveNextStageFinished();
     
-// Touch Event
+#pragma mark- Touch Event
 private:
     bool onTouchBegan(cocos2d::Touch *touch, cocos2d::Event*);
     void onTouchMoved(cocos2d::Touch *touch, cocos2d::Event*);
