@@ -137,7 +137,7 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
     
     // 타일 이동
     if( !isLevelClear ) {
-        isTouchLocked = true;
+        SBDirector::getInstance()->setScreenTouchLocked(true);
         
         SBDirector::postDelayed(this, [=]() {
             for( auto it = clearTilesMap.begin(); it != clearTilesMap.end(); ++it ) {
@@ -176,7 +176,7 @@ void GameView::onNumberClear(GameTileList selectedTiles) {
             // 이동 완료
             SBDirector::postDelayed(this, [=]() {
                 
-                this->isTouchLocked = false;
+                SBDirector::getInstance()->setScreenTouchLocked(false);
                 
                 // 메이드 불가능하면 새로고침
                 if( this->getMadePatterns().size() == 0 ) {
