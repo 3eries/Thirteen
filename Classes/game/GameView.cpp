@@ -51,7 +51,8 @@ bool GameView::init() {
     touchListener->onTouchCancelled = CC_CALLBACK_2(GameView::onTouchCancelled, this);
     getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
     
-    // FIXME: 다시 하기 버튼
+    // FIXME: 테스트 버튼, 릴리즈 버전에서 제거 해야함
+    /*
     {
         auto btn = SBNodeUtils::createTouchNode();
         btn->setAnchorPoint(ANCHOR_MT);
@@ -63,7 +64,8 @@ bool GameView::init() {
             this->updateMadePatterns();
         });
     }
-    
+    */
+     
     return true;
 }
 
