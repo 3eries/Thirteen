@@ -772,6 +772,8 @@ void GameView::onMoveNextStage() {
 //    updateTileMap(nextLevel);
 //    isTileMapUpdateLocked = true;
     
+    SBAudioEngine::playEffect(SOUND_TILE_REFRESH);
+    
     // 현재 맵 캡쳐
     double t = SBSystemUtils::getCurrentTimeSeconds();
 
