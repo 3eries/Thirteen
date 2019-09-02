@@ -67,7 +67,7 @@ private:
     typedef GameTileList             MadePattern;
     typedef std::vector<MadePattern> MadePatternList;
     
-    void recursiveMadePattern(GameTile *anchorTile, MadePattern &pattern, int &sum);
+    void recursiveMadePatternSearch(GameTile *anchorTile, MadePattern &pattern, int &sum);
     void updateMadePatterns();
     
     GameTile*        getTile(const TilePosition &p);

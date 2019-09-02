@@ -549,7 +549,13 @@ int GameView::getRandomNumber() {
 
 #pragma mark- Tile
 
-void GameView::recursiveMadePattern(GameTile *anchorTile, MadePattern &pattern, int &sum) {
+#define MADE_PATTERN_SEARCH_COUNT                   1
+
+void GameView::recursiveMadePatternSearch(GameTile *anchorTile, MadePattern &pattern, int &sum) {
+    
+    if( madePatterns.size() == MADE_PATTERN_SEARCH_COUNT ) {
+        return;
+    }
     
     if( !anchorTile || sum == 13 ) {
         return;
@@ -567,17 +573,17 @@ void GameView::recursiveMadePattern(GameTile *anchorTile, MadePattern &pattern, 
         }
     }
     
-    auto recursiveNearTile = [this](GameTile *nearTile, MadePattern &pattern, int &sum) {
+    auto searchNearTile = [this](GameTile *nearTile, MadePattern &pattern, int &sum) {
       
         if( !SBCollection::contains(pattern, nearTile) ) {
-            this->recursiveMadePattern(nearTile, pattern, sum);
+            this->recursiveMadePatternSearch(nearTile, pattern, sum);
         }
     };
 
-    recursiveNearTile(anchorTile->getLeft(), pattern, sum);
-    recursiveNearTile(anchorTile->getRight(), pattern, sum);
-    recursiveNearTile(anchorTile->getTop(), pattern, sum);
-    recursiveNearTile(anchorTile->getBottom(), pattern, sum);
+    searchNearTile(anchorTile->getLeft(), pattern, sum);
+    searchNearTile(anchorTile->getRight(), pattern, sum);
+    searchNearTile(anchorTile->getTop(), pattern, sum);
+    searchNearTile(anchorTile->getBottom(), pattern, sum);
 //    recursiveMadePattern(anchorTile->getLeft(), pattern, sum);
 //    recursiveMadePattern(anchorTile->getRight(), pattern, sum);
 //    recursiveMadePattern(anchorTile->getTop(), pattern, sum);
@@ -609,6 +615,10 @@ void GameView::updateMadePatterns() {
     for( auto tile : tiles ) {
         auto checkPattern = [=](GameTile *nearTile) {
             
+            if( madePatterns.size() == MADE_PATTERN_SEARCH_COUNT ) {
+                return;
+            }
+            
             if( !nearTile ) {
                 return;
             }
@@ -618,7 +628,7 @@ void GameView::updateMadePatterns() {
             pattern.push_back(nearTile);
             
             int number = getTileNumberSum(pattern);
-            this->recursiveMadePattern(nearTile, pattern, number);
+            this->recursiveMadePatternSearch(nearTile, pattern, number);
 
             if( number == 13 ) {
                 // 타일 아이디 오름차순 정렬
@@ -642,6 +652,10 @@ void GameView::updateMadePatterns() {
         checkPattern(tile->getRight());
         checkPattern(tile->getTop());
         checkPattern(tile->getBottom());
+        
+        if( madePatterns.size() == MADE_PATTERN_SEARCH_COUNT ) {
+            break;
+        }
     }
     
     CCLOG("patterns: %d", (int)madePatterns.size());
