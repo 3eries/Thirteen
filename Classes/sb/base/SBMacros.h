@@ -25,7 +25,7 @@
 #define SB_FORCE_LOG(format, ...)               cocos2d::log(format, ##__VA_ARGS__)
 
 #define DIR_ADD(__base__, __dir__)              std::string(__base__).append(__dir__).append("/")
-#define HASH_STR(__str__)                       SBStringUtils::hashStr(__str__.c_str())
+#define HASH_STR(__str__)                       SBStringUtils::hashStr(__str__)
 #define STR_FORMAT(__format__, ...)             cocos2d::StringUtils::format(__format__, __VA_ARGS__)
 #define TO_STRING(__var__)                      SBStringUtils::toString(__var__)
 #define TO_INTEGER(__var__)                     SBStringUtils::toNumber<int>(__var__)
