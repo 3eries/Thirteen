@@ -23,6 +23,7 @@
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
 		1D610A632316954C0042F5D0 /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D610A622316954C0042F5D0 /* MediaPlayer.framework */; };
 		1D610A65231695550042F5D0 /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D610A64231695540042F5D0 /* GameController.framework */; };
+		1D6EC38623256A4700554D87 /* AdUnit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D6EC38423256A4700554D87 /* AdUnit.cpp */; };
 		1D9CDDBE22E8A34D00106DA2 /* PatchManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CDCED22E8A34A00106DA2 /* PatchManager.cpp */; };
 		1D9CDDBF22E8A34D00106DA2 /* Define.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CDCEE22E8A34A00106DA2 /* Define.cpp */; };
 		1D9CDDC022E8A34D00106DA2 /* FunnyHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D9CDCF022E8A34A00106DA2 /* FunnyHelper.cpp */; };
@@ -189,6 +190,8 @@
 		1D6058910D05DD3D006BFB54 /* Thirteen-mobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Thirteen-mobile.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D610A622316954C0042F5D0 /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/MediaPlayer.framework; sourceTree = DEVELOPER_DIR; };
 		1D610A64231695540042F5D0 /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/GameController.framework; sourceTree = DEVELOPER_DIR; };
+		1D6EC38423256A4700554D87 /* AdUnit.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AdUnit.cpp; sourceTree = "<group>"; };
+		1D6EC38523256A4700554D87 /* AdUnit.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AdUnit.hpp; sourceTree = "<group>"; };
 		1D9CDCED22E8A34A00106DA2 /* PatchManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PatchManager.cpp; sourceTree = "<group>"; };
 		1D9CDCEE22E8A34A00106DA2 /* Define.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Define.cpp; sourceTree = "<group>"; };
 		1D9CDCEF22E8A34A00106DA2 /* Define.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Define.h; sourceTree = "<group>"; };
@@ -721,6 +724,8 @@
 				1D9CDD5222E8A34B00106DA2 /* AdsHelper-ios.mm */,
 				1D9CDD5522E8A34B00106DA2 /* AdsHelper.cpp */,
 				1D9CDD4A22E8A34B00106DA2 /* AdsHelper.hpp */,
+				1D6EC38423256A4700554D87 /* AdUnit.cpp */,
+				1D6EC38523256A4700554D87 /* AdUnit.hpp */,
 				1D9CDD4E22E8A34B00106DA2 /* ios */,
 			);
 			path = ads;
@@ -1220,6 +1225,7 @@
 				1D9CDDF522E8A34D00106DA2 /* PluginPlay.cpp in Sources */,
 				1D9CDF4C22E8A6E700106DA2 /* SplashScene.cpp in Sources */,
 				1DAA5BE822EFEF5100D0C06B /* SBPhysics.cpp in Sources */,
+				1D6EC38623256A4700554D87 /* AdUnit.cpp in Sources */,
 				1DB2756523156E8900930927 /* ClearPopup.cpp in Sources */,
 				1D9CDDF322E8A34D00106DA2 /* FirebaseAnalytics-android.cpp in Sources */,
 				1D9CDDE622E8A34D00106DA2 /* AdsEventDispatcher.cpp in Sources */,

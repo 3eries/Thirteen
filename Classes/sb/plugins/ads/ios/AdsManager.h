@@ -29,35 +29,21 @@
     NSMutableArray *testDevices;
     
     id<GADAdNetworkExtras> vungleExtras;
-    
-    BOOL isBannerLoaded;
-    BOOL isBannerLoading;
-    BOOL isInterstitialLoading;
-    BOOL isRewardedVideoLoading;
 }
-
-@property (nonatomic, readwrite) superbomb::AdListener *onBannerListener;
-@property (nonatomic, readwrite) superbomb::AdListener *onInterstitialListener;
-@property (nonatomic, readwrite) superbomb::RewardedVideoAdListener *onRewardedVideoListener;
 
 + (AdsManager*) getInstance;
 
 - (void) initAd:(const superbomb::AdsConfig&)config;
 
-- (void) loadBanner;
-- (void) loadInterstitial;
-- (void) loadRewardedVideo;
+- (bool) loadBanner;
+- (bool) loadInterstitial;
+- (bool) loadRewardedVideo;
 
 - (void) showBanner;
 - (void) hideBanner;
 
 - (void) showInterstitial;
 - (void) showRewardedVideo;
-
-- (BOOL) isBannerVisible;
-- (BOOL) isBannerLoaded;
-- (BOOL) isInterstitialLoaded;
-- (BOOL) isRewardedVideoLoaded;
 
 - (float) getBannerWidth;
 - (float) getBannerHeight;

@@ -83,8 +83,8 @@ void User::setRemoveAds(bool isRemoveAds) {
     UserDefault::getInstance()->setBoolForKey(USER_DEFAULT_KEY_REMOVE_ADS, isRemoveAds);
     UserDefault::getInstance()->flush();
     
-    AdsHelper::getInstance()->setActiveBanner(!isRemoveAds);
-    AdsHelper::getInstance()->setActiveInterstitial(!isRemoveAds);
+    AdsHelper::getInstance()->setBannerEnabled(!isRemoveAds);
+    AdsHelper::getInstance()->setInterstitialEnabled(!isRemoveAds);
     
     if( isRemoveAds ) {
         AdsHelper::hideBanner();

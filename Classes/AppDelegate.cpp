@@ -110,8 +110,8 @@ void AppDelegate::applicationWillEnterForeground() {
 #if SB_PLUGIN_USE_ADS
     auto adsHelper = superbomb::AdsHelper::getInstance();
     
-    if( adsHelper->getInterstitial().listener->isOpened() ||
-        adsHelper->getRewardedVideo().listener->isOpened() ) {
+    if( adsHelper->getInterstitial()->isOpened() ||
+        adsHelper->getRewardedVideo()->isOpened() ) {
         return;
     }
 #endif

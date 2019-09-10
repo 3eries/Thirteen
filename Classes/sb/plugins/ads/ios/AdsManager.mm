@@ -11,6 +11,7 @@
 #import "AppController.h"
 #import "RootViewController.h"
 
+#include "../AdsHelper.hpp"
 #include "../../../base/SBDirector.hpp"
 #include "../../../platform/SBPlatformMacros.h"
 
@@ -47,10 +48,6 @@ using namespace std;
 - (id) init {
     
     if( self = [super init] ) {
-        self.onBannerListener = nullptr;
-        self.onInterstitialListener = nullptr;
-        self.onRewardedVideoListener = nullptr;
-        
         bannerView = nil;
         interstitialAd = nil;
         rewardedVideoAd = nil;
@@ -60,11 +57,6 @@ using namespace std;
         testDevices = nil;
         
         vungleExtras = nil;
-        
-        isBannerLoaded = NO;
-        isBannerLoading = NO;
-        isInterstitialLoading = NO;
-        isRewardedVideoLoading = NO;
     }
     
     return self;
@@ -249,10 +241,7 @@ using namespace std;
  */
 - (void) adViewDidReceiveAd:(GADBannerView *)bannerView {
     
-    isBannerLoading = NO;
-    isBannerLoaded = YES;
-    
-    self.onBannerListener->onAdLoaded();
+    AdsHelper::getInstance()->getBanner()->onAdLoaded();
 }
 
 /**
@@ -263,12 +252,9 @@ using namespace std;
 didFailToReceiveAdWithError:(GADRequestError *)error {
     
     NSLog(@"adView:didFailToReceiveAdWithError: %@", [error localizedDescription]);
-    
-    isBannerLoading = NO;
-    isBannerLoaded = NO;
-    
+
     int errorCode = [[NSNumber numberWithInteger:error.code] intValue];
-    self.onBannerListener->onAdFailedToLoad(errorCode);
+    AdsHelper::getInstance()->getBanner()->onAdFailedToLoad(errorCode);
 }
 
 /**
@@ -279,7 +265,7 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
 - (void) adViewWillPresentScreen:(GADBannerView *)bannerView {
     NSLog(@"adViewWillPresentScreen");
     
-    self.onBannerListener->onAdOpened();
+    AdsHelper::getInstance()->getBanner()->onAdOpened();
 }
 
 /**
@@ -296,9 +282,8 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  */
 - (void) adViewDidDismissScreen:(GADBannerView *)bannerView {
     NSLog(@"adViewDidDismissScreen");
-    isBannerLoaded = NO;
     
-    self.onBannerListener->onAdClosed();
+    AdsHelper::getInstance()->getBanner()->onAdClosed();
     [self loadBanner];
 }
 
@@ -327,8 +312,7 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  * OnAdLoaded
  */
 - (void) interstitialDidReceiveAd:(GADInterstitial *)ad {
-    isInterstitialLoading = NO;
-    self.onInterstitialListener->onAdLoaded();
+    AdsHelper::getInstance()->getInterstitial()->onAdLoaded();
 }
 
 /**
@@ -336,12 +320,11 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  */
 - (void) interstitial:(GADInterstitial *)ad
 didFailToReceiveAdWithError:(GADRequestError *)error {
-    isInterstitialLoading = NO;
     
     NSLog(@"interstitial didFailToReceiveAdWithError: %@", [error description]);
     
     int errorCode = [[NSNumber numberWithInteger:error.code] intValue];
-    self.onInterstitialListener->onAdFailedToLoad(errorCode);
+    AdsHelper::getInstance()->getInterstitial()->onAdFailedToLoad(errorCode);
 }
 
 /**
@@ -351,7 +334,7 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
     
     Application::getInstance()->applicationDidEnterBackground();
     
-    self.onInterstitialListener->onAdOpened();
+    AdsHelper::getInstance()->getInterstitial()->onAdOpened();
 }
 
 /**
@@ -359,7 +342,7 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  */
 - (void) interstitialDidDismissScreen:(GADInterstitial *)ad {
     
-    self.onInterstitialListener->onAdClosed();
+    AdsHelper::getInstance()->getInterstitial()->onAdClosed();
     [self loadInterstitial];
     
     Application::getInstance()->applicationWillEnterForeground();
@@ -386,8 +369,7 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  * OnAdLoaded
  */
 - (void) rewardBasedVideoAdDidReceiveAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
-    isRewardedVideoLoading = NO;
-    self.onRewardedVideoListener->onAdLoaded();
+    AdsHelper::getInstance()->getRewardedVideo()->onAdLoaded();
 }
 
 /**
@@ -395,12 +377,11 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  */
 - (void) rewardBasedVideoAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd
      didFailToLoadWithError:(NSError *)error {
-    isRewardedVideoLoading = NO;
-    
+
     NSLog(@"rewardBasedVideoAd didFailToLoadWithError: %@", [error description]);
     
     int errorCode = [[NSNumber numberWithInteger:error.code] intValue];
-    self.onRewardedVideoListener->onAdFailedToLoad(errorCode);
+    AdsHelper::getInstance()->getRewardedVideo()->onAdFailedToLoad(errorCode);
 }
 
 /**
@@ -411,7 +392,7 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
     Application::getInstance()->applicationDidEnterBackground();
     // SBAudioEngine::pauseAll();
     
-    self.onRewardedVideoListener->onAdOpened();
+    AdsHelper::getInstance()->getRewardedVideo()->onAdOpened();
 }
 
 /**
@@ -419,7 +400,7 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  */
 - (void) rewardBasedVideoAdDidClose:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
     
-    self.onRewardedVideoListener->onAdClosed();
+    AdsHelper::getInstance()->getRewardedVideo()->onAdClosed();
     [self loadRewardedVideo];
     
     Application::getInstance()->applicationWillEnterForeground();
@@ -430,71 +411,53 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  */
 - (void) rewardBasedVideoAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd
     didRewardUserWithReward:(GADAdReward *)reward {
-    self.onRewardedVideoListener->onRewarded([reward.type UTF8String],
-                                             [reward.amount intValue]);
+    AdsHelper::getInstance()->getRewardedVideo()->onRewarded([reward.type UTF8String],
+                                                             [reward.amount intValue]);
 }
 
-- (void) loadBanner {
+- (bool) loadBanner {
     
-    NSLog(@"loadBanner bannerView: %d isLoading: %d", bannerView != nil, isBannerLoading);
+    NSLog(@"AdsManager::loadBanner bannerView: %d", bannerView != nil);
     
     if( bannerView == nil ) {
-        return;
+        return false;
     }
     
-    if( isBannerLoading ) {
-        return;
-    }
-
     GADRequest *request = [self createRequest];
-    // [request registerAdNetworkExtras:[[GADInMobiExtras alloc] init]];
-    
     [bannerView loadRequest:request];
+    
+    return true;
 }
 
-- (void) loadInterstitial {
+- (bool) loadInterstitial {
     
-    NSLog(@"loadInterstitial isLoading: %d", isInterstitialLoading);
+    NSLog(@"AdsManager::loadInterstitial");
 
     if( !interstitialUnitId || [interstitialUnitId isEqualToString:@""] ) {
-        return;
+        return false;
     }
-    
-    if( isInterstitialLoading ) {
-        return;
-    }
-    
-    isInterstitialLoading = YES;
     
     interstitialAd = [[GADInterstitial alloc] initWithAdUnitID:interstitialUnitId];
     interstitialAd.delegate = self;
     
     GADRequest *request = [self createRequest];
-    // [request registerAdNetworkExtras:[[GADInMobiExtras alloc] init]];
-    // [request registerAdNetworkExtras:vungleExtras];
-    
     [interstitialAd loadRequest:request];
+    
+    return true;
 }
 
-- (void) loadRewardedVideo {
+- (bool) loadRewardedVideo {
     
-    NSLog(@"loadRewardedVideo isLoading: %d", isRewardedVideoLoading);
+    NSLog(@"AdsManager::loadRewardedVideo");
     
     if( !rewardedVideoAd || !rewardedVideoUnitId || [rewardedVideoUnitId isEqualToString:@""] ) {
-        return;
+        return false;
     }
-    
-    if( isRewardedVideoLoading ) {
-        return;
-    }
-    
-    isRewardedVideoLoading = YES;
     
     GADRequest *request = [self createRequest];
-//    [request registerAdNetworkExtras:[[GADInMobiExtras alloc] init]];
-//    [request registerAdNetworkExtras:vungleExtras];
-    
     [rewardedVideoAd loadRequest:request withAdUnitID:rewardedVideoUnitId];
+    
+    return true;
 }
 
 /**
@@ -502,26 +465,21 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  */
 - (void) showBanner {
     
-    if( bannerView == nil ) {
-        return;
+    if( bannerView ) {
+        bannerView.hidden = NO;
     }
     
-    bannerView.hidden = NO;
-    
-    if( !isBannerLoaded ) {
+    /*
+    // 광고 로드됨
+    if( banner->isLoaded() ) {
+        bannerView.hidden = NO;
+    }
+    // 광고 로드 필요
+    else {
         NSLog(@"The banner wasn't loaded yet.");
         [self loadBanner];
     }
-    
-//    // 광고 로딩됨, 광고 노출
-//    if( isBannerLoaded ) {
-//        bannerView.hidden = NO;
-//    }
-//    // 광고 로딩
-//    else {
-//        NSLog(@"The banner wasn't loaded yet.");
-//        [self loadBanner];
-//    }
+    */
 }
 
 /**
@@ -572,25 +530,6 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
         NSLog(@"The rewarded video wasn't loaded yet.");
         [self loadRewardedVideo];
     }
-}
-
-- (BOOL) isBannerVisible {
-    if( !bannerView ) {
-        return NO;
-    }
-    return !bannerView.isHidden;
-}
-
-- (BOOL) isBannerLoaded {
-    return isBannerLoaded;
-}
-
-- (BOOL) isInterstitialLoaded {
-    return interstitialAd.isReady;
-}
-
-- (BOOL) isRewardedVideoLoaded {
-    return rewardedVideoAd.isReady;
 }
 
 - (float) getBannerWidth {

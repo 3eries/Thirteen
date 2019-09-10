@@ -135,7 +135,6 @@ void AdsEventDispatcher::dispatchOpenedEvent(AdType type) {
         });
         
         for( auto listener : listeners ) {
-            listener->setOpened(true);
             listener->onAdOpened();
         }
         
@@ -155,8 +154,6 @@ void AdsEventDispatcher::dispatchClosedEvent(AdType type) {
         });
         
         for( auto listener : listeners ) {
-            listener->setOpened(false);
-            
             if( listener->onAdClosed ) {
                 listener->onAdClosed();
             }

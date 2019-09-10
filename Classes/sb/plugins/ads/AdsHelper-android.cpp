@@ -21,9 +21,8 @@ NS_SB_BEGIN;
  * 광고 모듈 초기화
  */
 void AdsHelper::initImpl(const AdsConfig &config) {
-    
 #if SB_PLUGIN_USE_ADS
-    // 매니저 초기화
+    // Android 매니저 초기화
     cocos2d::JniHelper::callStaticVoidMethod(JNI_CLASS_NAME, "initAd",
                                              config.appId,
                                              config.bannerUnitId,
@@ -35,63 +34,43 @@ void AdsHelper::initImpl(const AdsConfig &config) {
 /**
  * 배너 광고 로드
  */
-void AdsHelper::loadBanner() {
-    
+bool AdsHelper::loadBannerImpl() {
 #if SB_PLUGIN_USE_ADS
-    if( !banner.active ) {
-        return;
-    }
-    
-    cocos2d::JniHelper::callStaticVoidMethod(JNI_CLASS_NAME, "loadBanner");
+    return cocos2d::JniHelper::callStaticBooleanMethod(JNI_CLASS_NAME, "loadBanner");
 #endif
+    return false;
 }
 
 /**
  * 전면 광고 로드
  */
-void AdsHelper::loadInterstitial() {
-    
+bool AdsHelper::loadInterstitialImpl() {
 #if SB_PLUGIN_USE_ADS
-    if( !interstitial.active ) {
-        return;
-    }
-    
-    cocos2d::JniHelper::callStaticVoidMethod(JNI_CLASS_NAME, "loadInterstitial");
+    return cocos2d::JniHelper::callStaticBooleanMethod(JNI_CLASS_NAME, "loadInterstitial");
 #endif
+    return false;
 }
 
 /**
  * 보상형 동영상 광고 로드
  */
-void AdsHelper::loadRewardedVideo() {
-    
+bool AdsHelper::loadRewardedVideoImpl() {
 #if SB_PLUGIN_USE_ADS
-    if( !rewardedVideo.active ) {
-        return;
-    }
-    
-    cocos2d::JniHelper::callStaticVoidMethod(JNI_CLASS_NAME, "loadRewardedVideo");
+    return cocos2d::JniHelper::callStaticBooleanMethod(JNI_CLASS_NAME, "loadRewardedVideo");
 #endif
+    return false;
 }
 
 /**
  * 배너 광고
  */
-void AdsHelper::showBanner(AdListener *listener) {
-    
+void AdsHelper::showBannerImpl() {
 #if SB_PLUGIN_USE_ADS
-    if( !getInstance()->getBanner().active ) {
-        return;
-    }
-    
-    getInstance()->getEventDispatcher()->addListener(AdType::BANNER, listener);
-    
     cocos2d::JniHelper::callStaticVoidMethod(JNI_CLASS_NAME, "showBanner");
 #endif
 }
 
-void AdsHelper::hideBanner() {
-
+void AdsHelper::hideBannerImpl() {
 #if SB_PLUGIN_USE_ADS
     cocos2d::JniHelper::callStaticVoidMethod(JNI_CLASS_NAME, "hideBanner");
 #endif
@@ -103,7 +82,7 @@ void AdsHelper::hideBanner() {
 void AdsHelper::showInterstitial(AdListener *listener) {
     
 #if SB_PLUGIN_USE_ADS
-    if( !getInstance()->getInterstitial().active ) {
+    if( !getInstance()->getInterstitial()->isEnabled() ) {
         return;
     }
     
@@ -119,45 +98,13 @@ void AdsHelper::showInterstitial(AdListener *listener) {
 void AdsHelper::showRewardedVideo(AdListener *listener) {
     
 #if SB_PLUGIN_USE_ADS
-    if( !getInstance()->getRewardedVideo().active ) {
+    if( !getInstance()->getRewardedVideo()->isEnabled() ) {
         return;
     }
     
     getInstance()->getEventDispatcher()->addListener(AdType::REWARDED_VIDEO, listener);
     
     cocos2d::JniHelper::callStaticVoidMethod(JNI_CLASS_NAME, "showRewardedVideo");
-#endif
-}
-
-bool AdsHelper::isBannerVisible() {
-#if SB_PLUGIN_USE_ADS
-    return cocos2d::JniHelper::callStaticBooleanMethod(JNI_CLASS_NAME, "isBannerVisible");
-#else
-    return false;
-#endif
-}
-
-bool AdsHelper::isBannerLoaded() {
-#if SB_PLUGIN_USE_ADS
-    return cocos2d::JniHelper::callStaticBooleanMethod(JNI_CLASS_NAME, "isBannerLoaded");
-#else
-    return false;
-#endif
-}
-
-bool AdsHelper::isInterstitialLoaded() {
-#if SB_PLUGIN_USE_ADS
-    return cocos2d::JniHelper::callStaticBooleanMethod(JNI_CLASS_NAME, "isInterstitialLoaded");
-#else
-    return false;
-#endif
-}
-
-bool AdsHelper::isRewardedVideoLoaded() {
-#if SB_PLUGIN_USE_ADS
-    return cocos2d::JniHelper::callStaticBooleanMethod(JNI_CLASS_NAME, "isRewardedVideoLoaded");
-#else
-    return false;
 #endif
 }
 
@@ -192,64 +139,62 @@ extern "C" {
      * Banner
      */
     void Java_com_superbomb_plugins_ads_AdsManager_nativeBannerOnAdLoaded(JNIEnv *env, jobject obj) {
-        AdsHelper::getInstance()->getBanner().listener->onAdLoaded();
+        AdsHelper::getInstance()->getBanner()->onAdLoaded();
     }
     
     void Java_com_superbomb_plugins_ads_AdsManager_nativeBannerOnAdFailedToLoad(JNIEnv *env, jobject obj, jint error) {
-        AdsHelper::getInstance()->getBanner().listener->onAdFailedToLoad(error);
+        AdsHelper::getInstance()->getBanner()->onAdFailedToLoad(error);
     }
     
     void Java_com_superbomb_plugins_ads_AdsManager_nativeBannerOnAdOpened(JNIEnv *env, jobject obj) {
-        AdsHelper::getInstance()->getBanner().listener->onAdOpened();
+        AdsHelper::getInstance()->getBanner()->onAdOpened();
     }
     
     void Java_com_superbomb_plugins_ads_AdsManager_nativeBannerOnAdClosed(JNIEnv *env, jobject obj) {
-        AdsHelper::getInstance()->getBanner().listener->onAdClosed();
+        AdsHelper::getInstance()->getBanner()->onAdClosed();
     }
     
     /**
      * Interstitial
      */
     void Java_com_superbomb_plugins_ads_AdsManager_nativeInterstitialOnAdLoaded(JNIEnv *env, jobject obj) {
-        AdsHelper::getInstance()->getInterstitial().listener->onAdLoaded();
+        AdsHelper::getInstance()->getInterstitial()->onAdLoaded();
     }
 
     void Java_com_superbomb_plugins_ads_AdsManager_nativeInterstitialOnAdFailedToLoad(JNIEnv *env, jobject obj, jint error) {
-        AdsHelper::getInstance()->getInterstitial().listener->onAdFailedToLoad(error);
+        AdsHelper::getInstance()->getInterstitial()->onAdFailedToLoad(error);
     }
 
     void Java_com_superbomb_plugins_ads_AdsManager_nativeInterstitialOnAdOpened(JNIEnv *env, jobject obj) {
-        AdsHelper::getInstance()->getInterstitial().listener->onAdOpened();
+        AdsHelper::getInstance()->getInterstitial()->onAdOpened();
     }
     
     void Java_com_superbomb_plugins_ads_AdsManager_nativeInterstitialOnAdClosed(JNIEnv *env, jobject obj) {
-        AdsHelper::getInstance()->getInterstitial().listener->onAdClosed();
+        AdsHelper::getInstance()->getInterstitial()->onAdClosed();
     }
     
     /**
      * Rewarded Video
      */
     void Java_com_superbomb_plugins_ads_AdsManager_nativeRewardedVideoOnAdLoaded(JNIEnv *env, jobject obj) {
-        AdsHelper::getInstance()->getRewardedVideo().listener->onAdLoaded();
+        AdsHelper::getInstance()->getRewardedVideo()->onAdLoaded();
     }
     
     void Java_com_superbomb_plugins_ads_AdsManager_nativeRewardedVideoOnAdFailedToLoad(JNIEnv *env, jobject obj, jint error) {
-        AdsHelper::getInstance()->getRewardedVideo().listener->onAdFailedToLoad(error);
+        AdsHelper::getInstance()->getRewardedVideo()->onAdFailedToLoad(error);
     }
     
     void Java_com_superbomb_plugins_ads_AdsManager_nativeRewardedVideoOnAdOpened(JNIEnv *env, jobject obj) {
-        AdsHelper::getInstance()->getRewardedVideo().listener->onAdOpened();
+        AdsHelper::getInstance()->getRewardedVideo()->onAdOpened();
     }
     
     void Java_com_superbomb_plugins_ads_AdsManager_nativeRewardedVideoOnAdClosed(JNIEnv *env, jobject obj) {
-        AdsHelper::getInstance()->getRewardedVideo().listener->onAdClosed();
+        AdsHelper::getInstance()->getRewardedVideo()->onAdClosed();
     }
     
     void Java_com_superbomb_plugins_ads_AdsManager_nativeRewardedVideoOnRewarded(JNIEnv *env, jobject obj, jstring jtype, jint rewardAmount) {
         string type = JniHelper::jstring2string(jtype);
-        
-        auto listener = dynamic_cast<RewardedVideoAdListener*>(AdsHelper::getInstance()->getRewardedVideo().listener);
-        listener->onRewarded(type, rewardAmount);
+        AdsHelper::getInstance()->getRewardedVideo()->onRewarded(type, rewardAmount);
     }
 }
 #endif

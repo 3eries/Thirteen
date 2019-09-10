@@ -6,6 +6,8 @@
 
 #include "AdsHelper.hpp"
 
+#include "../../base/SBDebug.hpp"
+
 USING_NS_CC;
 using namespace std;
 
@@ -31,20 +33,19 @@ void AdsHelper::destroyInstance() {
 AdsHelper::AdsHelper() :
 isInitialized(false),
 eventDispatcher(nullptr),
-autoLoadInterval(0),
-adOpened(false),
-banner(Ad(AdType::BANNER)),
-interstitial(Ad(AdType::INTERSTITIAL)),
-rewardedVideo(Ad(AdType::REWARDED_VIDEO)) {
+banner(nullptr),
+interstitial(nullptr),
+rewardedVideo(nullptr),
+autoLoadInterval(0) {
 }
 
 AdsHelper::~AdsHelper() {
     
     Director::getInstance()->getScheduler()->unscheduleAllForTarget(this);
     
-    CC_SAFE_RELEASE(banner.listener);
-    CC_SAFE_RELEASE(interstitial.listener);
-    CC_SAFE_RELEASE(rewardedVideo.listener);
+    CC_SAFE_DELETE(banner);
+    CC_SAFE_DELETE(interstitial);
+    CC_SAFE_DELETE(rewardedVideo);
     CC_SAFE_DELETE(eventDispatcher);
 }
 
@@ -58,126 +59,106 @@ void AdsHelper::init(const AdsConfig &config) {
         return;
     }
     
-    isInitialized = true;
+    this->isInitialized = true;
     this->config = config;
+    this->eventDispatcher = new AdsEventDispatcher();
     
-    initListeners();
+    initUnits();
     initImpl(config);
     
     setAutoLoad(config.autoLoadInterval);
 #endif
 }
 
-void AdsHelper::initListeners() {
-    
+void AdsHelper::initUnits() {
+
 #if SB_PLUGIN_USE_ADS
-    eventDispatcher = new AdsEventDispatcher();
-    
     // Banner
-    banner.listener = AdListener::create(AdType::BANNER);
-    banner.listener->retain();
-    banner.listener->onAdLoaded = [=]() {
-        CCLOG("Banner onAdLoaded");
+    banner = new AdUnit(AdType::BANNER, config.bannerUnitId);
+    banner->setLoading(true);
+    
+    auto bannerListener = AdListener::create(AdType::BANNER);
+    bannerListener->onAdLoaded = [=]() {
+        
+        if( banner->isVisible() ) {
+            this->showBanner();
+        }
+        
         this->eventDispatcher->dispatchLoadedEvent(AdType::BANNER);
     };
-    banner.listener->onAdFailedToLoad = [=](int errorCode) {
-        CCLOG("Banner onAdFailedToLoad errorCode: %d", errorCode);
+    bannerListener->onAdFailedToLoad = [=](int errorCode) {
         this->eventDispatcher->dispatchFailedToLoadEvent(AdType::BANNER, errorCode);
     };
-    banner.listener->onAdOpened = [=]() {
-        CCLOG("Banner onAdOpened");
-        
-        this->adOpened = true;
-        this->banner.listener->setOpened(true);
-        
+    bannerListener->onAdOpened = [=]() {
         this->eventDispatcher->dispatchOpenedEvent(AdType::BANNER);
     };
-    banner.listener->onAdClosed = [=]() {
-        CCLOG("Banner onAdClosed");
-        
-        this->adOpened = false;
-        this->banner.listener->setOpened(false);
-        
+    bannerListener->onAdClosed = [=]() {
         this->eventDispatcher->dispatchClosedEvent(AdType::BANNER);
     };
-    
+    banner->setListener(bannerListener);
+
     // Interstitial
-    interstitial.listener = AdListener::create(AdType::INTERSTITIAL);
-    interstitial.listener->retain();
-    interstitial.listener->onAdLoaded = [=]() {
-        CCLOG("Interstitial onAdLoaded");
+    interstitial = new AdUnit(AdType::INTERSTITIAL, config.interstitialUnitId);
+    interstitial->setLoading(true);
+    
+    auto interstitialListener = AdListener::create(AdType::INTERSTITIAL);
+    interstitialListener->onAdLoaded = [=]() {
         this->eventDispatcher->dispatchLoadedEvent(AdType::INTERSTITIAL);
     };
-    interstitial.listener->onAdFailedToLoad = [=](int errorCode) {
-        CCLOG("Interstitial onAdFailedToLoad errorCode: %d", errorCode);
+    interstitialListener->onAdFailedToLoad = [=](int errorCode) {
         this->eventDispatcher->dispatchFailedToLoadEvent(AdType::INTERSTITIAL, errorCode);
     };
-    interstitial.listener->onAdOpened = [=]() {
-        CCLOG("Interstitial onAdOpened");
-        
-        this->adOpened = true;
-        this->interstitial.listener->setOpened(true);
-        
+    interstitialListener->onAdOpened = [=]() {
         this->eventDispatcher->dispatchOpenedEvent(AdType::INTERSTITIAL);
     };
-    interstitial.listener->onAdClosed = [=]() {
-        CCLOG("Interstitial onAdClosed");
-        
-        this->adOpened = false;
-        this->interstitial.listener->setOpened(false);
-        
+    interstitialListener->onAdClosed = [=]() {
         this->eventDispatcher->dispatchClosedEvent(AdType::INTERSTITIAL);
     };
+    interstitial->setListener(interstitialListener);
     
     // Rewarded Video
+    rewardedVideo = new AdUnit(AdType::REWARDED_VIDEO, config.rewardedVideoUnitId);
+    rewardedVideo->setLoading(true);
+    
     auto rewardedVideoAdListener = RewardedVideoAdListener::create();
-    rewardedVideoAdListener->retain();
     rewardedVideoAdListener->onAdLoaded = [=]() {
-        CCLOG("RewardedVideo onAdLoaded");
         this->eventDispatcher->dispatchLoadedEvent(AdType::REWARDED_VIDEO);
     };
     rewardedVideoAdListener->onAdFailedToLoad = [=](int errorCode) {
-        CCLOG("RewardedVideo onAdFailedToLoad errorCode: %d", errorCode);
         this->eventDispatcher->dispatchFailedToLoadEvent(AdType::REWARDED_VIDEO, errorCode);
     };
     rewardedVideoAdListener->onAdOpened = [=]() {
-        CCLOG("RewardedVideo onAdOpened");
-        
-        this->adOpened = true;
-        this->rewardedVideo.listener->setOpened(true);
-        
         this->eventDispatcher->dispatchOpenedEvent(AdType::REWARDED_VIDEO);
     };
     rewardedVideoAdListener->onAdClosed = [=]() {
-        CCLOG("RewardedVideo onAdClosed");
-        
-        this->adOpened = false;
-        this->rewardedVideo.listener->setOpened(false);
-        
         this->eventDispatcher->dispatchClosedEvent(AdType::REWARDED_VIDEO);
     };
     rewardedVideoAdListener->onRewarded = [=](string type, int rewardAmount) {
-        CCLOG("RewardedVideo onRewarded type: %s amount: %d", type.c_str(), rewardAmount);
         this->eventDispatcher->dispatchRewardedEvent(type, rewardAmount);
     };
-    
-    rewardedVideo.listener = rewardedVideoAdListener;
+    rewardedVideo->setListener(rewardedVideoAdListener);
 #endif
 }
 
 /**
  * 광고 활성화 설정
  */
-void AdsHelper::setActiveBanner(bool active) {
-    banner.active = active;
+void AdsHelper::setBannerEnabled(bool isEnabled) {
+    if( banner ) {
+        banner->setEnabled(isEnabled);
+    }
 }
 
-void AdsHelper::setActiveInterstitial(bool active) {
-    interstitial.active = active;
+void AdsHelper::setInterstitialEnabled(bool isEnabled) {
+    if( interstitial ) {
+        interstitial->setEnabled(isEnabled);
+    }
 }
 
-void AdsHelper::setActiveRewardedVideo(bool active) {
-    rewardedVideo.active = active;
+void AdsHelper::setRewardedVideoEnabled(bool isEnabled) {
+    if( rewardedVideo ) {
+        rewardedVideo->setEnabled(isEnabled);
+    }
 }
 
 /**
@@ -205,23 +186,149 @@ void AdsHelper::setAutoLoad(float interval) {
         }
         
         // 배너 광고 로드
-        if( banner.active && !this->isBannerLoaded() ) {
+        if( banner->isEnabled() && !banner->isLoaded() ) {
             this->loadBanner();
         }
         
         // 전면 광고 로드
-        if( interstitial.active && !interstitial.listener->isOpened() &&
-           !this->isInterstitialLoaded() ) {
+        if( interstitial->isEnabled() &&
+           !interstitial->isOpened() && !interstitial->isLoaded() ) {
             this->loadInterstitial();
         }
         
         // 보상형 비디오 광고 로드
-        if( rewardedVideo.active && !rewardedVideo.listener->isOpened() &&
-           !this->isRewardedVideoLoaded() ) {
+        if( rewardedVideo->isEnabled() &&
+           !rewardedVideo->isOpened() && !rewardedVideo->isLoaded() ) {
             this->loadRewardedVideo();
         }
         
     }, this, interval, false, AUTO_LOAD_SCHEDULER);
+#endif
+}
+
+/**
+ * 배너 광고 로드
+ */
+void AdsHelper::loadBanner() {
+    
+#if SB_PLUGIN_USE_ADS
+    if( !banner ) {
+        return;
+    }
+    
+    Log::i("AdsHelper::loadBanner isEnabled: %d, isLoading: %d",
+           banner->isEnabled(), banner->isLoading());
+    
+    if( banner->isEnabled() && !banner->isLoading() ) {
+        if( loadBannerImpl() ) {
+            banner->setLoading(true);
+        }
+    }
+#endif
+}
+
+/**
+ * 전면 광고 로드
+ */
+void AdsHelper::loadInterstitial() {
+    
+#if SB_PLUGIN_USE_ADS
+    if( !interstitial ) {
+        return;
+    }
+    
+    Log::i("AdsHelper::loadInterstitial isEnabled: %d, isLoading: %d",
+           interstitial->isEnabled(), interstitial->isLoading());
+    
+    if( interstitial->isEnabled() && !interstitial->isLoading() ) {
+        if( loadInterstitialImpl() ) {
+            interstitial->setLoading(true);
+        }
+    }
+#endif
+}
+
+/**
+ * 보상형 동영상 광고 로드
+ */
+void AdsHelper::loadRewardedVideo() {
+    
+#if SB_PLUGIN_USE_ADS
+    if( !rewardedVideo ) {
+        return;
+    }
+    
+    Log::i("AdsHelper::loadRewardedVideo isEnabled: %d, isLoading: %d",
+           rewardedVideo->isEnabled(), rewardedVideo->isLoading());
+    
+    if( rewardedVideo->isEnabled() && !rewardedVideo->isLoading() ) {
+        if( loadRewardedVideoImpl() ) {
+            rewardedVideo->setLoading(true);
+        }
+    }
+#endif
+}
+
+void AdsHelper::showBanner(AdListener *listener) {
+    
+#if SB_PLUGIN_USE_ADS
+    if( !instance->banner || !instance->banner->isEnabled() ) {
+        return;
+    }
+
+    instance->banner->setVisible(true);
+    instance->eventDispatcher->addListener(AdType::BANNER, listener);
+    
+    // 광고 로드됨
+    if( instance->banner->isLoaded() ) {
+        showBannerImpl();
+    }
+    // 광고 로드 필요
+    else {
+        instance->loadBanner();
+    }
+#endif
+}
+
+void AdsHelper::hideBanner() {
+    
+#if SB_PLUGIN_USE_ADS
+    if( instance->banner ) {
+        instance->banner->setVisible(false);
+        hideBannerImpl();
+    }
+#endif
+}
+
+bool AdsHelper::isBannerVisible() {
+#if SB_PLUGIN_USE_ADS
+    return instance->banner ? instance->banner->isVisible() : false;
+#else
+    return false;
+#endif
+}
+
+bool AdsHelper::isBannerLoaded() {
+#if SB_PLUGIN_USE_ADS
+    return instance->banner ? instance->banner->isLoaded() : false;
+#else
+    return false;
+#endif
+}
+
+bool AdsHelper::isInterstitialLoaded() {
+#if SB_PLUGIN_USE_ADS
+    return instance->interstitial ? instance->interstitial->isLoaded() : false;
+#else
+    return false;
+#endif
+}
+
+bool AdsHelper::isRewardedVideoLoaded() {
+#if SB_PLUGIN_USE_ADS
+    return instance->rewardedVideo ? instance->rewardedVideo->isLoaded() : false;
+#else
+    return false;
 #endif
 }
 

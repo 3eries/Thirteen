@@ -36,7 +36,6 @@ protected:
     CC_SYNTHESIZE(AdType, type, Type);
     CC_SYNTHESIZE(cocos2d::Ref*, target, Target);
     SB_SYNTHESIZE_BOOL(forever, Forever);
-    SB_SYNTHESIZE_BOOL(opened, Opened);
 };
 
 #pragma mark- RewardedVideoAdListener

@@ -16,6 +16,7 @@
 
 #include "AdsDefine.h"
 #include "AdsEventDispatcher.hpp"
+#include "AdUnit.hpp"
 
 NS_SB_BEGIN;
 
@@ -29,15 +30,15 @@ public:
 private:
     AdsHelper();
     
-    void initListeners();
+    void initUnits();
     
 public:
     void init(const AdsConfig &config);
     void initImpl(const AdsConfig &config);
     
-    void setActiveBanner(bool active);
-    void setActiveInterstitial(bool active);
-    void setActiveRewardedVideo(bool active);
+    void setBannerEnabled(bool isEnabled);
+    void setInterstitialEnabled(bool isEnabled);
+    void setRewardedVideoEnabled(bool isEnabled);
     
     void setAutoLoad(float interval);
     
@@ -45,8 +46,15 @@ public:
     void loadInterstitial();
     void loadRewardedVideo();
 
+    bool loadBannerImpl();
+    bool loadInterstitialImpl();
+    bool loadRewardedVideoImpl();
+    
     static void showBanner(AdListener *listener = nullptr);
     static void hideBanner();
+    
+    static void showBannerImpl();
+    static void hideBannerImpl();
     
     static void showInterstitial(AdListener *listener = nullptr);
     static void showRewardedVideo(AdListener *listener = nullptr);
@@ -64,22 +72,14 @@ private:
     CC_SYNTHESIZE_READONLY(AdsConfig, config, Config);
     
     bool isInitialized;
+    
     CC_SYNTHESIZE_READONLY(AdsEventDispatcher*, eventDispatcher, EventDispatcher);
+    CC_SYNTHESIZE_READONLY(AdUnit*, banner, Banner);
+    CC_SYNTHESIZE_READONLY(AdUnit*, interstitial, Interstitial);
+    CC_SYNTHESIZE_READONLY(AdUnit*, rewardedVideo, RewardedVideo);
     
     float autoLoadInterval;     // 광고 자동 로드 시간 간격 (단위 : 초)
-    SB_SYNTHESIZE_READONLY_BOOL(adOpened, AdOpened); // 광고 오픈 여부
-    
-    struct Ad {
-        AdType type;            // 광고 타입
-        AdListener *listener;   // 광고 리스너
-        bool active;            // 광고 활성화 여부
-        
-        Ad(AdType _type) : type(_type), listener(nullptr), active(true) {}
-    };
-    
-    CC_SYNTHESIZE_READONLY(Ad, banner, Banner);
-    CC_SYNTHESIZE_READONLY(Ad, interstitial, Interstitial);
-    CC_SYNTHESIZE_READONLY(Ad, rewardedVideo, RewardedVideo);
+    // SB_SYNTHESIZE_READONLY_BOOL(adOpened, AdOpened); // 광고 오픈 여부
 };
 
 NS_SB_END;

@@ -28,7 +28,6 @@ AdListener* AdListener::create(AdType type) {
 
 AdListener::AdListener(AdType type) :
 type(type), target(nullptr), forever(false),
-opened(false),
 onAdLoaded(nullptr), onAdFailedToLoad(nullptr),
 onAdOpened(nullptr), onAdClosed(nullptr) {
 }

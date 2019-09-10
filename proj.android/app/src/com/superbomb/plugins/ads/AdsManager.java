@@ -54,11 +54,6 @@ public class AdsManager implements PluginListener {
     private String rewardedVideoUnitId = "";
     private final ArrayList<String> testDevices;
 
-    private boolean isBannerLoaded;
-    private boolean isInterstitialLoaded;
-    private boolean isRewardedVideoLoading;
-    private boolean isRewardedVideoLoaded;
-
     private AdsManager() {
         testDevices = new ArrayList<>();
     }
@@ -194,8 +189,6 @@ public class AdsManager implements PluginListener {
 
             @Override
             public void onAdLoaded() {
-                isBannerLoaded = true;
-
                 Cocos2dxHelper.runOnGLThread(new Runnable() {
                     @Override
                     public void run() {
@@ -206,8 +199,6 @@ public class AdsManager implements PluginListener {
 
             @Override
             public void onAdFailedToLoad(final int errorCode) {
-                isBannerLoaded = false;
-
                 Cocos2dxHelper.runOnGLThread(new Runnable() {
                     @Override
                     public void run() {
@@ -228,7 +219,6 @@ public class AdsManager implements PluginListener {
 
             @Override
             public void onAdClosed() {
-                isBannerLoaded = false;
                 Log.i(TAG, "banner onAdClosed");
 
                 Cocos2dxHelper.runOnGLThread(new Runnable() {
@@ -270,8 +260,6 @@ public class AdsManager implements PluginListener {
 
             @Override
             public void onAdLoaded() {
-                isInterstitialLoaded = true;
-
                 Cocos2dxHelper.runOnGLThread(new Runnable() {
                     @Override
                     public void run() {
@@ -282,8 +270,6 @@ public class AdsManager implements PluginListener {
 
             @Override
             public void onAdFailedToLoad(final int errorCode) {
-                isInterstitialLoaded = false;
-
                 Cocos2dxHelper.runOnGLThread(new Runnable() {
                     @Override
                     public void run() {
@@ -304,8 +290,6 @@ public class AdsManager implements PluginListener {
 
             @Override
             public void onAdClosed() {
-                isInterstitialLoaded = false;
-
                 Cocos2dxHelper.runOnGLThread(new Runnable() {
                     @Override
                     public void run() {
@@ -345,9 +329,6 @@ public class AdsManager implements PluginListener {
         rewardedVideoAd.setRewardedVideoAdListener(new RewardedVideoAdListener() {
             @Override
             public void onRewardedVideoAdLoaded() {
-                isRewardedVideoLoading = false;
-                isRewardedVideoLoaded = true;
-
                 Cocos2dxHelper.runOnGLThread(new Runnable() {
                     @Override
                     public void run() {
@@ -358,9 +339,6 @@ public class AdsManager implements PluginListener {
 
             @Override
             public void onRewardedVideoAdFailedToLoad(final int errorCode) {
-                isRewardedVideoLoading = false;
-                isRewardedVideoLoaded = false;
-
                 Cocos2dxHelper.runOnGLThread(new Runnable() {
                     @Override
                     public void run() {
@@ -381,8 +359,6 @@ public class AdsManager implements PluginListener {
 
             @Override
             public void onRewardedVideoAdClosed() {
-                isRewardedVideoLoaded = false;
-
                 Cocos2dxHelper.runOnGLThread(new Runnable() {
                     @Override
                     public void run() {
@@ -432,14 +408,19 @@ public class AdsManager implements PluginListener {
     /**
      * 배너 로드
      */
-    public static void loadBanner() {
+    public static boolean loadBanner() {
 
         final AdsManager mgr = instance;
         final AdView bannerView = mgr.bannerView;
 
         if( bannerView == null ) {
             Log.i(TAG, "banner load error: banner is null.");
-            return;
+            return false;
+        }
+
+        if( bannerView.isLoading() ) {
+            Log.i(TAG, "banner is loading.");
+            return false;
         }
 
         runOnUiThread(new Runnable() {
@@ -447,92 +428,77 @@ public class AdsManager implements PluginListener {
             @Override
             public void run() {
 
-                if( bannerView.isLoading() ) {
-                    Log.i(TAG, "banner is loading.");
-                    return;
-                }
-
                 Log.i(TAG, "banner load");
 
-                AdRequest adRequest = createRequestBuilder()
-                        .build();
-
+                AdRequest adRequest = createRequestBuilder().build();
                 bannerView.loadAd(adRequest);
             }
         });
+
+        return true;
     }
 
     /**
      * 전면 광고 로드
      */
-    public static void loadInterstitial() {
+    public static boolean loadInterstitial() {
 
         final AdsManager mgr = instance;
         final InterstitialAd interstitialAd = mgr.interstitialAd;
 
         if( interstitialAd == null ) {
             Log.i(TAG, "interstitialAd load error: interstitialAd is null.");
-            return;
+            return false;
+        }
+
+        if( interstitialAd.isLoading() ) {
+            Log.i(TAG, "interstitialAd is loading.");
+            return false;
         }
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
 
-                if( interstitialAd.isLoading() ) {
-                    Log.i(TAG, "interstitialAd is loading.");
-                    return;
-                }
-
                 Log.i(TAG, "interstitialAd load");
 
-                mgr.isInterstitialLoaded = false;
-
-                AdRequest adRequest = createRequestBuilder()
-                        .build();
-
+                AdRequest adRequest = createRequestBuilder().build();
                 interstitialAd.loadAd(adRequest);
             }
         });
+
+        return true;
     }
 
     /**
      * 보상형 동영상 로드
      */
-    public static void loadRewardedVideo() {
+    public static boolean loadRewardedVideo() {
 
         final AdsManager mgr = instance;
         final RewardedVideoAd rewardedVideoAd = mgr.rewardedVideoAd;
 
         if( rewardedVideoAd == null ) {
             Log.i(TAG, "rewardedVideoAd load error: rewardedVideoAd is null.");
-            return;
+            return false;
         }
 
         if( TextUtils.isEmpty(mgr.rewardedVideoUnitId) ) {
             Log.i(TAG, "rewardedVideoAd load error: rewardedVideoUnitId is null.");
-            return;
-        }
-
-        if( mgr.isRewardedVideoLoading ) {
-            Log.i(TAG, "rewardedVideoAd is loading.");
-            return;
+            return false;
         }
 
         Log.i(TAG, "rewardedVideoAd load");
 
-        mgr.isRewardedVideoLoading = true;
-        mgr.isRewardedVideoLoaded = false;
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                AdRequest adRequest = createRequestBuilder()
-                        .build();
-
+                AdRequest adRequest = createRequestBuilder().build();
                 rewardedVideoAd.loadAd(mgr.rewardedVideoUnitId, adRequest);
             }
         });
+
+        return true;
     }
 
     /**
@@ -545,33 +511,23 @@ public class AdsManager implements PluginListener {
             @Override
             public void run() {
 
-                final AdsManager mgr = instance;
-                final AdView bannerView = mgr.bannerView;
+                final AdView bannerView = instance.bannerView;
 
-                //                if( bannerView != null ) {
-                //                    bannerView.setVisibility(View.VISIBLE);
-                //                }
-
-                if( bannerView == null ) {
-                    return;
+                if( bannerView != null ) {
+                    bannerView.setVisibility(View.VISIBLE);
                 }
 
-                bannerView.setVisibility(View.VISIBLE);
-
-                if( !mgr.isBannerLoaded ) {
+                /*
+                // 광고 로딩됨, 광고 노출
+                if( mgr.isBannerLoaded ) {
+                    bannerView.setVisibility(View.VISIBLE);
+                }
+                // 광고 로딩
+                else {
                     Log.d(TAG, "The banner wasn't loaded yet.");
                     loadBanner();
                 }
-
-                //                // 광고 로딩됨, 광고 노출
-                //                if( mgr.isBannerLoaded ) {
-                //                    bannerView.setVisibility(View.VISIBLE);
-                //                }
-                //                // 광고 로딩
-                //                else {
-                //                    Log.d(TAG, "The banner wasn't loaded yet.");
-                //                    loadBanner();
-                //                }
+               */
             }
         });
     }
@@ -586,8 +542,7 @@ public class AdsManager implements PluginListener {
             @Override
             public void run() {
 
-                final AdsManager mgr = instance;
-                final AdView bannerView = mgr.bannerView;
+                final AdView bannerView = instance.bannerView;
 
                 if( bannerView != null ) {
                     bannerView.setVisibility(View.GONE);
@@ -653,27 +608,6 @@ public class AdsManager implements PluginListener {
                 }
             }
         });
-    }
-
-    public static boolean isBannerVisible() {
-        if( instance.bannerView == null ) {
-            return false;
-        }
-        return instance.bannerView.getVisibility() == View.VISIBLE;
-    }
-
-    public static boolean isBannerLoaded() {
-        return instance.isBannerLoaded;
-    }
-
-    public static boolean isInterstitialLoaded() {
-        //        return instance.interstitialAd.isLoaded();
-        return instance.isInterstitialLoaded;
-    }
-
-    public static boolean isRewardedVideoLoaded() {
-        //        return instance.rewardedVideoAd.isLoaded();
-        return instance.isRewardedVideoLoaded;
     }
 
     public static float getBannerWidth() {

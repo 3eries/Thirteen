@@ -36,6 +36,16 @@ enum class AdType {
     REWARDED_VIDEO,
 };
 
+static inline std::string adTypeToString(const AdType &type) {
+ 
+    switch( type ) {
+        case AdType::BANNER:            return "Banner";
+        case AdType::INTERSTITIAL:      return "Interstitial";
+        case AdType::REWARDED_VIDEO:    return "RewardedVideo";
+        default:                        return "none";
+    }
+}
+
 struct AdsConfig {
     // 테스트 모드
     bool testMode;
