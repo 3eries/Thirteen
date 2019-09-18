@@ -61,6 +61,7 @@ public:
     static SceneType          getSceneType();
     static SceneType          getPreviousSceneType();
     static cocos2d::Scene*    getScene();
+    static bool               isGameScene();
     
 private:
     SceneType sceneType;

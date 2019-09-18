@@ -104,7 +104,7 @@ void SceneManager::replace(SceneType type, function<Scene*()> createSceneFunc) {
             }
             // XXX -> Main
             else {
-                // trans = TransitionFade::create(REPLACE_DURATION_MAIN, scene);
+                trans = TransitionFade::create(REPLACE_DURATION_MAIN, scene);
             }
         } break;
         case SceneType::GAME: {
@@ -174,5 +174,9 @@ SceneType SceneManager::getPreviousSceneType() {
 
 Scene* SceneManager::getScene() {
     return instance->scene;
+}
+
+bool SceneManager::isGameScene() {
+    return getSceneType() == SceneType::GAME;
 }
 

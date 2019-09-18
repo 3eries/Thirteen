@@ -22,7 +22,8 @@ using namespace std;
 static const float FADE_DURATION    = 0.15f;
 static const float SLIDE_DURATION   = EffectDuration::POPUP_SLIDE_FAST;
 
-SettingPopup::SettingPopup() : BasePopup(PopupType::SETTING) {
+SettingPopup::SettingPopup() : BasePopup(PopupType::SETTING),
+onHomeListener(nullptr) {
     
 }
 
@@ -68,9 +69,11 @@ void SettingPopup::initContentView() {
     
     BasePopup::initContentView();
     
+    const bool isGameScene = SceneManager::isGameScene();
     const bool isRemovedAds = User::isRemovedAds();
     
     // common_bg_setting.png Vec2MC(0, 0) , Size(542, 380)
+    // game_bg_setting.png Vec2MC(0, 1) , Size(542, 488)
     popupBg = Sprite::create(DIR_IMG_COMMON + "common_bg_setting.png");
     popupBg->setAnchorPoint(ANCHOR_M);
     popupBg->setPosition(Vec2MC(0, 0));
@@ -147,9 +150,10 @@ void SettingPopup::initContentView() {
     });
     
     // remove ads
-    // common_btn_remove_ads.png Vec2MC(-166, -85) , Size(154, 154)
+    SBButton *removeAdsBtn = nullptr;
+    
     if( !isRemovedAds ) {
-        auto removeAdsBtn = SBButton::create(DIR_IMG_COMMON + "common_btn_remove_ads.png");
+        removeAdsBtn = SBButton::create(DIR_IMG_COMMON + "common_btn_remove_ads.png");
         removeAdsBtn->setZoomScale(ButtonZoomScale::NORMAL);
         removeAdsBtn->setAnchorPoint(ANCHOR_M);
         removeAdsBtn->setPosition(Vec2MC(-166, -85));
@@ -191,6 +195,32 @@ void SettingPopup::initContentView() {
         
         this->dismissWithAction();
     });
+    
+    // 게임씬인 경우 UI 변경
+    if( isGameScene ) {
+        popupBg->setTexture(DIR_IMG_GAME + "game_bg_setting.png");
+        
+        auto homeBtn = SBButton::create(DIR_IMG_GAME + "game_btn_home.png");
+        homeBtn->setZoomScale(ButtonZoomScale::NORMAL);
+        homeBtn->setAnchorPoint(ANCHOR_M);
+        homeBtn->setPosition(Vec2MC(0, 171));
+        addContentChild(homeBtn);
+        
+        homeBtn->setOnClickListener([=](Node*) {
+            SBAudioEngine::playEffect(SOUND_BUTTON_CLICK);
+            onHomeListener();
+        });
+        
+        effectBtn->setPosition(Vec2MC(-166, 31));
+        bgmBtn->setPosition(Vec2MC(0, 31));
+        howToPlayBtn->setPosition(Vec2MC(166, 31));
+        moreGames->setPosition(isRemovedAds ? Vec2MC(-83, -139) : Vec2MC(0, -139));
+        restoreBtn->setPosition(isRemovedAds ? Vec2MC(83, -139) : Vec2MC(166, -139));
+        
+        if( removeAdsBtn ) {
+            removeAdsBtn->setPosition(Vec2MC(-166, -139));
+        }
+    }
 }
 
 /**

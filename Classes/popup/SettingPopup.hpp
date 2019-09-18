@@ -36,7 +36,8 @@ private:
     void onEnterActionFinished() override;
     
 private:
-    cocos2d::Node *popupBg;
+    cocos2d::Sprite *popupBg;
+    CC_SYNTHESIZE(SBCallback, onHomeListener, OnHomeListener);
 };
 
 #endif /* SettingPopup_hpp */

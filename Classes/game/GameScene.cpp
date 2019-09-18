@@ -193,6 +193,9 @@ void GameScene::onClick(Node *sender) {
     switch( sender->getTag() ) {
         case Tag::BTN_SETTING: {
             auto popup = SettingPopup::create();
+            popup->setOnHomeListener([=]() {
+                this->replaceScene(SceneType::MAIN);
+            });
             SceneManager::getScene()->addChild(popup, ZOrder::POPUP_MIDDLE);
         } break;
     }
