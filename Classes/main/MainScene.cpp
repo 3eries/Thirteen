@@ -139,6 +139,15 @@ void MainScene::onClick(Node *sender) {
         case Tag::BTN_START: {
             replaceGameScene();
         } break;
+
+        // 리더 보드
+        case Tag::BTN_LEADER_BOARD: {
+            if( superbomb::PluginPlay::isSignedIn() ) {
+                superbomb::PluginPlay::showAllLeaderboards();
+            } else {
+                superbomb::PluginPlay::signIn();
+            }
+        } break;
             
         // 설정
         case Tag::BTN_SETTING: {
@@ -334,8 +343,9 @@ void MainScene::initMenu() {
 //    settingBtn->setOnClickListener(CC_CALLBACK_1(GameScene::onClick, this));
     
     SBUIInfo infos[] = {
-        SBUIInfo(Tag::BTN_SETTING, ANCHOR_M,
-                 Vec2TR(-56, -54),
+        SBUIInfo(Tag::BTN_LEADER_BOARD, ANCHOR_M, Vec2TL(56, -54),
+                 DIR_IMG_MAIN + "main_btn_leaderboard.png"),
+        SBUIInfo(Tag::BTN_SETTING, ANCHOR_M, Vec2TR(-56, -54),
                  DIR_IMG_COMMON + "common_btn_more.png"),
     };
     

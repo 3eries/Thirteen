@@ -15,6 +15,7 @@
 		1AF87B8A1F6F7822007BE51C /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1AF87B5B1F6F77D6007BE51C /* main.m */; };
 		1AF87B8B1F6F782A007BE51C /* RootViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1AF87B5E1F6F77D6007BE51C /* RootViewController.mm */; };
 		1D0ED1A52309B6B90021C0FE /* GameView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D0ED1A32309B6B90021C0FE /* GameView.cpp */; };
+		1D4D0265232F78DB00C50BF5 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D4D0264232F78DA00C50BF5 /* GameKit.framework */; };
 		1D5B5905230C2C07006D9A6B /* HintButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5B5903230C2C07006D9A6B /* HintButton.cpp */; };
 		1D5D5AF12309CE8A00A30FBB /* GameScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5D5AEF2309CE8A00A30FBB /* GameScene.cpp */; };
 		1D5D5AF42309D94800A30FBB /* GameManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1D5D5AF22309D94800A30FBB /* GameManager.cpp */; };
@@ -176,6 +177,7 @@
 		1D0ED1A32309B6B90021C0FE /* GameView.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = GameView.cpp; sourceTree = "<group>"; };
 		1D0ED1A42309B6B90021C0FE /* GameView.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = GameView.hpp; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		1D4D0264232F78DA00C50BF5 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.2.sdk/System/Library/Frameworks/GameKit.framework; sourceTree = DEVELOPER_DIR; };
 		1D5B5903230C2C07006D9A6B /* HintButton.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = HintButton.cpp; sourceTree = "<group>"; };
 		1D5B5904230C2C07006D9A6B /* HintButton.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = HintButton.hpp; sourceTree = "<group>"; };
 		1D5D5AE92309C29000A30FBB /* GameDefine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GameDefine.h; sourceTree = "<group>"; };
@@ -429,6 +431,7 @@
 				288765A50DF7441C002DB57D /* CoreGraphics.framework in Frameworks */,
 				BF171245129291EC00B8313A /* OpenGLES.framework in Frameworks */,
 				BF1712471292920000B8313A /* libz.dylib in Frameworks */,
+				1D4D0265232F78DB00C50BF5 /* GameKit.framework in Frameworks */,
 				BF1C47F01293687400B63C5D /* QuartzCore.framework in Frameworks */,
 				D44C620C132DFF330009C878 /* OpenAL.framework in Frameworks */,
 				D44C620E132DFF430009C878 /* AVFoundation.framework in Frameworks */,
@@ -1007,6 +1010,7 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1D4D0264232F78DA00C50BF5 /* GameKit.framework */,
 				1D610A64231695540042F5D0 /* GameController.framework */,
 				1D610A622316954C0042F5D0 /* MediaPlayer.framework */,
 				1D9CDF4D22E8A78900106DA2 /* StoreKit.framework */,
@@ -1132,6 +1136,9 @@
 					1D6058900D05DD3D006BFB54 = {
 						DevelopmentTeam = 4AFC962N95;
 						SystemCapabilities = {
+							com.apple.GameCenter.iOS = {
+								enabled = 1;
+							};
 							com.apple.InAppPurchase = {
 								enabled = 1;
 							};

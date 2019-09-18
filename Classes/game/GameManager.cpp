@@ -351,6 +351,8 @@ void GameManager::onStageClear(bool isSkipped) {
     auto stage = instance->stage;
     Log::i("GameManager::onStageClear stage: %d", stage.stage);
     
+    superbomb::PluginPlay::submitScore(LEADER_BOARD_TOP_LEVEL, stage.stage);
+    
     // 클리어한 스테이지 저장
     if( stage.stage <= Database::getLastStage().stage ) {
         User::setClearStage(stage.stage);

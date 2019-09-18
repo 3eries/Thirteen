@@ -24,7 +24,7 @@
 #endif
 
 #ifndef SB_PLUGIN_USE_PLAY
-#define SB_PLUGIN_USE_PLAY 0
+#define SB_PLUGIN_USE_PLAY 1
 #endif
 
 #endif /* SBPluginConfig_h */

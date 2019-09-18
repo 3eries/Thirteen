@@ -57,8 +57,7 @@ static const std::string ANALYTICS_EVENT_PARAM_LEVEL_RANGE          = "level_ran
 static const std::string ANALYTICS_EVENT_PARAM_SUMMARY              = "summary";                    // 요약
 
 // Leaderboard
-// 현재는 아이디를 사용하지만, 추후 plugin_config.json에 이름과 아이디를 정의하여 사용
-static const std::string LEADER_BOARD_HIGH_SCORE                = "CgkIhM_O4eseEAIQAQ";
+static const std::string LEADER_BOARD_TOP_LEVEL                     = "CgkI3oP_ia0VEAIQAQ";
 
 // cocos2d::Director Event
 static const std::string DIRECTOR_EVENT_REMOVE_ADS              = "DIRECTOR_EVENT_REMOVE_ADS";

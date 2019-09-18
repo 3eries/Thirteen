@@ -20,6 +20,7 @@ private:
     enum Tag {
         BTN_CREDIT           = 100,
         BTN_START,
+        BTN_LEADER_BOARD,
         BTN_SETTING,
         BTN_TEST,
     };
