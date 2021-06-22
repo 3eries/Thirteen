@@ -201,7 +201,7 @@ void MainScene::showSettingPopup() {
 
 void MainScene::initBg() {
     
-    addChild(LayerColor::create(Color4B::BLACK));
+    addChild(LayerColor::create(Color4B(GAME_BG_COLOR)));
     
     // 배너
     if( !User::isRemovedAds() ) {
@@ -314,8 +314,8 @@ void MainScene::initMenu() {
     auto btn = SBNodeUtils::createTouchNode();
     btn->setTag(Tag::BTN_START);
     btn->setAnchorPoint(ANCHOR_MB);
-    btn->setPosition(Vec2BC(0, 0));
-    btn->setContentSize(Size(SB_WIN_SIZE.width, SB_WIN_SIZE.height*0.5f));
+    btn->setPosition(Vec2BC(0, 80));
+    btn->setContentSize(Size(SB_WIN_SIZE.width, SB_WIN_SIZE.height*0.40f));
     addChild(btn);
     
     btn->addClickEventListener([=](Ref*) {
