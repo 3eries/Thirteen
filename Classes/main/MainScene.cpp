@@ -315,7 +315,7 @@ void MainScene::initMenu() {
     btn->setTag(Tag::BTN_START);
     btn->setAnchorPoint(ANCHOR_MB);
     btn->setPosition(Vec2BC(0, 80));
-    btn->setContentSize(Size(SB_WIN_SIZE.width, SB_WIN_SIZE.height*0.40f));
+    btn->setContentSize(Size(SB_WIN_SIZE.width*0.85f, SB_WIN_SIZE.height*0.40f));
     addChild(btn);
     
     btn->addClickEventListener([=](Ref*) {
