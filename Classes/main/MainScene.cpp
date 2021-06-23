@@ -73,6 +73,8 @@ void MainScene::onEnter() {
     if( !ConsentManager::isPrivacyPolicyChecked() ) {
         SBDirector::getInstance()->setScreenTouchLocked(true);
     }
+    
+    superbomb::PluginPlay::signIn();
 }
 
 void MainScene::onEnterTransitionDidFinish() {

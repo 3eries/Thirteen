@@ -20,7 +20,6 @@ NS_SB_BEGIN;
 void PluginPlay::init() {
     
 #if SB_PLUGIN_USE_PLAY
-    signIn();
 #endif
 }
 

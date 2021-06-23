@@ -21,13 +21,6 @@ NS_SB_BEGIN;
 void PluginPlay::init() {
     
 #if SB_PLUGIN_USE_PLAY
-//    [GameCenterHelper getInstance];
-    
-//    if( !superbomb::PluginPlay::isSignedIn() ) {
-//        superbomb::PluginPlay::signIn();
-//    }
-    
-    signIn();
 #endif
 }
 
