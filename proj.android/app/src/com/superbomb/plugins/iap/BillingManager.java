@@ -24,7 +24,6 @@ import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
 import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClient.BillingResponseCode;
-import com.android.billingclient.api.BillingClient.FeatureType;
 import com.android.billingclient.api.BillingClient.SkuType;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
@@ -159,7 +158,7 @@ public class BillingManager implements PurchasesUpdatedListener {
         Runnable purchaseFlowRequest = new Runnable() {
             @Override
             public void run() {
-                Log.d(TAG, "Launching in-app purchase flow.");
+                Log.d(TAG, "Launching in-app purchase flow: " + skuDetails.getSku());
                 BillingFlowParams purchaseParams = BillingFlowParams.newBuilder()
                         .setSkuDetails(skuDetails)
                         .build();
@@ -240,7 +239,6 @@ public class BillingManager implements PurchasesUpdatedListener {
                 // Consume the purchase async
                 ConsumeParams params = ConsumeParams.newBuilder()
                         .setPurchaseToken(purchaseToken)
-                        .setDeveloperPayload(purchase.getDeveloperPayload())
                         .build();
 
                 mBillingClient.consumeAsync(params, onConsumeListener);
@@ -267,7 +265,6 @@ public class BillingManager implements PurchasesUpdatedListener {
             public void run() {
                 AcknowledgePurchaseParams params = AcknowledgePurchaseParams.newBuilder()
                         .setPurchaseToken(purchase.getPurchaseToken())
-                        .setDeveloperPayload(purchase.getDeveloperPayload())
                         .build();
 
                 mBillingClient.acknowledgePurchase(params, new AcknowledgePurchaseResponseListener() {
@@ -394,12 +391,7 @@ public class BillingManager implements PurchasesUpdatedListener {
                     + "BASE_64_ENCODED_PUBLIC_KEY");
         }
 
-        try {
-            return Security.verifyPurchase(base64EncodedPublicKey, signedData, signature);
-        } catch(IOException e) {
-            Log.e(TAG, "Got an exception trying to validate a purchase: " + e);
-            return false;
-        }
+        return Security.verifyPurchase(base64EncodedPublicKey, signedData, signature);
     }
 
     private boolean verifyValidSignature(Purchase purchase) {

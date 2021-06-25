@@ -18,8 +18,7 @@ package com.superbomb.plugins.iap;
 
 import android.text.TextUtils;
 import android.util.Base64;
-
-import com.android.billingclient.util.BillingHelper;
+import android.util.Log;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -42,25 +41,26 @@ public class Security {
     private static final String SIGNATURE_ALGORITHM = "SHA1withRSA";
 
     /**
-     * Verifies that the data was signed with the given signature, and returns the verified
-     * purchase.
+     * Verifies that the data was signed with the given signature
      *
      * @param base64PublicKey the base64-encoded public key to use for verifying.
-     * @param signedData      the signed JSON string (signed, not encrypted)
-     * @param signature       the signature for the data, signed with the private key
-     * @throws IOException if encoding algorithm is not supported or key specification
-     *                     is invalid
+     * @param signedData the signed JSON string (signed, not encrypted)
+     * @param signature  the signature for the data, signed with the private key
      */
-    public static boolean verifyPurchase(String base64PublicKey, String signedData,
-                                         String signature) throws IOException {
-        if( TextUtils.isEmpty(signedData) || TextUtils.isEmpty(base64PublicKey)
-                || TextUtils.isEmpty(signature) ) {
-            BillingHelper.logWarn(TAG, "Purchase verification failed: missing data.");
+    static public boolean verifyPurchase(String base64PublicKey, String signedData, String signature) {
+        if ((TextUtils.isEmpty(signedData) || TextUtils.isEmpty(base64PublicKey)
+                || TextUtils.isEmpty(signature))
+        ) {
+            Log.w(TAG, "Purchase verification failed: missing data.");
             return false;
         }
-
-        PublicKey key = generatePublicKey(base64PublicKey);
-        return verify(key, signedData, signature);
+        try {
+            PublicKey key = generatePublicKey(base64PublicKey);
+            return verify(key, signedData, signature);
+        } catch (IOException e) {
+            Log.e(TAG, "Error generating PublicKey from encoded key: " + e.getMessage());
+            return false;
+        }
     }
 
     /**
@@ -70,17 +70,17 @@ public class Security {
      * @throws IOException if encoding algorithm is not supported or key specification
      *                     is invalid
      */
-    public static PublicKey generatePublicKey(String encodedPublicKey) throws IOException {
+    static private PublicKey generatePublicKey(String encodedPublicKey) throws IOException {
         try {
             byte[] decodedKey = Base64.decode(encodedPublicKey, Base64.DEFAULT);
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_FACTORY_ALGORITHM);
             return keyFactory.generatePublic(new X509EncodedKeySpec(decodedKey));
-        } catch(NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             // "RSA" is guaranteed to be available.
             throw new RuntimeException(e);
-        } catch(InvalidKeySpecException e) {
+        } catch (InvalidKeySpecException e) {
             String msg = "Invalid key specification: " + e;
-            BillingHelper.logWarn(TAG, msg);
+            Log.w(TAG, msg);
             throw new IOException(msg);
         }
     }
@@ -94,30 +94,30 @@ public class Security {
      * @param signature  server signature
      * @return true if the data and signature match
      */
-    public static boolean verify(PublicKey publicKey, String signedData, String signature) {
+    static private Boolean verify(PublicKey publicKey, String signedData, String signature) {
         byte[] signatureBytes;
         try {
             signatureBytes = Base64.decode(signature, Base64.DEFAULT);
-        } catch(IllegalArgumentException e) {
-            BillingHelper.logWarn(TAG, "Base64 decoding failed.");
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Base64 decoding failed.");
             return false;
         }
         try {
             Signature signatureAlgorithm = Signature.getInstance(SIGNATURE_ALGORITHM);
             signatureAlgorithm.initVerify(publicKey);
             signatureAlgorithm.update(signedData.getBytes());
-            if( !signatureAlgorithm.verify(signatureBytes) ) {
-                BillingHelper.logWarn(TAG, "Signature verification failed.");
+            if (!signatureAlgorithm.verify(signatureBytes)) {
+                Log.w(TAG, "Signature verification failed...");
                 return false;
             }
             return true;
-        } catch(NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException e) {
             // "RSA" is guaranteed to be available.
             throw new RuntimeException(e);
-        } catch(InvalidKeyException e) {
-            BillingHelper.logWarn(TAG, "Invalid key specification.");
-        } catch(SignatureException e) {
-            BillingHelper.logWarn(TAG, "Signature exception.");
+        } catch (InvalidKeyException e) {
+            Log.e(TAG, "Invalid key specification.");
+        } catch (SignatureException e) {
+            Log.e(TAG, "Signature exception.");
         }
         return false;
     }

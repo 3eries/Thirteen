@@ -92,10 +92,14 @@ public class IAPHelper implements PluginListener, BillingManager.BillingUpdatesL
         }
 
         for( Purchase purchase : purchases ) {
-            Item item = getItemById(purchase.getSku());
+            ArrayList<String> skus = purchase.getSkus();
 
-            if( item != null && item.itemId.equals(itemId) ) {
-                return item;
+            for( String sku : skus ) {
+                Item item = getItemById(sku);
+
+                if( item != null && item.itemId.equals(itemId) ) {
+                    return item;
+                }
             }
         }
 
@@ -256,11 +260,15 @@ public class IAPHelper implements PluginListener, BillingManager.BillingUpdatesL
                         // 요청 성공
                         if( responseCode == BillingResponseCode.OK && purchases != null ) {
                             for( Purchase purchase : purchases ) {
-                                Item item = getItemById(purchase.getSku());
+                                ArrayList<String> skus = purchase.getSkus();
 
-                                // 아이템 구매 승인
-                                if( item != null ) {
-                                    acknowledgePurchase(purchase, item.consumable);
+                                for( String sku : skus ) {
+                                    Item item = getItemById(sku);
+
+                                    // 아이템 구매 승인
+                                    if( item != null ) {
+                                        acknowledgePurchase(purchase, item.consumable);
+                                    }
                                 }
                             }
                         }
@@ -289,11 +297,8 @@ public class IAPHelper implements PluginListener, BillingManager.BillingUpdatesL
                 ArrayList<String> skuList = new ArrayList<>();
 
                 for( Item item : items ) {
+                    Log.i(TAG, "REQUEST SKU DETAIL: " + item.itemId);
                     skuList.add(item.itemId);
-                }
-
-                for( Item  item : items ) {
-                    Log.i(TAG, "REQUEST SKU: " + item.itemId);
                 }
 
                 billingManager.querySkuDetailsAsync(BillingClient.SkuType.INAPP, skuList, new SkuDetailsResponseListener() {
@@ -370,11 +375,11 @@ public class IAPHelper implements PluginListener, BillingManager.BillingUpdatesL
 
         // 성공
         if( billingResult.getResponseCode() == BillingResponseCode.OK ) {
-           Log.i(TAG, "onAcknowledgePurchaseFinished succeed! sku: " + purchase.getSku());
+            Log.i(TAG, "onAcknowledgePurchaseFinished succeed!");
         }
         // 실패
         else {
-            Log.i(TAG, "onAcknowledgePurchaseFinished fail! sku: " + purchase.getSku() + ", debugMsg: " + billingResult.getDebugMessage());
+            Log.i(TAG, "onAcknowledgePurchaseFinished fail! debug message: " + billingResult.getDebugMessage());
         }
     }
 
@@ -391,24 +396,26 @@ public class IAPHelper implements PluginListener, BillingManager.BillingUpdatesL
         // 결제 성공
         if( responseCode == BillingResponseCode.OK && purchases != null ) {
             for( Purchase purchase : purchases ) {
-                final Item item = getItemById(purchase.getSku());
-                if( item == null ) {
-                    // TODO: 예외처리
-                    continue;
-                }
+                ArrayList<String> skus = purchase.getSkus();
 
-                // 아이템 구매 승인
-                acknowledgePurchase(purchase, item.consumable);
-
-                // 구매 완료 리스너 실행
-                context.runOnGLThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        nativeOnPurchased(item.itemId);
+                for( String sku : skus ) {
+                    final Item item = getItemById(sku);
+                    if( item == null ) {
+                        Log.i(TAG, "onPurchasesUpdated invalid sku: " + sku);
+                        continue;
                     }
-                });
 
-                // Log.i(TAG, "onPurchasesUpdated purchased: " + purchase);
+                    // 아이템 구매 승인
+                    acknowledgePurchase(purchase, item.consumable);
+
+                    // 구매 완료 리스너 실행
+                    context.runOnGLThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            nativeOnPurchased(item.itemId);
+                        }
+                    });
+                }
             }
         }
         // 결제 취소
@@ -535,12 +542,16 @@ public class IAPHelper implements PluginListener, BillingManager.BillingUpdatesL
 
                 if( result && purchases != null ) {
                     for( final Purchase purchase : purchases ) {
-                        getContext().runOnGLThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                nativeOnRestored(purchase.getSku());
-                            }
-                        });
+                        ArrayList<String> skus = purchase.getSkus();
+
+                        for( String sku : skus ) {
+                            getContext().runOnGLThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    nativeOnRestored(sku);
+                                }
+                            });
+                        }
                     }
                 }
 
@@ -574,7 +585,11 @@ public class IAPHelper implements PluginListener, BillingManager.BillingUpdatesL
 
                 if( result && purchases != null ) {
                     for( final Purchase purchase : purchases ) {
-                        Log.i(TAG, "consumeAll item: " + purchase.getSku());
+                        ArrayList<String> skus = purchase.getSkus();
+                        for( String sku : skus ) {
+                            Log.i(TAG, "consumeAll item: " + sku);
+                        }
+
                         getInstance().billingManager.consumeAsync(purchase);
                     }
                 }

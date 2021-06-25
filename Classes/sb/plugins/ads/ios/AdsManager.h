@@ -17,21 +17,21 @@
 #import <GoogleMobileAds/GoogleMobileAds.h>
 
 #include "cocos2d.h"
-#include "AdListener.hpp"
+#include "../AdListener.hpp"
 
-@interface AdsManager : NSObject<GADBannerViewDelegate, GADInterstitialDelegate, GADRewardBasedVideoAdDelegate> {
-    GADBannerView *bannerView;
-    GADInterstitial *interstitialAd;
-    GADRewardBasedVideoAd *rewardedVideoAd;
-    
+@interface AdsManager : NSObject<GADBannerViewDelegate, GADFullScreenContentDelegate> {
     NSString *interstitialUnitId;
-    NSString *rewardedVideoUnitId;
-    NSMutableArray *testDevices;
-    
-    id<GADAdNetworkExtras> vungleExtras;
+    NSString *rewardedUnitId;
 }
 
-+ (AdsManager*) getInstance;
+@property(nonatomic, strong) GADBannerView* _Nullable bannerView;
+@property(nonatomic, strong) GADInterstitialAd* _Nullable interstitialAd;
+@property(nonatomic, strong) GADRewardedAd* _Nullable rewardedAd;
+
+@property bool isInterstitialLoading;
+@property bool isRewardedLoading;
+
++ (AdsManager*_Nonnull) getInstance;
 
 - (void) initAd:(const superbomb::AdsConfig&)config;
 
@@ -49,29 +49,25 @@
 - (float) getBannerHeight;
 
 // GADBannerViewDelegate
-- (void) adViewDidReceiveAd:(GADBannerView *)bannerView;
-- (void) adView:(GADBannerView *)bannerView didFailToReceiveAdWithError:(GADRequestError *)error;
-- (void) adViewWillPresentScreen:(GADBannerView *)bannerView;
-- (void) adViewWillDismissScreen:(GADBannerView *)bannerView;
-- (void) adViewDidDismissScreen:(GADBannerView *)bannerView;
-- (void) adViewWillLeaveApplication:(GADBannerView *)bannerView;
+//// Ad Request Lifecycle Notifications
+- (void) bannerViewDidReceiveAd:(nonnull GADBannerView *)bannerView;
+- (void) bannerView:(nonnull GADBannerView *)bannerView
+didFailToReceiveAdWithError:(nonnull NSError *)error;
+- (void) bannerViewDidRecordImpression:(nonnull GADBannerView *)bannerView;
 
-// GADInterstitialDelegate
-- (void) interstitialDidReceiveAd:(GADInterstitial *)ad;
-- (void) interstitial:(GADInterstitial *)ad
-didFailToReceiveAdWithError:(GADRequestError *)error;
-- (void) interstitialWillPresentScreen:(GADInterstitial *)ad;
-- (void) interstitialDidDismissScreen:(GADInterstitial *)ad;
+//// Click-Time Lifecycle Notifications
+- (void) bannerViewWillPresentScreen:(nonnull GADBannerView *)bannerView;
+- (void) bannerViewWillDismissScreen:(nonnull GADBannerView *)bannerView;
+- (void) bannerViewDidDismissScreen:(nonnull GADBannerView *)bannerView;
 
-// GADRewardBasedVideoAdDelegate
-- (void) rewardBasedVideoAdDidReceiveAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd;
-- (void) rewardBasedVideoAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd
-     didFailToLoadWithError:(NSError *)error;
-- (void) rewardBasedVideoAdDidOpen:(GADRewardBasedVideoAd *)rewardBasedVideoAd;
-- (void) rewardBasedVideoAdDidClose:(GADRewardBasedVideoAd *)rewardBasedVideoAd;
-- (void) rewardBasedVideoAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd
-    didRewardUserWithReward:(GADAdReward *)reward;
+// GADFullScreenContentDelegate
+- (void) adDidRecordImpression:(nonnull id<GADFullScreenPresentingAd>)ad;
+- (void) ad:(nonnull id<GADFullScreenPresentingAd>)ad
+didFailToPresentFullScreenContentWithError:(nonnull NSError *)error;
 
+- (void) adDidPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad;
+- (void) adWillDismissFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad;
+- (void) adDidDismissFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad;
 @end
 
 #endif // SB_PLUGIN_USE_ADS

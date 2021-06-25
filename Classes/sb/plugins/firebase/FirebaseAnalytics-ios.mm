@@ -21,8 +21,14 @@ NS_SB_BEGIN;
     
 void FirebaseAnalytics::setCurrentScreen(const string &screen, const string &screenClass) {
     
-    [FIRAnalytics setScreenName:NS_STRING(screen.c_str())
-                    screenClass:(screenClass != "") ? NS_STRING(screenClass.c_str()) : nil];
+    if( screenClass != "" ) {
+        [FIRAnalytics logEventWithName:kFIREventScreenView
+                            parameters:@{kFIRParameterScreenClass: NS_STRING(screenClass.c_str()),
+                                         kFIRParameterScreenName: NS_STRING(screen.c_str())}];
+    } else {
+        [FIRAnalytics logEventWithName:kFIREventScreenView
+                            parameters:@{kFIRParameterScreenName: NS_STRING(screen.c_str())}];
+    }
 }
 
 void FirebaseAnalytics::logEvent(const string &event, const EventParams &params) {

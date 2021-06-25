@@ -10,16 +10,24 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+
 import com.google.ads.mediation.admob.AdMobAdapter;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.InterstitialAd;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.reward.RewardItem;
-import com.google.android.gms.ads.reward.RewardedVideoAd;
-import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 import com.superbomb.math.Size;
 import com.superbomb.plugins.PluginListener;
 
@@ -48,14 +56,15 @@ public class AdsManager implements PluginListener {
     private AdView bannerView;
     private Size bannerSizeInPixels;
 
+    private String interstitialUnitId = "";
     private InterstitialAd interstitialAd;
-    private RewardedVideoAd rewardedVideoAd;
+    private boolean isInterstitialLoading;
 
     private String rewardedVideoUnitId = "";
-    private final ArrayList<String> testDevices;
+    private RewardedAd rewardedVideoAd;
+    private boolean isRewardedLoading;
 
     private AdsManager() {
-        testDevices = new ArrayList<>();
     }
 
     @Override
@@ -74,19 +83,16 @@ public class AdsManager implements PluginListener {
     @Override
     public void onResume() {
         if( bannerView != null ) bannerView.resume();
-        if( rewardedVideoAd != null ) rewardedVideoAd.resume(context);
     }
 
     @Override
     public void onPause() {
         if( bannerView != null ) bannerView.pause();
-        if( rewardedVideoAd != null ) rewardedVideoAd.pause(context);
     }
 
     @Override
     public void onDestroy() {
         if( bannerView != null ) bannerView.destroy();
-        if( rewardedVideoAd != null ) rewardedVideoAd.destroy(context);
     }
 
     @Override
@@ -104,10 +110,7 @@ public class AdsManager implements PluginListener {
      */
     private static AdRequest.Builder createRequestBuilder() {
 
-        return new AdRequest.Builder()
-                //                .addTestDevice("0A16B70F54452DD393143983A218FB9A")
-                //                .addTestDevice("81E690704D782651A631FAB69551FE0C")
-                .addNetworkExtrasBundle(AdMobAdapter.class, new Bundle());
+        return new AdRequest.Builder();
     }
 
     /**
@@ -126,36 +129,17 @@ public class AdsManager implements PluginListener {
                 final AdsManager mgr = instance;
                 final Activity ctx = mgr.context;
 
-                MobileAds.initialize(ctx, appId);
+                MobileAds.initialize(ctx, new OnInitializationCompleteListener() {
+                    @Override
+                    public void onInitializationComplete(InitializationStatus initializationStatus) {
+                    }
+                });
 
                 mgr.initBanner(bannerUnitId);
                 mgr.initInterstitial(interstitialUnitId);
                 mgr.initRewardedVideo(rewardedVideoUnitId);
-
-                // TODO: 어댑터 초기화
             }
         });
-    }
-
-    /**
-     * Vungle 어댑터 초기화
-     */
-    //    public static void initVungleAdapter(String placement1, String placement2) {
-    //
-    //        String[] placements = new String[2];
-    //        placements[0] = placement1;
-    //        placements[1] = placement2;
-    //        instance.vungleExtras = new VungleExtrasBuilder(placements).build();
-    //    }
-
-    /**
-     * 테스트 기기 초기화
-     */
-    public static void initTestDevices(String devices[]) {
-
-        for( String device : devices ) {
-            getInstance().testDevices.add(device);
-        }
     }
 
     /**
@@ -198,11 +182,11 @@ public class AdsManager implements PluginListener {
             }
 
             @Override
-            public void onAdFailedToLoad(final int errorCode) {
+            public void onAdFailedToLoad(final LoadAdError loadAdError) {
                 Cocos2dxHelper.runOnGLThread(new Runnable() {
                     @Override
                     public void run() {
-                        nativeBannerOnAdFailedToLoad(errorCode);
+                        nativeBannerOnAdFailedToLoad(loadAdError.getCode());
                     }
                 });
             }
@@ -254,52 +238,7 @@ public class AdsManager implements PluginListener {
             return;
         }
 
-        interstitialAd = new InterstitialAd(context);
-        interstitialAd.setAdUnitId(unitId);
-        interstitialAd.setAdListener(new AdListener() {
-
-            @Override
-            public void onAdLoaded() {
-                Cocos2dxHelper.runOnGLThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        nativeInterstitialOnAdLoaded();
-                    }
-                });
-            }
-
-            @Override
-            public void onAdFailedToLoad(final int errorCode) {
-                Cocos2dxHelper.runOnGLThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        nativeInterstitialOnAdFailedToLoad(errorCode);
-                    }
-                });
-            }
-
-            @Override
-            public void onAdOpened() {
-                Cocos2dxHelper.runOnGLThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        nativeInterstitialOnAdOpened();
-                    }
-                });
-            }
-
-            @Override
-            public void onAdClosed() {
-                Cocos2dxHelper.runOnGLThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        nativeInterstitialOnAdClosed();
-                    }
-                });
-
-                loadInterstitial();
-            }
-        });
+        this.interstitialUnitId = unitId;
 
         loadInterstitial();
     }
@@ -324,73 +263,6 @@ public class AdsManager implements PluginListener {
         }
 
         this.rewardedVideoUnitId = unitId;
-
-        rewardedVideoAd = MobileAds.getRewardedVideoAdInstance(context);
-        rewardedVideoAd.setRewardedVideoAdListener(new RewardedVideoAdListener() {
-            @Override
-            public void onRewardedVideoAdLoaded() {
-                Cocos2dxHelper.runOnGLThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        nativeRewardedVideoOnAdLoaded();
-                    }
-                });
-            }
-
-            @Override
-            public void onRewardedVideoAdFailedToLoad(final int errorCode) {
-                Cocos2dxHelper.runOnGLThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        nativeRewardedVideoOnAdFailedToLoad(errorCode);
-                    }
-                });
-            }
-
-            @Override
-            public void onRewardedVideoAdOpened() {
-                Cocos2dxHelper.runOnGLThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        nativeRewardedVideoOnAdOpened();
-                    }
-                });
-            }
-
-            @Override
-            public void onRewardedVideoAdClosed() {
-                Cocos2dxHelper.runOnGLThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        nativeRewardedVideoOnAdClosed();
-                    }
-                });
-
-                loadRewardedVideo();
-            }
-
-            @Override
-            public void onRewarded(final RewardItem rewardItem) {
-                Cocos2dxHelper.runOnGLThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        nativeRewardedVideoOnRewarded(rewardItem.getType(), rewardItem.getAmount());
-                    }
-                });
-            }
-
-            @Override
-            public void onRewardedVideoStarted() {
-            }
-
-            @Override
-            public void onRewardedVideoAdLeftApplication() {
-            }
-
-            @Override
-            public void onRewardedVideoCompleted() {
-            }
-        });
 
         loadRewardedVideo();
     }
@@ -443,27 +315,59 @@ public class AdsManager implements PluginListener {
      */
     public static boolean loadInterstitial() {
 
+        Log.d(TAG, "loadInterstitial");
+
         final AdsManager mgr = instance;
-        final InterstitialAd interstitialAd = mgr.interstitialAd;
 
-        if( interstitialAd == null ) {
-            Log.i(TAG, "interstitialAd load error: interstitialAd is null.");
+        if( TextUtils.isEmpty(mgr.interstitialUnitId) ) {
             return false;
         }
 
-        if( interstitialAd.isLoading() ) {
-            Log.i(TAG, "interstitialAd is loading.");
+        if( mgr.interstitialAd != null ) {
+            Log.d(TAG, "Interstitial was loaded.");
             return false;
         }
+
+        if( mgr.isInterstitialLoading ) {
+            Log.d(TAG, "Interstitial was loading.");
+            return false;
+        }
+
+        mgr.isInterstitialLoading = true;
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
-                Log.i(TAG, "interstitialAd load");
-
                 AdRequest adRequest = createRequestBuilder().build();
-                interstitialAd.loadAd(adRequest);
+
+                InterstitialAd.load(mgr.context, mgr.interstitialUnitId, adRequest, new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(InterstitialAd interstitialAd) {
+                        mgr.isInterstitialLoading = false;
+                        mgr.interstitialAd = interstitialAd;
+
+                        Cocos2dxHelper.runOnGLThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                nativeInterstitialOnAdLoaded();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(final LoadAdError loadAdError) {
+                        mgr.isInterstitialLoading = false;
+                        mgr.interstitialAd = null;
+
+                        Cocos2dxHelper.runOnGLThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                nativeInterstitialOnAdFailedToLoad(loadAdError.getCode());
+                            }
+                        });
+
+                    }
+                });
             }
         });
 
@@ -475,26 +379,58 @@ public class AdsManager implements PluginListener {
      */
     public static boolean loadRewardedVideo() {
 
-        final AdsManager mgr = instance;
-        final RewardedVideoAd rewardedVideoAd = mgr.rewardedVideoAd;
+        Log.d(TAG, "loadRewardedVideo");
 
-        if( rewardedVideoAd == null ) {
-            Log.i(TAG, "rewardedVideoAd load error: rewardedVideoAd is null.");
-            return false;
-        }
+        final AdsManager mgr = instance;
 
         if( TextUtils.isEmpty(mgr.rewardedVideoUnitId) ) {
-            Log.i(TAG, "rewardedVideoAd load error: rewardedVideoUnitId is null.");
             return false;
         }
 
-        Log.i(TAG, "rewardedVideoAd load");
+        if( mgr.rewardedVideoAd != null ) {
+            Log.d(TAG, "Rewarded was loaded.");
+            return false;
+        }
+
+        if( mgr.isRewardedLoading ) {
+            Log.d(TAG, "Rewarded was loading.");
+            return false;
+        }
+
+        mgr.isRewardedLoading = true;
 
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 AdRequest adRequest = createRequestBuilder().build();
-                rewardedVideoAd.loadAd(mgr.rewardedVideoUnitId, adRequest);
+
+                RewardedAd.load(mgr.context, mgr.rewardedVideoUnitId, adRequest, new RewardedAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(RewardedAd rewardedAd) {
+                        mgr.isRewardedLoading = false;
+                        mgr.rewardedVideoAd = rewardedAd;
+
+                        Cocos2dxHelper.runOnGLThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                nativeRewardedVideoOnAdLoaded();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(final LoadAdError loadAdError) {
+                        mgr.isRewardedLoading = false;
+                        mgr.rewardedVideoAd = null;
+
+                        Cocos2dxHelper.runOnGLThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                nativeRewardedVideoOnAdFailedToLoad(loadAdError.getCode());
+                            }
+                        });
+                    }
+                });
             }
         });
 
@@ -559,23 +495,42 @@ public class AdsManager implements PluginListener {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-
                 final AdsManager mgr = instance;
-                final InterstitialAd interstitialAd = mgr.interstitialAd;
 
-                if( interstitialAd == null ) {
+                if( mgr.interstitialAd == null ) {
+                    Log.d(TAG, "showInterstitial ad wasn't ready yet.");
+                    loadInterstitial();
                     return;
                 }
 
-                // 광고 로딩됨, 광고 노출
-                if( interstitialAd.isLoaded() ) {
-                    interstitialAd.show();
-                }
-                // 광고 로딩
-                else {
-                    Log.d(TAG, "The interstitial wasn't loaded yet.");
-                    loadInterstitial();
-                }
+                mgr.interstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+
+                    @Override
+                    public void onAdShowedFullScreenContent() {
+                        mgr.interstitialAd = null;
+
+                        Cocos2dxHelper.runOnGLThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                nativeInterstitialOnAdOpened();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onAdDismissedFullScreenContent() {
+                        Cocos2dxHelper.runOnGLThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                nativeInterstitialOnAdClosed();
+                            }
+                        });
+
+                        loadInterstitial();
+                    }
+                });
+
+                mgr.interstitialAd.show(mgr.context);
             }
         });
     }
@@ -589,23 +544,51 @@ public class AdsManager implements PluginListener {
 
             @Override
             public void run() {
-
                 final AdsManager mgr = instance;
-                final RewardedVideoAd rewardedVideoAd = mgr.rewardedVideoAd;
 
-                if( rewardedVideoAd == null ) {
+                if( mgr.rewardedVideoAd == null ) {
+                    Log.d(TAG, "showRewardedVideo ad wasn't ready yet.");
+                    loadRewardedVideo();
                     return;
                 }
 
-                // 광고 로딩됨, 광고 노출
-                if( rewardedVideoAd.isLoaded() ) {
-                    rewardedVideoAd.show();
-                }
-                // 광고 로딩
-                else {
-                    Log.d(TAG, "The rewarded video wasn't loaded yet.");
-                    loadRewardedVideo();
-                }
+                mgr.rewardedVideoAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                    @Override
+                    public void onAdShowedFullScreenContent() {
+                        mgr.rewardedVideoAd = null;
+
+                        Cocos2dxHelper.runOnGLThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                nativeRewardedVideoOnAdOpened();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onAdDismissedFullScreenContent() {
+                        Cocos2dxHelper.runOnGLThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                nativeRewardedVideoOnAdClosed();
+                            }
+                        });
+
+                        loadRewardedVideo();
+                    }
+                });
+
+                mgr.rewardedVideoAd.show(mgr.context, new OnUserEarnedRewardListener() {
+                    @Override
+                    public void onUserEarnedReward(final RewardItem rewardItem) {
+                        Cocos2dxHelper.runOnGLThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                nativeRewardedVideoOnRewarded(rewardItem.getType(), rewardItem.getAmount());
+                            }
+                        });
+                    }
+                });
             }
         });
     }

@@ -24,7 +24,6 @@ using namespace std;
 - (id) init;
 - (GADRequest*) createRequest;
 
-- (void) initTestDevices:(vector<string>)devices;
 - (void) initBanner:(const string&)unitId;
 - (void) initInterstitial:(const string&)unitId;
 - (void) initRewardedVideo:(const string&)unitId;
@@ -48,15 +47,15 @@ using namespace std;
 - (id) init {
     
     if( self = [super init] ) {
-        bannerView = nil;
-        interstitialAd = nil;
-        rewardedVideoAd = nil;
-        
         interstitialUnitId = nil;
-        rewardedVideoUnitId = nil;
-        testDevices = nil;
+        rewardedUnitId = nil;
         
-        vungleExtras = nil;
+        self.bannerView = nil;
+        self.interstitialAd = nil;
+        self.rewardedAd = nil;
+        
+        self.isInterstitialLoading = false;
+        self.isRewardedLoading = false;
     }
     
     return self;
@@ -65,7 +64,6 @@ using namespace std;
 - (GADRequest*) createRequest {
     
     GADRequest *request = [GADRequest request];
-    request.testDevices = testDevices;
     
     return request;
 }
@@ -78,47 +76,14 @@ using namespace std;
     // Initialize the Google Mobile Ads SDK.
     // [GADMobileAds configureWithApplicationID:NS_STRING(config.appId.c_str())];
     [[GADMobileAds sharedInstance] startWithCompletionHandler:nil];
-  
-    // 테스트 기기 초기화
-    [self initTestDevices:config.testDevices];
     
     // 광고 단위 초기화
     [self initBanner:config.bannerUnitId];
     [self initInterstitial:config.interstitialUnitId];
     [self initRewardedVideo:config.rewardedVideoUnitId];
-    
-    // TODO: 어댑터 초기화
 }
 
-/**
- * Vungle 어댑터 초기화
- */
-//- (void) initVungleAdapter:(vector<string>)placements {
-//
-//    NSMutableArray *array = [NSMutableArray array];
-//
-//    for( string placement : placements ) {
-//        [array addObject:NS_STRING(placement)];
-//    }
-//
-////    VungleAdNetworkExtras *extras = [[VungleAdNetworkExtras alloc] init];
-////    extras.allPlacements = array;
-////
-////    vungleExtras = extras;
-//}
-
-/**
- * 테스트 기기 초기화
- */
-- (void) initTestDevices:(vector<string>)devices {
-    
-    testDevices = [[NSMutableArray alloc] init];
-    [testDevices addObject:kGADSimulatorID];
-    
-    for( string device : devices ) {
-        [testDevices addObject:NS_STRING(device.c_str())];
-    }
-}
+#pragma mark- 배너
 
 /**
  * 배너 광고 초기화
@@ -131,18 +96,19 @@ using namespace std;
         return;
     }
     
-    GADAdSize bannerSize =
-                    !SBDirector::isPadResolution() ? kGADAdSizeBanner : kGADAdSizeSmartBannerPortrait;
+//    GADAdSize bannerSize =
+//                    !SBDirector::isPadResolution() ? kGADAdSizeBanner : kGADAdSizeSmartBannerPortrait;
+    GADAdSize bannerSize = kGADAdSizeSmartBannerPortrait;
     
-    bannerView = [[GADBannerView alloc] initWithAdSize:bannerSize];
-    bannerView.adUnitID = NS_STRING(unitId.c_str());
-    bannerView.hidden = YES;
-    bannerView.translatesAutoresizingMaskIntoConstraints = NO; // example
-    bannerView.delegate = self;
-    bannerView.rootViewController = ROOT_VIEW_CONTROLLER;
+    self.bannerView = [[GADBannerView alloc] initWithAdSize:bannerSize];
+    self.bannerView.adUnitID = NS_STRING(unitId.c_str());
+    self.bannerView.hidden = YES;
+    self.bannerView.translatesAutoresizingMaskIntoConstraints = NO; // example
+    self.bannerView.delegate = self;
+    self.bannerView.rootViewController = ROOT_VIEW_CONTROLLER;
     
     UIView *view = ROOT_VIEW_CONTROLLER.view;
-    [view addSubview:bannerView];
+    [view addSubview:self.bannerView];
     
     // set frame
     /*
@@ -162,30 +128,30 @@ using namespace std;
         
         // align screen bottom
         [NSLayoutConstraint activateConstraints:@[
-                                                  [guide.leftAnchor constraintEqualToAnchor:bannerView.leftAnchor],
-                                                  [guide.rightAnchor constraintEqualToAnchor:bannerView.rightAnchor],
-                                                  [guide.bottomAnchor constraintEqualToAnchor:bannerView.bottomAnchor]
+                                                  [guide.leftAnchor constraintEqualToAnchor:self.bannerView.leftAnchor],
+                                                  [guide.rightAnchor constraintEqualToAnchor:self.bannerView.rightAnchor],
+                                                  [guide.bottomAnchor constraintEqualToAnchor:self.bannerView.bottomAnchor]
                                                   ]];
         // align screen top
         /*
         [NSLayoutConstraint activateConstraints:@[
-                                                  [guide.leftAnchor constraintEqualToAnchor:bannerView.leftAnchor],
-                                                  [guide.rightAnchor constraintEqualToAnchor:bannerView.rightAnchor],
-                                                  [guide.topAnchor constraintEqualToAnchor:bannerView.topAnchor]
+                                                  [guide.leftAnchor constraintEqualToAnchor:self.bannerView.leftAnchor],
+                                                  [guide.rightAnchor constraintEqualToAnchor:self.bannerView.rightAnchor],
+                                                  [guide.topAnchor constraintEqualToAnchor:self.bannerView.topAnchor]
                                                   ]];
          */
         
     } else {
         // In lower iOS versions, safe area is not available so we use
         // bottom layout guide and view edges.
-        [view addConstraint:[NSLayoutConstraint constraintWithItem:bannerView
+        [view addConstraint:[NSLayoutConstraint constraintWithItem:self.bannerView
                                                          attribute:NSLayoutAttributeLeading
                                                          relatedBy:NSLayoutRelationEqual
                                                             toItem:view
                                                          attribute:NSLayoutAttributeLeading
                                                         multiplier:1
                                                           constant:0]];
-        [view addConstraint:[NSLayoutConstraint constraintWithItem:bannerView
+        [view addConstraint:[NSLayoutConstraint constraintWithItem:self.bannerView
                                                          attribute:NSLayoutAttributeTrailing
                                                          relatedBy:NSLayoutRelationEqual
                                                             toItem:view
@@ -193,16 +159,17 @@ using namespace std;
                                                         multiplier:1
                                                           constant:0]];
         // align screen bottom
-        [view addConstraint:[NSLayoutConstraint constraintWithItem:bannerView
+        [view addConstraint:[NSLayoutConstraint constraintWithItem:self.bannerView
                                                          attribute:NSLayoutAttributeBottom
                                                          relatedBy:NSLayoutRelationEqual
                                                             toItem:ROOT_VIEW_CONTROLLER.bottomLayoutGuide
                                                          attribute:NSLayoutAttributeTop
                                                         multiplier:1
                                                           constant:0]];
+        
         // align screen top
         /*
-        [view addConstraint:[NSLayoutConstraint constraintWithItem:bannerView
+        [view addConstraint:[NSLayoutConstraint constraintWithItem:self.bannerView
                                                          attribute:NSLayoutAttributeTop
                                                          relatedBy:NSLayoutRelationEqual
                                                             toItem:ROOT_VIEW_CONTROLLER.topLayoutGuide
@@ -235,65 +202,71 @@ using namespace std;
     [self loadBanner];
 }
 
+#pragma mark- GADBannerViewDelegate
+
 /**
  * OnAdLoaded
- * Tells the delegate an ad request loaded an ad.
+ * Tells the delegate that an ad request successfully received an ad. The delegate may want to add
+ * the banner view to the view hierarchy if it hasn't been added yet.
  */
-- (void) adViewDidReceiveAd:(GADBannerView *)bannerView {
+- (void) bannerViewDidReceiveAd:(nonnull GADBannerView *)bannerView {
     
     AdsHelper::getInstance()->getBanner()->onAdLoaded();
 }
 
 /**
  * OnAdFailedToLoad
- * Tells the delegate an ad request failed.
+ * Tells the delegate that an ad request failed. The failure is normally due to network
+ * connectivity or ad availablility (i.e., no fill).
  */
-- (void) adView:(GADBannerView *)bannerView
-didFailToReceiveAdWithError:(GADRequestError *)error {
+- (void) bannerView:(nonnull GADBannerView *)bannerView
+didFailToReceiveAdWithError:(nonnull NSError *)error {
     
-    NSLog(@"adView:didFailToReceiveAdWithError: %@", [error localizedDescription]);
+    NSLog(@"Failed to load banner ad with error: %@", [error localizedDescription]);
 
     int errorCode = [[NSNumber numberWithInteger:error.code] intValue];
     AdsHelper::getInstance()->getBanner()->onAdFailedToLoad(errorCode);
 }
 
 /**
- * OnAdOpened
- * Tells the delegate that a full-screen view will be presented in response
- * to the user clicking on an ad.
+ * Tells the delegate that an impression has been recorded for an ad.
  */
-- (void) adViewWillPresentScreen:(GADBannerView *)bannerView {
-    NSLog(@"adViewWillPresentScreen");
+- (void) bannerViewDidRecordImpression:(nonnull GADBannerView *)bannerView {
+    
+    NSLog(@"bannerViewDidRecordImpression");
+}
+
+/**
+ * OnAdOpened
+ * Tells the delegate that a full screen view will be presented in response to the user clicking on
+ * an ad. The delegate may want to pause animations and time sensitive interactions.
+ */
+- (void) bannerViewWillPresentScreen:(nonnull GADBannerView *)bannerView {
+    NSLog(@"bannerViewWillPresentScreen");
     
     AdsHelper::getInstance()->getBanner()->onAdOpened();
 }
 
 /**
- *
- * Tells the delegate that the full-screen view will be dismissed.
+ * Tells the delegate that the full screen view will be dismissed.
  */
-- (void) adViewWillDismissScreen:(GADBannerView *)bannerView {
-    NSLog(@"adViewWillDismissScreen");
+- (void) bannerViewWillDismissScreen:(nonnull GADBannerView *)bannerView {
+    NSLog(@"bannerViewWillDismissScreen");
 }
 
 /**
  * OnAdClosed
- * Tells the delegate that the full-screen view has been dismissed.
+ * Tells the delegate that the full screen view has been dismissed. The delegate should restart
+ * anything paused while handling bannerViewWillPresentScreen:.
  */
-- (void) adViewDidDismissScreen:(GADBannerView *)bannerView {
-    NSLog(@"adViewDidDismissScreen");
+- (void) bannerViewDidDismissScreen:(nonnull GADBannerView *)bannerView {
+    NSLog(@"bannerViewDidDismissScreen");
     
     AdsHelper::getInstance()->getBanner()->onAdClosed();
     [self loadBanner];
 }
 
-/**
- * Tells the delegate that a user click will open another app (such as
- * the App Store), backgrounding the current app.
- */
-- (void) adViewWillLeaveApplication:(GADBannerView *)bannerView {
-    NSLog(@"adViewWillLeaveApplication");
-}
+#pragma mark- 전면
 
 /**
  * 전면 광고 초기화
@@ -308,45 +281,76 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
     [self loadInterstitial];
 }
 
+#pragma mark- GADFullScreenContentDelegate
+
 /**
- * OnAdLoaded
+ * Tells the delegate that an impression has been recorded for the ad.
  */
-- (void) interstitialDidReceiveAd:(GADInterstitial *)ad {
-    AdsHelper::getInstance()->getInterstitial()->onAdLoaded();
+- (void) adDidRecordImpression:(nonnull id<GADFullScreenPresentingAd>)ad {
+    
+    NSLog(@"adDidRecordImpression");
 }
 
 /**
- * OnAdFailedToLoad
+ * Tells the delegate that the ad failed to present full screen content.
  */
-- (void) interstitial:(GADInterstitial *)ad
-didFailToReceiveAdWithError:(GADRequestError *)error {
+- (void) ad:(nonnull id<GADFullScreenPresentingAd>)ad
+didFailToPresentFullScreenContentWithError:(nonnull NSError *)error {
     
-    NSLog(@"interstitial didFailToReceiveAdWithError: %@", [error description]);
-    
-    int errorCode = [[NSNumber numberWithInteger:error.code] intValue];
-    AdsHelper::getInstance()->getInterstitial()->onAdFailedToLoad(errorCode);
+    NSLog(@"ad:didFailToPresentFullScreenContentWithError");
 }
 
 /**
  * OnAdOpened
+ * Tells the delegate that the ad presented full screen content.
  */
-- (void) interstitialWillPresentScreen:(GADInterstitial *)ad {
-    
+- (void) adDidPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
+
+    NSLog(@"adDidPresentFullScreenContent");
+
     Application::getInstance()->applicationDidEnterBackground();
     
-    AdsHelper::getInstance()->getInterstitial()->onAdOpened();
+    if( ad == self.interstitialAd ) {
+        AdsHelper::getInstance()->getInterstitial()->onAdOpened();
+    }
+    else if( ad == self.rewardedAd ) {
+        // SBAudioEngine::pauseAll();
+        AdsHelper::getInstance()->getRewardedVideo()->onAdOpened();
+    }
 }
 
 /**
- * OnAdClosed
+ * Tells the delegate that the ad will dismiss full screen content.
  */
-- (void) interstitialDidDismissScreen:(GADInterstitial *)ad {
+- (void) adWillDismissFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
     
-    AdsHelper::getInstance()->getInterstitial()->onAdClosed();
-    [self loadInterstitial];
+    NSLog(@"adWillDismissFullScreenContent");
+}
+
+/**
+ * Tells the delegate that the ad dismissed full screen content.
+ */
+- (void) adDidDismissFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
+    
+    NSLog(@"adDidDismissFullScreenContent");
+    
+    if( ad == self.interstitialAd ) {
+        AdsHelper::getInstance()->getInterstitial()->onAdClosed();
+        self.interstitialAd = nil;
+        
+        [self loadInterstitial];
+    }
+    else if( ad == self.rewardedAd ) {
+        AdsHelper::getInstance()->getRewardedVideo()->onAdClosed();
+        self.rewardedAd = nil;
+        
+        [self loadRewardedVideo];
+    }
     
     Application::getInstance()->applicationWillEnterForeground();
 }
+
+#pragma mark- 보상형
 
 /**
  * 보상형 비디오 초기화
@@ -357,74 +361,23 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
         return;
     }
     
-    rewardedVideoUnitId = NS_STRING(unitId.c_str());
-    
-    rewardedVideoAd = [GADRewardBasedVideoAd sharedInstance];
-    rewardedVideoAd.delegate = self;
+    rewardedUnitId = NS_STRING(unitId.c_str());
     
     [self loadRewardedVideo];
 }
 
-/**
- * OnAdLoaded
- */
-- (void) rewardBasedVideoAdDidReceiveAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
-    AdsHelper::getInstance()->getRewardedVideo()->onAdLoaded();
-}
-
-/**
- * OnAdFailedToLoad
- */
-- (void) rewardBasedVideoAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd
-     didFailToLoadWithError:(NSError *)error {
-
-    NSLog(@"rewardBasedVideoAd didFailToLoadWithError: %@", [error description]);
-    
-    int errorCode = [[NSNumber numberWithInteger:error.code] intValue];
-    AdsHelper::getInstance()->getRewardedVideo()->onAdFailedToLoad(errorCode);
-}
-
-/**
- * OnAdOpened
- */
-- (void) rewardBasedVideoAdDidOpen:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
-    
-    Application::getInstance()->applicationDidEnterBackground();
-    // SBAudioEngine::pauseAll();
-    
-    AdsHelper::getInstance()->getRewardedVideo()->onAdOpened();
-}
-
-/**
- * OnAdClosed
- */
-- (void) rewardBasedVideoAdDidClose:(GADRewardBasedVideoAd *)rewardBasedVideoAd {
-    
-    AdsHelper::getInstance()->getRewardedVideo()->onAdClosed();
-    [self loadRewardedVideo];
-    
-    Application::getInstance()->applicationWillEnterForeground();
-}
-
-/**
- * OnRewarded
- */
-- (void) rewardBasedVideoAd:(GADRewardBasedVideoAd *)rewardBasedVideoAd
-    didRewardUserWithReward:(GADAdReward *)reward {
-    AdsHelper::getInstance()->getRewardedVideo()->onRewarded([reward.type UTF8String],
-                                                             [reward.amount intValue]);
-}
+#pragma mark- 광고 유닛 컨트롤
 
 - (bool) loadBanner {
     
-    NSLog(@"AdsManager::loadBanner bannerView: %d", bannerView != nil);
+    NSLog(@"AdsManager::loadBanner bannerView: %d", self.bannerView != nil);
     
-    if( bannerView == nil ) {
+    if( self.bannerView == nil ) {
         return false;
     }
     
     GADRequest *request = [self createRequest];
-    [bannerView loadRequest:request];
+    [self.bannerView loadRequest:request];
     
     return true;
 }
@@ -437,11 +390,30 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
         return false;
     }
     
-    interstitialAd = [[GADInterstitial alloc] initWithAdUnitID:interstitialUnitId];
-    interstitialAd.delegate = self;
+    if( self.isInterstitialLoading ) {
+        return false;
+    }
     
-    GADRequest *request = [self createRequest];
-    [interstitialAd loadRequest:request];
+    self.isInterstitialLoading = true;
+    
+    [GADInterstitialAd loadWithAdUnitID:interstitialUnitId
+                                request:[self createRequest]
+                      completionHandler:^(GADInterstitialAd *ad, NSError *error) {
+        
+        self.isInterstitialLoading = false;
+        
+        if( error ) {
+            NSLog(@"Failed to load interstitial ad with error: %@", [error localizedDescription]);
+            int errorCode = [[NSNumber numberWithInteger:error.code] intValue];
+            AdsHelper::getInstance()->getInterstitial()->onAdFailedToLoad(errorCode);
+            return;
+        }
+        
+        self.interstitialAd = ad;
+        self.interstitialAd.fullScreenContentDelegate = self;
+
+        AdsHelper::getInstance()->getInterstitial()->onAdLoaded();
+    }];
     
     return true;
 }
@@ -450,12 +422,36 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
     
     NSLog(@"AdsManager::loadRewardedVideo");
     
-    if( !rewardedVideoAd || !rewardedVideoUnitId || [rewardedVideoUnitId isEqualToString:@""] ) {
+    if( !rewardedUnitId || [rewardedUnitId isEqualToString:@""] ) {
         return false;
     }
     
-    GADRequest *request = [self createRequest];
-    [rewardedVideoAd loadRequest:request withAdUnitID:rewardedVideoUnitId];
+    if( self.isRewardedLoading ) {
+        return false;
+    }
+    
+    self.isRewardedLoading = true;
+    
+    [GADRewardedAd loadWithAdUnitID:rewardedUnitId
+                            request:[self createRequest]
+                  completionHandler:^(GADRewardedAd *ad, NSError *error) {
+        
+        self.isRewardedLoading = false;
+        
+        if( error ) {
+            NSLog(@"Failed to load rewarded ad with error: %@", [error localizedDescription]);
+            
+            int errorCode = [[NSNumber numberWithInteger:error.code] intValue];
+            AdsHelper::getInstance()->getRewardedVideo()->onAdFailedToLoad(errorCode);
+            
+            return;
+        }
+        
+        self.rewardedAd = ad;
+        self.rewardedAd.fullScreenContentDelegate = self;
+        
+        AdsHelper::getInstance()->getRewardedVideo()->onAdLoaded();
+    }];
     
     return true;
 }
@@ -465,8 +461,8 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  */
 - (void) showBanner {
     
-    if( bannerView ) {
-        bannerView.hidden = NO;
+    if( self.bannerView ) {
+        self.bannerView.hidden = NO;
     }
     
     /*
@@ -487,8 +483,8 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  */
 - (void) hideBanner {
     
-    if( bannerView ) {
-        bannerView.hidden = YES;
+    if( self.bannerView ) {
+        self.bannerView.hidden = YES;
     }
 }
 
@@ -497,13 +493,9 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  */
 - (void) showInterstitial {
     
-    if( !interstitialAd ) {
-        return;
-    }
-    
     // 광고 로딩됨, 광고 노출
-    if( interstitialAd.isReady ) {
-        [interstitialAd presentFromRootViewController:ROOT_VIEW_CONTROLLER];
+    if( self.interstitialAd ) {
+        [self.interstitialAd presentFromRootViewController:ROOT_VIEW_CONTROLLER];
     }
     // 광고 로딩
     else {
@@ -516,14 +508,17 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
  * 보상형 비디오 노출
  */
 - (void) showRewardedVideo {
-
-    if( !rewardedVideoAd ) {
-        return;
-    }
     
     // 광고 로딩됨, 광고 노출
-    if( rewardedVideoAd.isReady ) {
-        [rewardedVideoAd presentFromRootViewController:ROOT_VIEW_CONTROLLER];
+    if( self.rewardedAd ) {
+        [self.rewardedAd presentFromRootViewController:ROOT_VIEW_CONTROLLER
+                              userDidEarnRewardHandler:^{
+            
+            GADAdReward *reward = self.rewardedAd.adReward;
+            AdsHelper::getInstance()->getRewardedVideo()->onRewarded([reward.type UTF8String],
+                                                                     [reward.amount intValue]);
+        }];
+        
     }
     // 광고 로딩
     else {
@@ -533,11 +528,11 @@ didFailToReceiveAdWithError:(GADRequestError *)error {
 }
 
 - (float) getBannerWidth {
-    return bannerView.frame.size.width;
+    return self.bannerView.frame.size.width;
 }
 
 - (float) getBannerHeight {
-    return bannerView.frame.size.height;
+    return self.bannerView.frame.size.height;
 }
 
 @end

@@ -15,6 +15,46 @@
       },
       "oauth_client": [
         {
+          "client_id": "733655056862-bo3d1qjn6pe4v1ocdtp6kj4fp9br4ksv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.superbomb.series.Thirteen",
+            "certificate_hash": "974066f51b60e6c42a62862599e69c9678f102d7"
+          }
+        },
+        {
+          "client_id": "733655056862-cvl87iiohahuqqo6rgofa6105lucdk5c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.superbomb.series.Thirteen",
+            "certificate_hash": "7ec1df14f50f6d7193af61b2ba838182ffc43a07"
+          }
+        },
+        {
+          "client_id": "733655056862-l51bfkcd01vj8u198v2dqga53qa2ho5j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.superbomb.series.Thirteen",
+            "certificate_hash": "875c6d5c71aadd37ad8f583c3636edc5cc35754f"
+          }
+        },
+        {
+          "client_id": "733655056862-r8mb9b5ls1u0slcbepf213r30vcq5cmk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.superbomb.series.Thirteen",
+            "certificate_hash": "f0bac3c0d8f4ed6bbdd416ccaa533524e5287c78"
+          }
+        },
+        {
+          "client_id": "733655056862-s3sa655hpf5qchab8iuqfes2q595bru2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.superbomb.series.Thirteen",
+            "certificate_hash": "a1fc26a7f1d13fb96b7e8d16ccf056f5cbe8f83d"
+          }
+        },
+        {
           "client_id": "733655056862-2ug3g8giaqh0r6of94jratskhdhp4651.apps.googleusercontent.com",
           "client_type": 3
         }

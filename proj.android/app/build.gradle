@@ -9,8 +9,9 @@ android {
         applicationId "com.superbomb.series.Thirteen"
         minSdkVersion PROP_MIN_SDK_VERSION
         targetSdkVersion PROP_TARGET_SDK_VERSION
-        versionCode 4
-        versionName "0.0.5"
+        versionCode 5
+        versionName "0.0.6"
+        multiDexEnabled true
 
         externalNativeBuild {
             if (PROP_BUILD_TYPE == 'ndk-build') {
@@ -127,15 +128,20 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':libcocos2dx')
 
-    implementation 'androidx.appcompat:appcompat:1.0.2'
-    implementation 'com.google.firebase:firebase-core:17.0.1'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
+
+    // External Plugins
+    implementation platform('com.google.firebase:firebase-bom:28.1.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.android.gms:play-services-ads:20.2.0'
+
     // gps
-    implementation "com.google.android.gms:play-services-auth:17.0.0"
-    implementation "com.google.android.gms:play-services-games:18.0.1"
-    // ads
-    implementation 'com.google.android.gms:play-services-ads:18.1.0'
+    implementation "com.google.android.gms:play-services-auth:18.1.0"
+    implementation "com.google.android.gms:play-services-games:20.0.1"
+
     // billing
-    implementation 'com.android.billingclient:billing:2.0.2'
+    implementation 'com.android.billingclient:billing:4.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'  // Google Play services Gradle plugin
