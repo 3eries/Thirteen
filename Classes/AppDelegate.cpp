@@ -107,9 +107,9 @@ void AppDelegate::applicationDidEnterBackground() {
 // this function will be called when the app is active again
 void AppDelegate::applicationWillEnterForeground() {
     
-#if SB_PLUGIN_USE_ADS
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS && SB_PLUGIN_USE_ADS)
     auto adsHelper = superbomb::AdsHelper::getInstance();
-    
+
     if( adsHelper->getInterstitial()->isOpened() ||
         adsHelper->getRewardedVideo()->isOpened() ) {
         return;

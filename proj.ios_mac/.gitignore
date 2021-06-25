@@ -1,4 +1,5 @@
 # Created by https://www.gitignore.io/api/xcode
+# Edit at https://www.gitignore.io/?templates=xcode
 
 ### Xcode ###
 # Xcode
@@ -25,12 +26,41 @@ DerivedData/
 *.perspectivev3
 !default.perspectivev3
 
-### Xcode Patch ###
+## Xcode Patch
 *.xcodeproj/*
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/xcshareddata/
 !*.xcworkspace/contents.xcworkspacedata
 /*.gcno
 
+### Xcode Patch ###
+**/xcshareddata/WorkspaceSettings.xcsettings
 
 # End of https://www.gitignore.io/api/xcode
+
+# Created by https://www.gitignore.io/api/cmake
+# Edit at https://www.gitignore.io/?templates=cmake
+
+### CMake ###
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+### CMake Patch ###
+# External projects
+*-prefix/
+
+# End of https://www.gitignore.io/api/cmake
+
+# cocos2d-x
+/bin
+/lib
+**/*.build/*
