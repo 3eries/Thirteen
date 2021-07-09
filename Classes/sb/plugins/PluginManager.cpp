@@ -90,12 +90,6 @@ void PluginManager::initAds(const rapidjson::Value &obj) {
 #elif COCOS2D_DEBUG == 1
         adsConfig.testMode = true;
 #endif
-        
-        auto testDevices = obj["test_devices"].GetArray();
-        
-        for( int i = 0; i < testDevices.Size(); ++i ) {
-            adsConfig.testDevices.push_back(testDevices[i].GetString());
-        }
     }
     
     // auto load interval
@@ -135,33 +129,6 @@ void PluginManager::initAds(const rapidjson::Value &obj) {
         adsConfig.bannerUnitId        = obj.HasMember("banner_unit_id") ? obj["banner_unit_id"].GetString() : "";
         adsConfig.interstitialUnitId  = obj.HasMember("interstitial_unit_id") ? obj["interstitial_unit_id"].GetString() : "";
         adsConfig.rewardedVideoUnitId = obj.HasMember("rewarded_video_unit_id") ? obj["rewarded_video_unit_id"].GetString() : "";
-    }
-    
-    // placements
-    auto placements = obj["placements"].GetObject();
-    
-    auto getPlatformPlacements = [=](const string &key) -> vector<string> {
-        
-        vector<string> platformPlacements;
-        
-        if( placements.HasMember(key.c_str()) ) {
-            auto array = placements[key.c_str()].GetArray();
-            
-            for( int i = 0; i < array.Size(); ++i ) {
-                platformPlacements.push_back(array[i].GetString());
-            }
-        }
-        
-        return platformPlacements;
-    };
-    
-    const AdPlatform PLATFORMS[] = {
-        AdPlatform::VUNGLE,
-    };
-    
-    for( auto platform : PLATFORMS ) {
-        auto placements = getPlatformPlacements(AD_PLATFORM_STRING_MAP.at(platform));
-        adsConfig.placements[platform] = placements;
     }
     
     AdsHelper::getInstance()->init(adsConfig);
