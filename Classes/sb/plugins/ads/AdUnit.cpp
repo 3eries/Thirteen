@@ -59,6 +59,8 @@ void AdUnit::onAdOpened() {
     if( listener ) {
         listener->onAdOpened();
     }
+    
+    Application::getInstance()->applicationDidEnterBackground();
 }
 
 void AdUnit::onAdClosed() {
@@ -67,6 +69,8 @@ void AdUnit::onAdClosed() {
     
     opened = false;
     loaded = false;
+    
+    Application::getInstance()->applicationWillEnterForeground();
     
     if( listener ) {
         listener->onAdClosed();

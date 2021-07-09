@@ -100,18 +100,31 @@ bool AppDelegate::applicationDidFinishLaunching() {
 // This function will be called when the app is inactive. Note, when receiving a phone call it is invoked.
 void AppDelegate::applicationDidEnterBackground() {
     
+    CCLOG("AppDelegate::applicationDidEnterBackground valid: %d (1이 정상)", Director::getInstance()->isValid());
+    
+    if( !Director::getInstance()->isValid() ) {
+        return;
+    }
+    
     Director::getInstance()->getEventDispatcher()->dispatchCustomEvent(superbomb::EVENT_ENTER_BACKGROUND);
     Director::getInstance()->stopAnimation();
 }
 
 // this function will be called when the app is active again
 void AppDelegate::applicationWillEnterForeground() {
+
+    CCLOG("AppDelegate::applicationWillEnterForeground valid: %d (0이 정상)", Director::getInstance()->isValid());
     
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS && SB_PLUGIN_USE_ADS)
+    if( Director::getInstance()->isValid() ) {
+        return;
+    }
+    
+#if SB_PLUGIN_USE_ADS
     auto adsHelper = superbomb::AdsHelper::getInstance();
 
     if( adsHelper->getInterstitial()->isOpened() ||
         adsHelper->getRewardedVideo()->isOpened() ) {
+        CCLOG("AppDelegate::applicationWillEnterForeground 광고 오픈됨");
         return;
     }
 #endif
