@@ -71,6 +71,8 @@ bool SplashScene::init() {
 void SplashScene::onEnter() {
     
     BaseScene::onEnter();
+    
+    ConsentForm::show();
 }
 
 void SplashScene::onExit() {

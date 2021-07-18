@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIAlert.h>
+#include <UserMessagingPlatform/UserMessagingPlatform.h>
 
 #import "AppController.h"
 #import "RootViewController.h"
@@ -26,34 +27,61 @@ static string globalTitle;
 static string globalMessage;
 static string globalPolicyUrl;
 
-void ConsentForm::showImpl(const string &title, const string &message,
-                           const string &policyUrl) {
+void ConsentForm::show() {
     
-    globalTitle = title;
-    globalMessage = message;
-    globalPolicyUrl = policyUrl;
+//    [UMPConsentInformation.sharedInstance reset];
+//    return;
+    // Create a UMPRequestParameters object.
+    UMPRequestParameters *parameters = [[UMPRequestParameters alloc] init];
+    // Set tag for under age of consent. Here NO means users are not under age.
+    parameters.tagForUnderAgeOfConsent = NO;
+
+    // Force a geography for GDPR
+    /*
+    UMPDebugSettings *debugSettings = [[UMPDebugSettings alloc] init];
+    debugSettings.testDeviceIdentifiers = @[ @"6A2A3F2D-4E16-4886-9F92-491567BAB9D8" ];
+    debugSettings.geography = UMPDebugGeographyEEA;
+    parameters.debugSettings = debugSettings;
+    */
     
-    UIAlertController *alert = [UIAlertController
-                                alertControllerWithTitle:NS_STRING(title.c_str())
-                                message:NS_STRING(message.c_str())
-                                preferredStyle:UIAlertControllerStyleAlert];
-    
-    UIAlertAction *policyAction = [UIAlertAction actionWithTitle:@"Privacy Policy"
-                                                           style:UIAlertActionStyleDefault
-                                                         handler:^(UIAlertAction *action) {
-                                                             ConsentManager::setPrivacyPolicyChecked(true);
-                                                             Application::getInstance()->openURL(globalPolicyUrl);
-                                                         }];
-    
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK"
-                                                       style:UIAlertActionStyleDefault
-                                                     handler:^(UIAlertAction * action) {
-                                                         ConsentManager::setPrivacyPolicyChecked(true);
-                                                     }];
-    [alert addAction:policyAction];
-    [alert addAction:okAction];
-    
-    [ROOT_VIEW_CONTROLLER presentViewController:alert animated:YES completion:nil];
+    // Request an update to the consent information.
+    [UMPConsentInformation.sharedInstance
+     requestConsentInfoUpdateWithParameters:parameters
+     completionHandler:^(NSError *_Nullable error) {
+        
+        if( error ) {
+            // Handle the error.
+        } else {
+            // The consent information state was updated.
+            // You are now ready to check if a form is
+            // available.
+            UMPFormStatus formStatus = UMPConsentInformation.sharedInstance.formStatus;
+            
+            // load form
+            if( formStatus == UMPFormStatusAvailable ) {
+                [UMPConsentForm loadWithCompletionHandler:^(UMPConsentForm *form, NSError *loadError) {
+                    if (loadError) {
+                        // Handle the error.
+                    } else {
+                        // Present the form. You can also hold on to the reference to present
+                        // later.
+                        if (UMPConsentInformation.sharedInstance.consentStatus == UMPConsentStatusRequired) {
+                            [form presentFromViewController:ROOT_VIEW_CONTROLLER
+                                          completionHandler:^(NSError *_Nullable dismissError) {
+                                
+                                if (UMPConsentInformation.sharedInstance.consentStatus == UMPConsentStatusObtained) {
+                                    // App can start requesting ads.
+                                    ConsentManager::setPrivacyPolicyChecked(true);
+                                }
+                            }];
+                        } else {
+                            // Keep the form available for changes to user consent.
+                        }
+                    }
+                }];
+            }
+        }
+    }];
 }
 
 NS_SB_END;

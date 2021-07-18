@@ -11,25 +11,24 @@
 #include "platform/android/jni/JniHelper.h"
 #include "ConsentManager.hpp"
 
-#define JNI_CLASS_NAME     "com/superbomb/consent/ConsentForm"
+#define JNI_CLASS_NAME     "com/superbomb/consent/ConsentFormHelper"
 
 USING_NS_CC;
 using namespace std;
 
 NS_SB_BEGIN;
 
-void ConsentForm::showImpl(const string &title, const string &message,
-                           const string &policyUrl) {
+void ConsentForm::show() {
     
-    cocos2d::JniHelper::callStaticVoidMethod(JNI_CLASS_NAME, "show", title, message, policyUrl);
+    cocos2d::JniHelper::callStaticVoidMethod(JNI_CLASS_NAME, "show");
 }
 
 extern "C" {
-    void Java_com_superbomb_consent_ConsentForm_nativeOnClickPrivacyPolicy(JNIEnv *env, jobject obj) {
+    void Java_com_superbomb_consent_ConsentFormHelper_nativeOnClickPrivacyPolicy(JNIEnv *env, jobject obj) {
         ConsentManager::setPrivacyPolicyChecked(true);
     }
     
-    void Java_com_superbomb_consent_ConsentForm_nativeOnClickOk(JNIEnv *env, jobject obj) {
+    void Java_com_superbomb_consent_ConsentFormHelper_nativeOnClickOk(JNIEnv *env, jobject obj) {
         ConsentManager::setPrivacyPolicyChecked(true);
     }
 }

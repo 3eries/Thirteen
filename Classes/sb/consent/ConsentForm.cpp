@@ -41,11 +41,4 @@ bool ConsentForm::init() {
     return true;
 }
 
-ConsentForm* ConsentForm::show() {
- 
-    showImpl(title, message, policyUrl);
-    
-    return this;
-}
-
 NS_SB_END;

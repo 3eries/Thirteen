@@ -24,14 +24,7 @@ private:
     virtual bool init() override;
     
 public:
-    ConsentForm* show();
-    static void showImpl(const std::string &title, const std::string &message,
-                         const std::string &policyUrl);
-    
-private:
-    SB_SYNTHESIZE_BUILDER(ConsentForm*, std::string, title, Title);
-    SB_SYNTHESIZE_BUILDER(ConsentForm*, std::string, message, Message);
-    SB_SYNTHESIZE_BUILDER(ConsentForm*, std::string, policyUrl, PolicyUrl);
+    static void show();
 };
 
 NS_SB_END;

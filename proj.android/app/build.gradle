@@ -9,8 +9,8 @@ android {
         applicationId "com.superbomb.series.Thirteen"
         minSdkVersion PROP_MIN_SDK_VERSION
         targetSdkVersion PROP_TARGET_SDK_VERSION
-        versionCode 6
-        versionName "0.0.7"
+        versionCode 7
+        versionName "0.0.7.3"
         multiDexEnabled true
 
         externalNativeBuild {
@@ -135,6 +135,7 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:28.1.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.android.gms:play-services-ads:20.2.0'
+    implementation 'com.google.android.ump:user-messaging-platform:2.0.0'
 
     // gps
     implementation "com.google.android.gms:play-services-auth:18.1.0"

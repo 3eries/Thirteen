@@ -68,27 +68,11 @@ void MainScene::onEnter() {
     scheduleOnce([=](float) {
         SBAudioEngine::playBGM(SOUND_BGM_MAIN);
     }, SceneManager::REPLACE_DURATION_MAIN, "MAIN_SCENE_BGM_DELAY");
-    
-    // 개인 정보 처리 방침 안내 팝업
-    if( !ConsentManager::isPrivacyPolicyChecked() ) {
-        SBDirector::getInstance()->setScreenTouchLocked(true);
-    }
 }
 
 void MainScene::onEnterTransitionDidFinish() {
     
     BaseScene::onEnterTransitionDidFinish();
-    
-    // 개인 정보 처리 방침 안내 팝업
-    if( !ConsentManager::isPrivacyPolicyChecked() ) {
-        SBDirector::getInstance()->setScreenTouchLocked(false);
-        
-        ConsentForm::create()
-        ->setTitle("Important")
-        ->setMessage("We don't collect your personal data,\nhowever our ads suppliers may use\nthem to personalise ads for you. You'll\nfind links to our partner's privacy\npolicies in our Privacy Policy.\n\nYou can opt-out ads tracking from\ngame & device settings.")
-        ->setPolicyUrl("http://www.3eries.com/privacy_policy")
-        ->show();
-    }
 }
 
 void MainScene::onExit() {
